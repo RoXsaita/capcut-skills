@@ -34,6 +34,7 @@ capcutctl doctor   --project NAME                    # read-only integrity repor
 capcutctl new --project NAME [--media FILE] [--scenes 0:6@122.4,6:12,12:18]
 capcutctl layout split-screen --project NAME --at SECONDS --track N
 capcutctl layout circle       --project NAME --at SECONDS --track N
+capcutctl layout broll        --project NAME --at S --track N --row ROW [--scale S]
 capcutctl layout background   --project NAME
 capcutctl layout list
 
@@ -41,7 +42,7 @@ capcutctl apply    --project NAME --spec FILE [--dry-run]   # arbitrary edits, v
 capcutctl snapshot --project NAME --label WHY
 capcutctl history  --project NAME
 capcutctl restore  --project NAME --snapshot NAME
-capcutctl sync     --project NAME                    # repair mirror drift
+capcutctl sync     --project NAME                    # repair mirror drift + collapse duplicate material ids
 ```
 
 Everything that writes takes `--dry-run`.
@@ -67,6 +68,38 @@ and the running order. Everything else is arithmetic.
 
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
 timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
+
+## SFX and transitions — `polish`
+
+```bash
+capcutctl polish --project NAME [--lead 0.14] [--no-transitions]
+```
+
+Puts a transition and its matching sound on every visible cut, using the grammar measured
+from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
+
+| pair | transition | sound |
+|---|---|---|
+| layout change | `Horizontal Triptych` | `Woosh` / `swish_whoosh` (5/5 in his projects) |
+| jump inside a scene | `Flash` / `White Flash 2` / `Glitch Flash II` | `Decision / choice / click` (6/7) |
+| the machine doing something | `Glitch` | `Glitch sound that matches the sound logo` (2/2) |
+| the payoff, once, on the last cut | `Flash` | `Coin cashier shop item get 4` |
+
+**The sound leads the picture by 0.14s** — measured median across 20 paired cuts, not invented.
+Volume 1.0, transitions 0.20–0.33s. Never the same pair twice running. Re-running replaces the
+previous pass rather than stacking, so it is safe to iterate.
+
+## B-roll framing — `layout broll`
+
+```bash
+capcutctl layout broll --project NAME --at 35 --track 4 --row 2336
+```
+
+Frames a B-roll clip in the TOP half of a split screen on a chosen **source row**, and cuts it
+at the seam. It computes the transform and the mask line, refuses a scale that would leave
+background at the sides, and clamps the window inside the frame so it can never run off the edge.
+Omit `--scale` for exact 1:1 full width — anything larger crops the sides, which on a phone UI
+cuts text.
 
 ## Finding the moment
 
