@@ -89,7 +89,7 @@ user's own projects: `KFTypePositionX`, `KFTypePositionY`, `KFTypeScaleX`, `KFTy
 ## Masks (split-screen)
 
 A `common_mask` entry referenced from `extra_material_refs`. The user's split-screen uses the
-built-in **`Split`** line mask — see `style-profile.md` for his exact config and transform.
+built-in **`Split`** line mask — the exact config is `presets/layouts.json` and `capcutctl layout split-screen` applies it.
 ## Validation before saving
 
 1. every `material_id` and every `extra_material_refs` id exists in `materials`

@@ -1,12 +1,23 @@
 # The three layout presets (LOCKED)
 
+> **Do not apply these by hand.** `capcutctl layout circle|split-screen|background` writes them.
+> The machine-readable source of truth is `presets/layouts.json` in the capcutctl repo, measured
+> verbatim from `grok-build-claude`. This file is the *record of what the numbers mean* — read it
+> to understand or to verify, not to copy-paste.
+>
+> ```bash
+> capcutctl layout circle       --project NAME --at 12 --track 7
+> capcutctl layout split-screen --project NAME --at 30 --track 7
+> capcutctl layout background   --project NAME      # blurred plate under circle scenes
+> ```
+
 Every scene uses exactly one of these. They describe **where the talking head goes** — B-roll is a
 separate decision and is not part of the preset.
 
 His method, verbatim: *"I copy the attributes of the circular small talking head, and just paste
-it, then I copy the white frame, and it's like 99.9% of the times fits perfectly."* So these
-numbers are **copied, never recomputed**. Their source of truth is the Preset 3 endcard and a
-scene he positioned by hand.
+it, then I copy the white frame, and it's like 99.9% of the times fits perfectly."* The numbers
+are **copied, never recomputed** — which is precisely why they are now data in a file rather than
+something an agent retypes.
 ## Preset 1 — CIRCLE (small head + white frame)
 
 **Always put the white circle over it. Always.** The two are one unit; a circle without its frame

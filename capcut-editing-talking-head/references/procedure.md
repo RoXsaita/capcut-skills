@@ -1,11 +1,18 @@
 # The VO cut — the locked procedure
 
-This produced a cut the user reviewed and called perfect, with "literally no mistakes". Follow it
-in order. It is ~10 minutes of work for a 4-minute source.
+This produced a cut the user reviewed and called perfect, with "literally no mistakes".
 
-1. **Transcribe** with word timestamps. Cache it.
-2. **Build the energy index.** `AudioIndex.build_or_load(source)`.
-3. **Split into takes.** Look for the hook line repeating after a long silence.
+> **Steps 1–10 are now `capcutctl cut` and you should not perform them by hand.** They are
+> arithmetic, they are tested, and doing them manually is how the defects got in. Step 11
+> (re-transcribe the render) and step 12 (contact-sheet the seams) are still yours;
+> `capcutctl qa` renders the frames for step 12.
+>
+> Read on for **why** each step exists — before overriding anything, and when a cut comes back
+> wrong and you need to know which assumption broke.
+
+1. **Transcribe** with word timestamps. Cache it.  *(automated)*
+2. **Build the energy index.**  *(automated)*
+3. **Split into takes.** Look for the hook line repeating after a long silence.  *(automated — detection only; the choice is yours)*
 4. **Keep only the last take** unless it is visibly worse. He warms up as he goes.
 5. **Group into beats** — one idea per beat.
 6. **Last instance of every beat wins.** His rule, verbatim: *"generally the last cut of a
@@ -17,12 +24,12 @@ in order. It is ~10 minutes of work for a 4-minute source.
    - stutter — the same word twice in the word list → cut the first
 8. **Place every boundary with the energy index, never with Whisper timings.**
    IN → `onset_after(t)` minus ~2 frames. OUT → `trough(t)`.
-9. **Lint.** `lint(idx, spans)` must come back empty.
-10. **Quantise to whole frames** using position differences (`us(t+n) - us(t)`).
+9. **Lint.** *(automated — and every computable fault is auto-repaired; `cut` refuses to build if one survives)*
+10. **Quantise to whole frames** using position differences (`us(t+n) - us(t)`).  *(automated)*
 11. **Render, then re-transcribe the render.** One segment per beat, no repeats, no
     hallucinated tail.
 12. **Contact-sheet every cut frame** and confirm head size and position hold across each pair.
-13. **Then** write CapCut — overlays only, main track empty.
+13. **Then** write CapCut — overlays only, main track empty.  *(automated: `--project NAME`)*
 ## Rooms for improvement
 
 Known-weak, in the order worth fixing:

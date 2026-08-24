@@ -1,6 +1,11 @@
 # The preview loop
 
 Render → look → fix → repeat. Only write CapCut once the preview is actually good.
+
+> **For still frames, use `capcutctl qa --project NAME --times 3,9,15 --guide 960`.** It
+> composites the real timeline outside CapCut and prints every segment's on-canvas rect, so the
+> geometry is checked as numbers first. The ffmpeg renderer below is for **full-motion** preview
+> — watching the cut play — which `qa` does not do.
 ## Why
 
 The first build skipped this entirely and produced an unusable edit. Looking at frames catches,
@@ -8,7 +13,7 @@ in minutes, errors that are invisible in JSON: wrong crop, wrong moment, a shot 
 next screen, a black transition frame.
 ## Split-screen renderer
 
-The user's layout is **screen on top, face on bottom** (see `style-profile.md`). For a 1080×1920
+The user's layout is **screen on top, face on bottom** (see `style.md`). For a 1080×1920
 canvas that is two 1080×960 halves.
 
 ```

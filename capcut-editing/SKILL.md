@@ -3,10 +3,10 @@ name: capcut-editing
 description: >
   Edit real video projects by writing CapCut's project JSON directly, so the user finishes in the
   CapCut UI he actually likes. THE HUB — start here for any CapCut editing request. Covers why
-  this exists, the non-negotiable rules, the draft_info.json schema, the safe write path
-  (scripts/capcut.py), the user's measured style, pitfalls, and current project state. For cutting
-  the talking head use capcut-editing-talking-head; for screen-recording B-roll use
-  capcut-editing-screen-recording.
+  this exists, the non-negotiable rules, the draft_info.json schema, the user's measured style,
+  pitfalls, and current project state. The write path itself is `capcutctl` — read capcut-cli
+  before touching JSON. For cutting the talking head use capcut-editing-talking-head; for
+  screen-recording B-roll use capcut-editing-screen-recording.
 ---
 
 # CapCut Editing — hub
@@ -46,31 +46,41 @@ know is right.
 
 ## The CLI — the only sanctioned way to write
 
-`scripts/capcut.py` exists because this work was being hand-rolled into one-off scripts, and each
-rewrite dropped a step.
+**`capcutctl`.** Read `capcut-cli` for the full surface. The short version:
 
-```
-capcut.py spans   <proj>              the live EDL
-capcut.py lint    <proj>              energy-lint every seam
-capcut.py strip   <proj> [a] [b]      ASCII energy map
-capcut.py preview <proj> [out.mp4]    render the VO from live spans
-capcut.py sheet   <proj> [out.png]    contact sheet of every cut frame
-capcut.py verify  <proj>              structure + all-copies md5
-capcut.py backup  <proj> [tag]
-capcut.py write   <proj> <new.json> [--wait]
+```bash
+capcutctl cut VIDEO --lang ar                    # A-roll: index, review table
+capcutctl cut VIDEO --keep 0,2-9 --project NAME  # A-roll: build the project
+capcutctl layout split-screen|circle|background --project NAME --at S --track N
+capcutctl scenes|inspect|doctor --project NAME
+capcutctl qa --project NAME --times 3,9,15       # composite real frames
+capcutctl snapshot|history|restore --project NAME
+capcutctl apply --project NAME --spec FILE       # anything else, as a v1 spec
 ```
 
-**Never hand-roll a project writer.** `write` validates and refuses on error, refuses while CapCut
-is running (`--wait` blocks — background it), writes **every** timeline copy, updates meta +
-registry, keeps a pre-write backup, and md5-verifies. Run `verify` after any change.
+Every write is snapshotted, applied to the root draft and the active timeline as separate
+documents, staged, re-parsed, atomically renamed, doctored, and rolled back on failure. It
+refuses to run while CapCut is open.
+
+**Never hand-roll a project writer, and never hand-write `draft_info.json`.** If `capcutctl`
+cannot express the edit, extend it — the layouts got built exactly that way, by capturing a
+verified structure out of a real project instead of inventing one.
+
+### Legacy scripts
+
+`scripts/` still holds the one-off tools this grew out of (`capcut.py`, `build.py`, `render.py`,
+`to_overlays.py`, the `vo_*` pair, …). They predate `capcutctl` and are kept for reference and
+for the few things it does not do yet. `scripts/audio_index.py` is still live — `capcut.py`
+imports it. Prefer `capcutctl` for anything it covers.
 
 ## Workflow
 
-1. **Probe** sources with `ffprobe`.
-2. **Index** — see the two sub-skills.
-3. **Cut the VO** — `capcut-editing-talking-head`, then `capcut.py lint` must come back empty.
-4. **Preview → look → fix.**
-5. **Write** with `capcut.py write`, then `capcut.py verify`.
+1. **Cut the A-roll** — `capcutctl cut VIDEO`, review the table, re-run with `--keep`.
+   See `capcut-editing-talking-head`.
+2. **Give the scenes their looks** — `capcutctl layout …`.
+3. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
+   two real defects passed it clean.
+4. **`capcutctl doctor`** must be error-free before you hand it over.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.
 
@@ -80,8 +90,8 @@ Work **one section at a time** and check end-to-end. He asked for this explicitl
 |---|---|
 | `references/capcut-format.md` | draft_info.json schema, segments, masks, keyframes, the multi-copy write, registration |
 | `references/style.md` | Rule zero, his measured signature, SFX palette |
-| `references/preview-loop.md` | ffmpeg preview renderer, contact sheets, delivery |
+| `references/preview-loop.md` | Full-motion ffmpeg preview and contact sheets (frame checks are `capcutctl qa`) |
 | `references/pitfalls.md` | Concrete traps already hit. Read before starting. |
 | `references/project-state.md` | Sources, the signed-off VO EDL, what is done and what is not |
 
-`scripts/` — see `scripts/README.md`.
+`scripts/` — legacy one-offs, see `scripts/README.md`. The live tooling is `capcutctl`.

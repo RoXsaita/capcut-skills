@@ -1,9 +1,31 @@
-# Scripts
+# Scripts — legacy
+
+**The live tooling is `capcutctl`.** Read `capcut-cli` first; everything below predates it.
+
+| Superseded by | Was |
+|---|---|
+| `capcutctl cut` | `vo_plan.py`, `vo_cut.py`, `vo_rebuild_capcut.py`, `beats.py` |
+| `capcutctl layout` | `presets.py`, `layout_preview.py` |
+| `capcutctl qa` | `render.py` frame grabs, `capcut.py sheet` |
+| `capcutctl doctor` / `apply` / `snapshot` | `capcut.py verify|write|backup` |
+| `capcutctl new` | `build.py`, `full.py`, `to_overlays.py` |
+
+Still live: **`audio_index.py`** — the acoustic energy index. `capcut.py` imports it, and it is
+the same code `capcutctl cut` uses.
+
+Kept because a few of these do things `capcutctl` does not yet (full-motion preview renders,
+ASCII energy strips, OCR matching in `match.py`). Reach for them only when `capcutctl` has no
+answer, and prefer extending `capcutctl` over reviving one.
+
+---
+
+## The original notes
 
 ## Start here: `capcut.py`
 
-One deterministic entry point. Use it instead of hand-rolling a script — every command below
-existed as ad-hoc code first, and each rewrite was a chance to drop a step.
+*(Historical. `capcutctl` is the entry point now — see the table above.)* One deterministic
+entry point. Use it instead of hand-rolling a script — every command below existed as ad-hoc code
+first, and each rewrite was a chance to drop a step.
 
 ```
 capcut.py spans   <proj>              the live EDL
@@ -16,7 +38,8 @@ capcut.py backup  <proj> [tag]
 capcut.py write   <proj> <new.json> [--wait]
 ```
 
-**`write` is the only sanctioned way to modify a project.** It validates first and refuses on
+**`write` was the only sanctioned way to modify a project** *(superseded by `capcutctl apply`,
+which additionally snapshots, applies to both documents, and rolls back on failure).* It validates first and refuses on
 error, refuses while CapCut is running (unless `--wait`, which blocks — background it), writes
 **every** timeline copy, updates meta + registry, keeps a pre-write backup, and md5-verifies.
 

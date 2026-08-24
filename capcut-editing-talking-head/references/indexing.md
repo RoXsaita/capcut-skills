@@ -3,20 +3,27 @@
 Nothing gets cut from a source that has not been indexed. There are three, and they answer
 different questions. Skipping any one of them is where every defect so far came from.
 
+**`capcutctl cut VIDEO` builds the Whisper and Energy indexes for you** and caches both in
+`~/Downloads/.video-index/`. You never invoke them directly. OCR is only for screen B-roll —
+see `capcut-editing-screen-recording`.
+
 | Index | Question it answers | Built with | Cache |
 |---|---|---|---|
-| **Whisper** | what is said, and roughly when | `mlx-community/whisper-large-v3-turbo` | `~/Downloads/.video-index/<name>_transcript_ar.json` |
+| **Whisper** | what is said, and roughly when | `mlx_whisper`, `large-v3-turbo` | `<name>.whisper-<model>.json` |
 | **OCR** | what is on the screen, second by second | tesseract at 1 fps | `<name>.ocr.json` |
-| **Energy** | where sound actually is, to 10 ms | `scripts/audio_index.py` | `<name>.energy10.json` |
+| **Energy** | where sound actually is, to 10 ms | `audio_index.py` (inside `capcutctl cut`) | `<name>.energy10.json` |
 
 Whisper is **semantic** and its timings lie (contiguous fill). Energy is **acoustic** and
 sample-true but knows no meaning. A cut point has to satisfy both: Whisper decides *which words*,
 energy decides *exactly where*.
 ## The energy index
 
+`capcutctl cut` builds and queries this for you. The API below is what runs **inside** it —
+read it to understand a boundary decision or to extend the tool, not to drive a cut by hand.
+
 ```python
-from audio_index import AudioIndex, lint
-idx = AudioIndex.build_or_load("~/Downloads/cam.mp4")   # ~2s for 4 min, then cached
+from audio_index import AudioIndex, lint          # tools/audio_index.py in the capcutctl repo
+idx = AudioIndex.build_or_load("cam.mp4")         # ~2s for 4 min, then cached
 
 idx.at(t)              # dB at t
 idx.rising(t)          # is the envelope climbing -> you are inside a word
