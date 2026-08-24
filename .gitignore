@@ -1,0 +1,11 @@
+# Only the CapCut toolkit lives here; everything else in this directory is
+# third-party or machine-local.
+/*
+!.gitignore
+!capcut-cli/
+!capcut-editing/
+!capcut-editing-screen-recording/
+!capcut-editing-talking-head/
+__pycache__/
+*.pyc
+.DS_Store
