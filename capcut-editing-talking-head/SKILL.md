@@ -1,55 +1,86 @@
 ---
 name: capcut-editing-talking-head
 description: >
-  Cut and lay out the talking-head (A-roll) half of a CapCut video. Use when trimming a face
-  recording to its best take, removing duplicate lines, fillers, stutters and dead space, placing
-  frame-accurate cut points, or applying one of the three locked layout presets (circle + white
-  frame / full frame / split screen + purple frame). Covers Whisper + audio-energy indexing and
-  the seam linter. Read the capcut-editing hub first for the format and the safe write path.
+  Cut the talking-head (A-roll) half of a CapCut video and give each scene a layout. One
+  command does the mechanical work — transcribe, energy-sync, strip dead air, snap every
+  boundary, lint and repair the seams, build the project. Use when trimming a face recording,
+  removing duplicate lines, false starts and dead space, or applying the circle / full-frame /
+  split-screen looks. Read the capcut-editing hub for the format and the write path.
 ---
 
-# Talking head — cutting and layout
+# Talking head — one command, one review
 
-The A-roll half. **This part is solved**: the procedure here produced a cut the user reviewed as
-*"just fucking perfect ... literally no mistakes."* Follow it rather than improvising.
+```bash
+capcutctl cut VIDEO.mp4 --lang ar
+```
 
-Read `capcut-editing` (the hub) first — it owns the CapCut format, the write path and rule zero.
+Transcribes (mlx large-v3-turbo), builds the acoustic energy index, splits beats on dead air,
+snaps every boundary to a real onset/trough, detects takes and repeated lines, and prints a
+numbered table. **~10s for a 107s source; cached after that.**
 
-## Do not do this by hand — `aroll` does it
+Read the table. Decide what to keep. Then:
 
-`aroll index MEDIA --lang ar` then `aroll cut MEDIA.aroll.json --keep … --project NAME`
-implements steps 1–10 of the locked procedure deterministically: transcription, the energy index,
-dead-air removal, take and duplicate detection, acoustic boundary snapping, auto-repair of every
-computable seam fault, frame quantisation and the CapCut write. It self-tests (`aroll selftest`).
+```bash
+capcutctl cut VIDEO.mp4 --keep 0,2,3,6-10,13-14,16-19,22 --project my-video
+```
 
-The procedure below is still the reference for **why**, and for the judgement calls the tool
-deliberately leaves to you: which take, which instance of a repeated line, what is a false start,
-and the running order. Read `references/procedure.md` before overriding anything.
+It applies your selection, auto-fixes every seam fault it can compute, packs the timeline with
+no gaps, lints, and builds the CapCut project. It **refuses to build** if a seam is still bad.
+That is the whole procedure. Two invocations, one command, ~2 minutes.
+
+Then give the scenes their looks — see `capcut-cli`:
+
+```bash
+capcutctl layout circle       --project my-video --at 12 --track 7
+capcutctl layout split-screen --project my-video --at 30 --track 7
+capcutctl layout background   --project my-video
+capcutctl qa --project my-video --times 4,12,30 --guide 960 --out qa/
+```
+
+## What you decide, and nothing else
+
+The tool proposes "last take, last instance of every repeat". That is a starting point, not an
+answer. Yours are the calls a transcript cannot make:
+
+- **which take** — he warms up as he goes, so the last is usually best
+- **which instance of a repeated line** — his rule: *"generally the last cut of a specific thing
+  is better."* Sanity-check that the last is also the most complete; it usually gains a word
+- **false starts** — a short beat whose full version appears later. These often do *not* cluster
+  as duplicates, because the complete version continues past the shared opening
+- **near-duplicates the clustering missed** — different phrasings of one idea
+- **running order**, if a beat lands badly
+
+Everything else — timings, boundaries, dead air, frame quantisation, seam repair — is arithmetic.
+Do not do it by hand and do not second-guess it without reading `references/procedure.md`.
 
 ## The one idea that matters
 
 Whisper is **semantic** and its timings lie (word starts are contiguous-filled, off by up to
-~0.7 s). The audio energy index is **acoustic** and sample-true but knows no meaning.
+~0.7s). The energy index is **acoustic** and sample-true but knows no meaning.
 
 > Whisper decides *which words*. The energy index decides *exactly where*.
 
-Every seam defect came from trusting Whisper alone.
+Every seam defect in this project's history came from trusting Whisper alone. Boundaries come
+from `onset_after()` and `trough()`. This is enforced in code; you cannot get it wrong by
+accident any more.
 
 ## Files
 
 | File | Use it for |
 |---|---|
-| `references/procedure.md` | **The 13-step locked cut procedure** — start here — plus known weaknesses |
-| `references/indexing.md` | The indexes, the seam linter, take/beat selection, verification |
-| `references/layouts.md` | The three layout presets as copy-paste numbers, geometry conventions |
+| `references/procedure.md` | Why each step exists, and the known-weak list — read before overriding |
+| `references/indexing.md` | The indexes, the linter's calibration, take/beat selection |
+| `references/layouts.md` | The three layouts as raw numbers (`capcutctl layout` applies them for you) |
 
-Scripts live in the hub: `~/.claude/skills/capcut-editing/scripts/`
-(`audio_index.py` for the energy index and linter, `capcut.py lint|strip|preview|sheet`).
+## Still done by eye
 
-## Non-negotiables
+Not yet automated, so still yours:
 
-- Boundaries come from `onset_after()` and `trough()`, never from a Whisper timestamp.
-- `capcut.py lint` must return **zero findings** before you render.
-- Re-transcribe the render and check it reads as one coherent script.
-- Contact-sheet every cut frame and confirm head size and position hold across each pair.
-- Layout numbers are **copied verbatim from a reference segment, never recomputed**.
+- **Loudness across seams** — two clips can differ by a few dB and the join is audible even with
+  perfect timing.
+- **Breaths** sit near −45 dB and read as silence. Usually keep at a sentence start, cut
+  mid-phrase.
+- **The video side of a seam.** `capcutctl qa` renders the frames; nothing yet checks head
+  position holds across a cut.
+- The lint margin is **one example wide** (0.28s good vs 0.35s bad). Flag any bad seam you hear
+  by timecode — each one is a labelled negative worth keeping.

@@ -19,6 +19,9 @@ transactional. Hand-editing loses the snapshot, the root/timeline pairing and th
 ## Commands
 
 ```bash
+capcutctl cut VIDEO [--keep …] [--project NAME]      # talking-head cleanup (see below)
+capcutctl qa  --project NAME --times 3,9,15          # composite real frames
+
 capcutctl projects                                   # list drafts
 capcutctl scenes   --project NAME                    # every segment: time, track, style
 capcutctl inspect  --project NAME                    # tracks, canvas, active timeline
@@ -39,33 +42,27 @@ capcutctl sync     --project NAME                    # repair mirror drift
 
 Everything that writes takes `--dry-run`.
 
-## Cleaning the talking head — `aroll`
-
-Two commands. Code does the mechanical work; you only make the editorial calls.
+## Cleaning the talking head
 
 ```bash
-aroll index MEDIA --lang ar          # whisper + energy index + dead-air removal + handout
-aroll cut  MEDIA.aroll.json --keep 0,2,3,7-16 --project NAME
-aroll selftest
+capcutctl cut VIDEO.mp4 --lang ar                       # -> numbered review table
+capcutctl cut VIDEO.mp4 --keep 0,2,3,6-10 --project NAME  # -> built project
 ```
 
-`index` transcribes with word timestamps, builds the acoustic energy index, splits each beat
-wherever it goes quiet for >0.6s, snaps every boundary acoustically, detects takes and repeated
-lines, and prints a table: id, in, out, duration, suggested keep, defects, text. ~15s for a
-107s source. Everything is cached in `~/Downloads/.video-index`.
+One command, run twice. The first pass transcribes (mlx `large-v3-turbo`), builds the acoustic
+energy index, splits beats on dead air, snaps every boundary to a real onset/trough, detects
+takes and repeated lines, and prints a table with a copy-paste command for the second pass.
+~10s for a 107s source, cached in `~/Downloads/.video-index` afterwards.
 
-`cut` applies your selection, **auto-repairs** the boundaries the linter can compute (an OUT on a
-rising envelope slides to the trough; dead air at an IN slides to the onset), packs the timeline
-with no gaps, lints every seam, and refuses to build while findings remain (`--force` overrides).
-It emits `--scenes` for `capcutctl new`, so the cut lands in CapCut in one step.
+The second pass applies the selection, **auto-repairs** every seam fault the linter can compute
+(an OUT on a rising envelope slides to the trough; dead air at an IN slides to the onset), packs
+the timeline with no gaps, and refuses to build while findings remain (`--force` overrides).
 
-**What the agent decides**, and nothing else: which take, which of a repeated line, whether a
-beat is a false start, and the running order. `index` proposes "last take, last instance of every
-repeat" as the default; it is a starting point, not an answer — Whisper's Arabic is noisy enough
-that near-duplicates slip past the similarity threshold.
+The agent decides only: which take, which instance of a repeated line, what is a false start,
+and the running order. Everything else is arithmetic.
 
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
-timestamp. Whisper's word starts are contiguous-filled and lie by up to ~0.7s.
+timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
 
 ## Creating a project
 
@@ -113,8 +110,7 @@ It validates structure only. A split at 900/1020 instead of 960/960, and an indi
 its content, both passed `doctor` clean. For pixels:
 
 ```bash
-python3 ~/.claude/skills/capcut-editing/scripts/frame_qa.py \
-  --project NAME --times 3,9,15 --guide 960 --out qa/
+capcutctl qa --project NAME --times 3,9,15 --guide 960 --out qa/
 ```
 
 It composites any frame outside CapCut and prints each segment's on-canvas rect. Check the numbers

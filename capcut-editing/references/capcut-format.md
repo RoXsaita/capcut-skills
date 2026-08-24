@@ -252,11 +252,11 @@ resolve identically. Check it before shipping a project you did not build.
 
 ## Rendered-pixel QA
 
-`scripts/frame_qa.py` composites any timeline frame outside CapCut and prints each
+`capcutctl qa` composites any timeline frame outside CapCut and prints each
 segment's on-canvas rect. `capcutctl doctor` validates structure only — it passed clean
 on a split that was 900/1020 instead of 960/960 and on a frame 47px off its content.
 Numbers first, then look at the frame.
 
 ```bash
-python3 scripts/frame_qa.py --project grok-build-gpt --times 1.5,6,41.5 --guide 960 --out qa/
+capcutctl qa --project grok-build-gpt --times 1.5,6,41.5 --guide 960 --out qa/
 ```
