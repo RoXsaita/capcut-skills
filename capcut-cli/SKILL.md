@@ -20,7 +20,11 @@ transactional. Hand-editing loses the snapshot, the root/timeline pairing and th
 
 ```bash
 capcutctl cut VIDEO [--keep …] [--project NAME]      # talking-head cleanup (see below)
-capcutctl qa  --project NAME --times 3,9,15          # composite real frames
+capcutctl qa  --project NAME --times 3,9,15 --sheet  # composite real frames + contact sheet
+capcutctl find "agent running" --media F --shows --strip   # when is it on screen
+capcutctl find "قروك بيلد"     --media F --says            # when was it said
+capcutctl close                                      # quit CapCut, wait for it to exit
+capcutctl rm --project NAME                          # to .recycle_bin, registry cleaned
 
 capcutctl projects                                   # list drafts
 capcutctl scenes   --project NAME                    # every segment: time, track, style
@@ -63,6 +67,32 @@ and the running order. Everything else is arithmetic.
 
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
 timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
+
+## Finding the moment
+
+```bash
+capcutctl find "agent running" --media screen.mp4 --shows --strip   # on screen, + frames
+capcutctl find "publish"       --media cam.mp4    --says --context  # spoken, word-level
+```
+
+`--shows` searches the OCR index, `--says` the Whisper transcript. Runs are collapsed and
+reported from their first *stable* second.
+
+**`--strip` is not optional in practice.** OCR matches text it cannot tell is occluded or
+scrolled off. A search for "read file" reported a run starting at 168s; at 168s the sidebar
+drawer is open over it and the file list does not actually appear until 176s. The B-roll sat on
+the wrong content until the frames were checked. Look before you cut.
+
+## Housekeeping
+
+```bash
+capcutctl close                 # quit CapCut and WAIT — writes are refused while it runs
+capcutctl rm --project NAME     # move to .recycle_bin and drop the registry entry
+```
+
+`rm` is the recoverable version of what deleting by hand looks like: `rm -rf` plus a hand-edited
+`root_meta_info.json`. It backs up the registry, moves rather than deletes, and prints the `mv`
+that puts it back.
 
 ## Creating a project
 
