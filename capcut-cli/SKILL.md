@@ -69,6 +69,54 @@ and the running order. Everything else is arithmetic.
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
 timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
 
+## Pace — `pace`
+
+```bash
+capcutctl pace --project NAME                          # the plan (read-only, default)
+capcutctl pace --project NAME --auto [--max 100] [--min-gap 5]
+capcutctl pace --project NAME --at 16.57 --speed 8
+capcutctl pace --project NAME --at 16.57 --cover 178.6-296.0
+```
+
+**Speed is arithmetic, not judgment.** The A-roll cut already fixes how long a B-roll slot
+lasts, so the only free variable is how much source it consumes:
+
+```
+speed = source_duration / target_duration
+```
+
+`pace` never changes a clip's position or length on the timeline — only how much footage
+it races through. Measured from his own projects:
+
+| project | source | screen | compression | at 1× |
+|---|---|---|---|---|
+| IKEA Refund | 1317.6s | 66.8s | **19.7×** | 38% |
+| Hermes-agent | 61.8s | 40.4s | 1.5× | 62% |
+| grok-build-final *(before)* | 76.4s | 40.9s | 1.9× | **79%** |
+| grok-build-final *(after `--auto`)* | — | — | **8.1×** | 42% |
+
+79% at real time means the viewer watches a phone scroll at the speed it actually
+scrolled. That is the single loudest "not premium" tell. IKEA crushes 260s of an agent
+working into 2.6s at 100× and drops its final beat to 0.4×.
+
+**What `--auto` does, and what it refuses to do.** For each B-roll clip it looks at how
+much source is *skipped* before the next shot from the same file — matched by **path**, not
+material id, because CapCut keeps many material records per file. A long skip is waiting;
+it closes the gap so the footage plays through instead of cutting past it. It will not:
+
+- touch the principal (talking-head) track — faces never ramp
+- override a ramp that is already there (`speed ≠ 1.0`) — that was somebody's choice
+- fire on a skip under `--min-gap` (default 5s) — a few seconds is an editorial cut
+- exceed `--max` (default 100, his own ceiling) or run past the end of the source
+
+Everything else is the plan table plus your judgment. `pace` with no flags prints it —
+each clip's source window, current speed, skipped seconds, suggested speed, and `desc`.
+
+**Zooms survive a speed change.** Keyframe `time_offset` is an *absolute source position*,
+so a 0.2s punch-in at 10× would collapse to 0.02s — under one frame, reading as a jump.
+`pace` rescales every offset by the same factor as the window, which holds each zoom's
+**on-screen** duration constant. Verified: a clip taken 1× → 3.08× kept its 0.333s ramp.
+
 ## SFX and transitions — `polish`
 
 ```bash

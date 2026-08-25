@@ -91,3 +91,43 @@ timeline fighting him. Respect it; it is the whole reason he wants a CapCut hand
 order. `track_render_index` must equal the track's position in `tracks`. His endcard stack uses
 20 (indigo frame) < 36 (screen rec) < 43 (avatar) < 45 (endcard video) < 46 (white circle) <
 47 (gif) — preserve those exactly. A-roll can sit at a low index like 2.
+
+## Pace — measured, not felt
+
+Compression = source seconds consumed per screen second on the B-roll track.
+
+| project | compression | B-roll ramped | plays at 1× |
+|---|---|---|---|
+| IKEA Refund | 19.7× | 21/30 (70%) | 38% |
+| Hermes-agent | 1.5× | 9/18 (50%) | 62% |
+
+Speeds he actually uses: **20–100×** for an agent working (IKEA: 260s→2.6s, 463s→4.6s),
+**2–4×** for navigating and typing (Hermes: 2.0 / 2.2 / 3.1 / 4.0), **1.0×** for the thing
+he is naming right now, **0.4–0.7×** for the payoff. IKEA ends on 0.4×.
+
+## Motion — two zoom idioms and nothing else
+
+Every keyframed move in every project is **2 keyframes across 4 properties**
+(PositionX, PositionY, ScaleX, Rotation). Rotation is `0.0` everywhere — he never tilts.
+
+- **Snap punch** — ramp **0.10–0.33s** (median 0.20), scale 1.0 → 2.0–4.5.
+- **Punch → hold → release** — 4 keyframes: in over 0.2s, hold ~1.8s, back over 0.2s.
+  IKEA uses it on its money shot.
+- **Slow drift** — ramp **6.7–30s**, and it appears *only over a speed-ramped timelapse*.
+- **Pop-in** — anything that appears scales from `0.01` over **0.07–0.17s** (the IKEA
+  logo, the Hermes endcard, grok's circle GIF).
+
+A single keyframe on a property is a static hold doing nothing. Two of grok-build-final's
+nine keyframed segments were that — dead weight.
+
+## What he does not do
+
+Worth knowing so nobody builds it: **no music bed** (zero audio segments over 10s in any
+project), **no captions** (0–1 text materials each), **no colour grade** (`filters=0`,
+`effects=0` everywhere; the only video effect in the set is the Blur on Hermes' backdrop),
+**no rotation**. The premium feel is entirely pace and motion.
+
+Open question: IKEA holds its screen-recording audio at **0.4** under the voice (19 clips),
+Hermes at 0.49; grok-build-final mutes all 19 to **0.0**. UI ticking under the VO is real
+texture — but grok's B-roll is a *phone* recording, so it may be room noise. Test one clip
+before making it a default.
