@@ -69,6 +69,46 @@ and the running order. Everything else is arithmetic.
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
 timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
 
+## Layout is a rule, not a judgement — `layout auto`
+
+```bash
+capcutctl layout audit --project NAME          # what each clip is vs what it should be
+capcutctl layout auto  --project NAME [--plan] # make it so
+```
+
+**If moving picture covers the moment from a lower track, he is sharing the frame:
+split-screen. If nothing does, he is alone in it: full face.** That is the whole rule, and
+it reproduces grok-build-final's hand-made choices **18 out of 18** — sixteen split-screen
+beats and two full-face ones, zero disagreements. Layout plates (PNG/GIF bars and rings) do
+not count as B-roll.
+
+There is now a third layout, `full-face`: scale 1.0, transform 0, **no mask** — and applying
+it also removes the seam bar the split screen left behind, which a mask-only change would
+strand on screen.
+
+## Verification — `qa --expect`
+
+```bash
+capcutctl qa --project NAME --times 18.6 --ocr                  # what is actually on screen
+capcutctl qa --project NAME --times 18.6 --expect "18.6=Read file|Thinking for"
+```
+
+Exit 0 if every phrase is on the rendered frame, **exit 1** if any is missing — so it can
+gate a build. `doctor` validates structure and cannot see the picture; `qa` drew the picture
+but needed a human to read it. This closes the loop: the composited frame the viewer will
+actually see is read back and checked against what the edit claims is on it.
+
+This is the only check that would have caught the sidebar-vs-file-list mistake, where the
+JSON was valid, the geometry was right, and the frame simply showed the wrong thing.
+
+OCR is Apple's Vision framework via a small Swift helper — `pyobjc` and `pytesseract` are
+both absent on a stock machine, and this is the engine the OS itself uses, so it reads UI
+text well. Build it once:
+
+```bash
+swiftc -O -o tools/vision/ocr tools/vision/ocr.swift
+```
+
 ## The signature — `wrap`, `logo`, `endcard`, `zoom`
 
 ```bash
