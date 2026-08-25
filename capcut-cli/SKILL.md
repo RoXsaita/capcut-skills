@@ -27,7 +27,7 @@ capcutctl close                                      # quit CapCut, wait for it 
 capcutctl rm --project NAME                          # to .recycle_bin, registry cleaned
 
 capcutctl projects                                   # list drafts
-capcutctl scenes   --project NAME                    # every segment: time, track, style
+capcutctl scenes   --project NAME [--name SUBSTR] [--transcript]  # time, track, desc, media, source
 capcutctl inspect  --project NAME                    # tracks, canvas, active timeline
 capcutctl doctor   --project NAME                    # read-only integrity report
 
@@ -43,6 +43,19 @@ capcutctl snapshot --project NAME --label WHY
 capcutctl history  --project NAME
 capcutctl restore  --project NAME --snapshot NAME
 capcutctl sync     --project NAME                    # repair mirror drift + collapse duplicate material ids
+
+capcutctl add      --project NAME --media FILE --at S --dur S --track NAME|N
+                   [--src S] [--cover IN-OUT] [--volume 0] [--desc TEXT] [--localize]
+capcutctl replace-media --project NAME --file FILE --at S --track NAME [--retime]
+capcutctl trim     --project NAME --at S --track NAME --src IN-OUT
+capcutctl shift    --project NAME --at S --track NAME --by SECONDS
+capcutctl remove   --project NAME --at S --track NAME
+capcutctl volume   --project NAME --at S --track NAME --level 0
+capcutctl fade     --project NAME --at S --track NAME [--in 0.08] [--out 0.12]
+capcutctl keyframe --project NAME --at S --track NAME [--to 2.4] [--hold 1.6] [--plan]
+capcutctl preview  --project NAME --out preview.mp4 [--fps 6]
+capcutctl diff     --project NAME --snapshot NAME | --against NAME
+capcutctl harvest  [--projects A,B] [--out FILE] [--plan]
 ```
 
 Everything that writes takes `--dry-run`.
@@ -222,7 +235,17 @@ from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
 | the payoff, once, on the last cut | `Flash` | `Coin cashier shop item get 4` |
 
 **The sound leads the picture by 0.14s** — measured median across 20 paired cuts, not invented.
+(Re-measured 2026-08-26 on 22 seams: **0.133s = exactly 4 frames at 30fps**, with the sound
+starting when the transition starts. 0.14 is within a fifth of a frame; either is right.)
 Volume 1.0, transitions 0.20–0.33s. Never the same pair twice running.
+
+**Sweeps alternate.** A layout change gets a sweep, but `sweep` and `sweepL` take turns. They used
+to be exempt from never-twice-running, so a video whose every scene changes layout got the
+identical `Horizontal Triptych` + `Woosh` on every cut — **18 of 24 seams** in
+`GrokBuild-20260825`. Identical seams are the loudest tell that a machine made the edit; his own
+hand-cut projects keep any one transition under ~45% (Hermes-agent 4/9, Higgsfield 2/6).
+`polish` now reports this as `variety: {cuts, distinct, top, topShare, lopsided}` — read it,
+it is a quality signal, not an error.
 
 **Every transition goes on the principal track** — the one gapless video track that spans the
 timeline, which is the talking head. That is where all 9 of Hermes-agent's transitions sit and
@@ -314,6 +337,19 @@ Re-running a layout replaces the overlay covering that span rather than stacking
 - Transform is in **half-canvas units, y positive UP**. Mask `centerX/centerY` are half-**clip**
   units, y up; mask `width/height` are full-clip fractions.
 
+**A logo whose pixel size cannot be read is refused** (`LOGO_SIZE_UNKNOWN`). CapCut lays out from
+the material's `width`/`height`, so falling back to the 1280×276 template renders any other logo
+as a squashed strip — silently. `imageSize` reads PNG / JPEG / GIF / WebP headers and falls back
+to `sips`; `brands.json` ships a `.webp`, so PNG-only was never enough.
+
+**Errors print their details whatever shape they are.** `details` is an array of validation issues
+for `VALIDATION_FAILED`, but a plain object for `ROLLED_BACK` (`{snapshot}`) and `CAPCUT_RUNNING`.
+Iterating it blindly threw a `TypeError` that buried the real message under a stack trace — worst
+on rollback, exactly when you need to be told which snapshot saved you.
+
+**`--dry-run` works while CapCut is open.** A dry run writes nothing, so refusing it cost a
+quit-and-relaunch just to see a plan. Only real writes still require CapCut closed.
+
 ## doctor cannot see the picture
 
 It validates structure only. A split at 900/1020 instead of 960/960, and an indigo frame 47px off
@@ -326,8 +362,65 @@ capcutctl qa --project NAME --times 3,9,15 --guide 960 --out qa/
 It composites any frame outside CapCut and prints each segment's on-canvas rect. Check the numbers
 first, then look at the frame.
 
+## Adding B-roll — `add` / `replace-media`
+
+Do **not** hand-write `material.clone` + `track.clone` + N `segment.clone` for B-roll. `add` is the verb:
+
+```bash
+capcutctl add --project NAME --media screen.mp4 \
+  --at 16.3 --dur 8.2 --src 90 \
+  --track broll --volume 0 --desc reading-files
+```
+
+- `--track broll` (name) creates/reuses that overlay (`flag=2`) **below** the talking head. Never `track.clone`.
+- `--track N` (number) uses that index and **refuses to create** — inserting a track renumbers everything above it.
+- **Never the main track (`flag=0`) — from any verb.** `remove` / `volume` / `trim` / `shift` / `fade` / `keyframe` all resolve through one gate (`resolveClip`), which refuses a flag=0 segment and makes the main track invisible to a bare `--at`. It filtered on track *type* only until 2026-08-26, so all six could edit the cover track.
+- Overlap on that named overlay is refused by the op (`CLIP_OVERLAP`). Doctor's `TRACK_OVERLAP` is only a warning.
+- Running past `doc.duration` slides the preset endcard and **rewrites** `.capcutctl/created.json` `preserved: {start,end}`. That window feeds `layout background` / scene filters — leaving it stale includes or drops the wrong scenes.
+- Endcard sliding is measured from where the endcard **is now**, shared across every op in a spec and across both mirror documents. Two `add`s in one spec each push it once. A clip that already sits *inside* the window refuses (`INSIDE_ENDCARD`) rather than pushing it again — otherwise a 1ms nudge grew the project by 1ms, forever.
+- Speed is `source/target`, written to the segment **and its speed material** — `pace` reads the material first, so a clip whose material still says 1× reads as un-ramped. `--cover IN-OUT` or `--src-dur` sets the source window (passing both is refused); otherwise 1×.
+- `--src` defaults to **0**, the start of the media. It defaulted to `--at` until 2026-08-26, so `add --at 30` silently began 30s into the file.
+- Prints the segment id, track name + index, and a `layout broll --at … --track NAME` reminder (name, not a stale N).
+
+`replace-media` relinks the material (cloning it if shared) and **must not** go through `segment.clone` — that wipes `keyframe_refs` / `common_keyframes`. It refuses upfront rather than rolling back: a missing file, a selector matching more than one clip, or a current window longer than the new file (pass `--retime` to rebuild the window). `trim` refuses a window past the end of the media the same way.
+
+```bash
+capcutctl replace-media --project NAME --at 16.3 --track broll --file new.mp4 [--retime]
+```
+
+`--track` takes a **name or an index everywhere**, `layout` included — it was `Number()`-parsed there, so the `layout broll --track broll` line `add` prints resolved to `NaN` and matched nothing.
+
+Nudge after the fact with `trim` / `shift` / `remove` / `volume` / `fade`. `shift` uses the same extend-or-refuse policy as `add`. `fade` clones a verified `audio_fade` extra (`fade_type`, `fade_in_duration`, `fade_out_duration`) harvested from Higgsfield/IKEA — it does not invent fields.
+
+## Scale punch — `keyframe`
+
+Scale-only, cloned from logo `popKeyframes`. Offsets are **absolute source positions** (`source.start + ramp`), not 0. A clip added with `--src 90` that punched at offset 0 would clamp to a dead hold. Two keys that clamp to the same offset are refused (`KEYFRAME_CLAMPED`).
+
+```bash
+capcutctl keyframe --project NAME --at 43.2 --track broll --to 2.4 --hold 1.6
+```
+
+Position punches wait on a harvested `KFTypePositionX/Y` block. `capcutctl harvest` now walks
+**all 88 drafts** and writes two: `positionScale` (a `Line` block from IKEA Refund) and
+`positionScaleEased` (a real `FreeCurveInOut` block from Higgsfield Refund, with genuine
+`left_control` / `right_control` bezier handles, covering PositionX + PositionY + ScaleX).
+Copy one of those; do not invent the fields.
+
+**Prefer the eased block.** 57 keyframe points across 10 of his projects use `FreeCurveInOut`;
+a linear scale punch reads mechanical where an eased one reads like a camera. Note CapCut writes
+`left_control`/`right_control` objects on `Line` points too, so their presence does not mean
+eased — test `curveType === 'FreeCurveInOut'`.
+
+## Watchable proxy — `preview` / `diff`
+
+```bash
+capcutctl preview --project NAME --out preview.mp4     # 6fps compositor stills + principal audio
+capcutctl diff --project NAME --snapshot BEFORE        # what changed since a snapshot
+capcutctl harvest                                      # catalogue transitions / SFX / masks / Line + eased Position+Scale blocks
+```
+
+`preview` reuses `qa`'s compositor (speed-aware source time). It is not CapCut's export. `harvest` is catalogue-only — there is no `--apply`.
+
 ## What it does NOT do
 
-No transitions, speed ramps, keyframes, text, audio or SFX placement; no effect structures invented
-from scratch; no zoom-to-bbox. For those, capture a verified template from a real CapCut project
-first — that is how the three layouts were built.
+No captions, OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `rl2`, not `find` upgrades.
