@@ -69,6 +69,54 @@ and the running order. Everything else is arithmetic.
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
 timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
 
+## The signature — `wrap`, `logo`, `endcard`, `zoom`
+
+```bash
+capcutctl brands                                       # what is known, and which need a PNG
+capcutctl wrap    --project NAME --words TRANSCRIPT.json [--text Follow] [--plan]
+capcutctl logo    --project NAME --at 8.25 --brand grok [--scale 0.36] [--hold 2.5] [--pos x,y]
+capcutctl endcard --project NAME [--text Follow] [--at S]
+capcutctl zoom    --project NAME --auto | --at S[,S...] [--to 1.15] [--hold 1.6]
+```
+
+`wrap` is the "final touches" pass: brand logos keyed to the moment he says the name, the
+closing card, and a push-in on every talking-head scene. `--plan` shows it without writing.
+
+**Brand logos.** Measured across 11 projects: scale `0.01 → 0.20–0.57` over **0.07–0.17s**,
+held ~2.5s, with `"Pop!" "Pon!" Pitch height` **0.1s ahead** of the picture. Each brand pops
+**once**, when he introduces it — never on later mentions.
+
+**The endcard.** Starts at **93–98% of duration** (default 96%), scale `0.01 → 1.4–3.4` over
+**0.07–0.20s**, with `Culin…` **coincident**, not leading. Text varies by video — `Follow`,
+`نشر`, `دليل`, `CV` — so it is a parameter, defaulting to `Follow`.
+
+**The talking-head push-in.** `1.0 → 1.15` over **0.23s**, hold 1.6s, release. That is 25 of
+43 measured face push-ins at 1.15 and 11 more at 1.2; median ramp 0.23s. Much subtler than
+a B-roll punch, which goes to 2.0–4.5. `--auto` finds the scenes: a principal-track clip
+carrying **no mask** is him alone in frame; a Split or Circle mask means he is sharing it.
+
+### The piece that makes it work: source time → timeline time
+
+The transcript is of the **raw take**; the timeline is a recut of it with dead air removed
+and clips sped up. "Put a logo where he says Grok" is meaningless until those are joined.
+`sourceToTimeline()` builds the map from the principal track's paired ranges — exact, not
+estimated — and `detectBrands` takes the first mention **that survives the cut**, because
+the earliest one is usually in a take that was thrown away.
+
+Whisper transliterates inconsistently — جروك and قروك in the same file — so aliases are
+compared after folding Arabic letters that differ only by dots or hamza.
+
+### Logo assets
+
+`presets/brands.json` maps a brand to its spoken aliases and a **transparent raster**.
+CapCut will not place an SVG, and `qlmanage` (the only rasteriser on a stock Mac) composites
+onto opaque white, so `tools/rasterize.py` keys the white back out and reports what survived
+— under 0.5% ink means a white-on-white logo, over 60% means a block, not a glyph.
+
+```bash
+python3 tools/rasterize.py ~/Downloads/Logos/grok.svg --out ~/Downloads/Logos/.raster/grok.png
+```
+
 ## Pace — `pace`
 
 ```bash
