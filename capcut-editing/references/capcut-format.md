@@ -250,6 +250,56 @@ track position, so it does not discriminate.
 **Do not rely on either model.** Keep `render_index` monotonic with track order so both
 resolve identically. Check it before shipping a project you did not build.
 
+## The layer stack — measured from `Hermes-agent`
+
+`Hermes-agent` is the reference: it contains every layout (split screen, circle inset,
+full face) and the user calls it the masterpiece of the set. Its stack, verified against
+the JSON and against the CapCut timeline he screenshotted:
+
+| track | content | note |
+|---|---|---|
+| 0 | main — **always empty** | he calls it "the cover" and never uses it |
+| 1 | blurred backdrop (the face again, under an effect) | furthest back |
+| 2 | screen-recording B-roll | `attribute: 1` (muted) |
+| 3 | indigo rect **when it frames the screen recording** | circle-inset scenes only |
+| 4 | **the talking head — carries every transition** | gapless, spans the timeline |
+| 5 | plates on top: indigo rect in split scenes, white circle ring in circle scenes | absolute front |
+
+**Higher track index renders in front, and the CapCut UI draws the highest index as the
+top row.** This resolves the ambiguity in the section above for real projects: track order
+is the model that matches what he sees.
+
+The indigo rect appears at two different heights because it does two different jobs:
+
+- framing the **screen recording** (circle-inset scenes) → *below* the face, `s=(1.05, 0.75) t=(0, 0)`
+- framing the **talking head** (split-screen scenes) → *above* the face, `s=(1.4777, 0.7211) t=(-0.0710, -0.5725)`
+
+His words: *"the purple cover usually sits at the absolute top … however, in case the scene
+is the [circle] talking head, then the purple cover sits in the middle on top of the screen
+recording, but under the talking head."* Both halves check out against the JSON.
+
+## Transitions belong to one track
+
+All **9** of Hermes-agent's transitions sit on track 4, the talking head. None sit anywhere
+else, and none are orphaned. Two rules follow, and `capcutctl polish` now enforces both:
+
+1. **One layer.** A transition affects the composite from its own layer down. Split across
+   layers, each wipe fires alone while the others cut straight through it — a B-roll that
+   dissolves under a face that jumps.
+2. **A clip on both sides.** A transition on a segment with nothing after it on its own
+   track is *silently discarded by CapCut on load*. The project is correct on disk and
+   wrong the moment it opens. This cost a payoff cue in `grok-build-final` — 15 written,
+   14 survived — and was invisible until the transitions were counted after a re-save.
+
+Hermes achieves (2) by slicing the face at every visible cut **even where the face content
+runs straight through**: five of its segments 0.00–8.80 are the same file at the same
+geometry, cut only so the transitions have boundaries to live on. `polish` reproduces this
+(`sliced` in its result) and the cut is frame-continuous, so nothing moves in the picture.
+
+`doctor` checks: `TRANSITION_ORPHANED` (error), `TRANSITION_OFF_PRINCIPAL` (warn),
+`TRANSITION_BELOW_TOP` (warn — a higher track of *moving picture* cutting bare through the
+wipe; plates and PNG frames swapping with the layout are expected and exempt).
+
 ## Rendered-pixel QA
 
 `capcutctl qa` composites any timeline frame outside CapCut and prints each

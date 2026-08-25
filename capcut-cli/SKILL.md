@@ -72,7 +72,7 @@ timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s
 ## SFX and transitions — `polish`
 
 ```bash
-capcutctl polish --project NAME [--lead 0.14] [--no-transitions]
+capcutctl polish --project NAME [--lead 0.14] [--track N] [--no-transitions]
 ```
 
 Puts a transition and its matching sound on every visible cut, using the grammar measured
@@ -86,8 +86,19 @@ from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
 | the payoff, once, on the last cut | `Flash` | `Coin cashier shop item get 4` |
 
 **The sound leads the picture by 0.14s** — measured median across 20 paired cuts, not invented.
-Volume 1.0, transitions 0.20–0.33s. Never the same pair twice running. Re-running replaces the
-previous pass rather than stacking, so it is safe to iterate.
+Volume 1.0, transitions 0.20–0.33s. Never the same pair twice running.
+
+**Every transition goes on the principal track** — the one gapless video track that spans the
+timeline, which is the talking head. That is where all 9 of Hermes-agent's transitions sit and
+none sit anywhere else. `polish` finds it automatically (`--track N` overrides) and **slices it
+at every cut that lacks a boundary**, frame-continuously, so the transition has a clip on both
+sides. Without a clip after it, CapCut silently drops the transition on load: the file is right
+on disk and wrong in the app. See `capcut-editing/references/capcut-format.md` for the full
+layer stack.
+
+`polish` owns the transitions: it clears and rebuilds all of them, because CapCut strips any
+marker it could use to recognise its own. Pass `keepExisting` in a spec to protect hand-made
+ones. Otherwise re-running is idempotent — same timeline, same result.
 
 ## B-roll framing — `layout broll`
 
