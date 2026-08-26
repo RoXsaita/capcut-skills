@@ -40,8 +40,12 @@ from may be deleted without loss. Do not re-derive the numbers from a live proje
 ## Decisions that must not be silently undone
 
 - The **usage-limits beat was deleted by the user** as too long. Deliberate; do not restore it.
-- **Zero transitions, zero video effects** — his measured style. Adding them is a style change;
-  confirm first.
+- **Transitions are his style, not a deviation.** *(re-measured 2026-08-26 across 88 drafts:
+  342 transitions in 57 projects.)* The old "zero transitions" note here came from `IKEA Refund`
+  alone, which is the one outlier with none. `capcutctl polish` owns them — see `style.md`
+  → "The seam formula". **Video effects** genuinely stay off: of 402 in the library, 370 are the
+  `Blur` background plate `layout background` already writes. Adding any other effect, or a
+  colour grade, is still a style change — confirm first.
 - **Overlays only.** Main track always empty. See `style.md` rule zero.
 - Deliberately excluded from the Grok Build B-roll: the two `"That name isn't allowed"` publish
   rejections, and the notification shade at 8:25 (personal content).
