@@ -11,7 +11,7 @@ description: >
 # capcutctl — what already exists
 
 `capcutctl` is installed (`~/.local/bin/capcutctl`, source at
-`~/Documents/Codex/2026-08-23/can-x20/outputs/capcut-editor-cli`, `npm link`ed).
+`~/Documents/Devving/capcut-cli/cli`, `npm link`ed).
 
 **Do not hand-write `draft_info.json` for anything below.** It is already solved, tested, and
 transactional. Hand-editing loses the snapshot, the root/timeline pairing and the mirror sync.
