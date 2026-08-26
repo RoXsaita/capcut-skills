@@ -46,7 +46,7 @@ Note the frame sits 0.0114 higher than the head — that offset is deliberate, k
 ## Preset 2 — FULL
 
 Nothing to do. `scale 1.0`, `transform (0,0)`, no mask. This is the default state of a clip.
-## Preset 3 — SPLIT (head on top + purple frame)
+## Preset 3 — SPLIT (head on the BOTTOM half + purple frame)
 
 ```python
 # the cam segment
@@ -79,11 +79,11 @@ transform + mask arithmetic produced a confidently wrong answer.
 - Mask `centerY` is relative to **half the clip height**, in the clip's own space.
 - Mask configs transfer between clips of the same aspect ratio without change — the endcard's
   source is 1080x1920 and the cam is 1440x2560, both 9:16, which is why paste-in-place works.
-## Applying a preset in code
+## Applying a preset
 
-Copy `clip` and `uniform_scale` wholesale from the reference segment, then attach a **private
-copy** of the mask (new UUID). Never let two segments share one `common_mask` entry, or moving one
-moves the other. See `scripts/presets.py`.
+`capcutctl layout circle|split-screen|background|auto`. Do not copy the Python dicts above
+into `draft_info.json`, and do not run `scripts/presets.py`. The dicts are the *record of
+what the numbers mean*. The write path is the CLI.
 ## The CIRCLE preset's full composition
 
 A small circle is almost never alone. Its standard completion — the user: *"usually, when there's

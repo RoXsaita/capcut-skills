@@ -134,6 +134,8 @@ capcutctl zoom    --project NAME --auto | --at S[,S...] [--to 1.15] [--hold 1.6]
 
 `wrap` is the "final touches" pass: brand logos keyed to the moment he says the name, the
 closing card, and a push-in on every talking-head scene. `--plan` shows it without writing.
+`--words` wants a Whisper transcript (`segments[].words`), not `.aroll.json`. Omit it and
+wrap looks in `~/Downloads/.video-index/<stem>.whisper-*.json` (written by `cut`).
 
 **Brand logos.** Measured across 11 projects: scale `0.01 → 0.20–0.57` over **0.07–0.17s**,
 held ~2.5s, with `"Pop!" "Pon!" Pitch height` **0.1s ahead** of the picture. Each brand pops
@@ -301,7 +303,9 @@ that puts it back.
 
 `new` is a **literal duplicate of `Preset 3`** with the name changed — nothing cleverer. The
 branded endcard comes along and is slid to sit immediately after your scenes. `--from NAME` for a
-different template, `--blank` to drop the template content.
+different template. `--blank` empties the timeline (and with `--media`, keeps only your new
+scenes). `--canvas WIDTHxHEIGHT` and `--fps N` write through; they used to be accepted and
+discarded.
 
 `--scenes` is `START:END` on the timeline, `@SOURCE` for the media in-point, seconds throughout.
 It prints **`contentTrack`** — the track index your scenes landed on. The layout commands need it.
@@ -314,7 +318,7 @@ recompute these numbers, never invent new ones.
 | | subject | companion |
 |---|---|---|
 | `split-screen` | fills the BOTTOM half from y=960; `Split`/line mask, `rotation 180` | indigo bar on the seam |
-| `circle` | upper-left circular avatar | white ring (**which carries its own circle mask**) |
+| `circle` | upper-left circular avatar (`transform.y = +0.644`, y up) | white ring (**which carries its own circle mask**) |
 | `background` | — | blurred copy of the subject, `scale 1.12`, `alpha 0.72`, on a track BELOW |
 
 `background` auto-detects circle-scenes-with-a-ring and skips the cloned preset's endcard

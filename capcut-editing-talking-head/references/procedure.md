@@ -48,7 +48,7 @@ Known-weak, in the order worth fixing:
   outliers.
 - **The video side of a seam is unchecked by machine.** The contact sheet is read by eye. Frame
   differencing across each cut pair would flag head-position jumps automatically.
-- **Take detection is manual.** It should fall out of the transcript (hook line repeated after a
-  long gap).
+- **Take detection is automated** (`detect_takes` — a long silence or the opening line
+  coming round again). You still choose which take to keep.
 - **Nothing is verified end-to-end after the CapCut write.** The rendered ffmpeg preview is
   verified; the CapCut project is only structurally validated. Worst case they diverge silently.

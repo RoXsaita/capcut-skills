@@ -31,8 +31,9 @@ That is the whole procedure. Two invocations, one command, ~2 minutes.
 Then give the scenes their looks — see `capcut-cli`:
 
 ```bash
-capcutctl layout circle       --project my-video --at 12 --track 7
-capcutctl layout split-screen --project my-video --at 30 --track 7
+capcutctl layout auto         --project my-video   # split where B-roll covers, full face else
+capcutctl layout circle       --project my-video --at 12 --track content
+capcutctl layout split-screen --project my-video --at 30 --track content
 capcutctl layout background   --project my-video
 capcutctl qa --project my-video --times 4,12,30 --guide 960 --out qa/
 ```

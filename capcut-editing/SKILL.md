@@ -51,12 +51,15 @@ know is right.
 ```bash
 capcutctl cut VIDEO --lang ar                    # A-roll: index, review table
 capcutctl cut VIDEO --keep 0,2-9 --project NAME  # A-roll: build the project
-capcutctl layout split-screen|circle|background --project NAME --at S --track N
+capcutctl add --project NAME --media FILE --at S --dur S --track broll
+capcutctl layout auto|split-screen|circle|background --project NAME
+capcutctl polish|pace|wrap --project NAME
 capcutctl scenes|inspect|doctor --project NAME
 capcutctl qa --project NAME --times 3,9,15       # composite real frames
 capcutctl snapshot|history|restore --project NAME
-capcutctl apply --project NAME --spec FILE       # anything else, as a v1 spec
 ```
+
+`--track` is a name or an index. Read `capcut-cli` before reaching for `apply --spec`.
 
 Every write is snapshotted, applied to the root draft and the active timeline as separate
 documents, staged, re-parsed, atomically renamed, doctored, and rolled back on failure. It

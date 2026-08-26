@@ -83,9 +83,12 @@ its `id`. See `scripts/build.py` (`refs_for`).
                    "values":[1.0],"string_value":"","graphID":""}, ...]}
 ```
 
-`time_offset` is microseconds **relative to the segment start**. Property types seen in the
+`time_offset` is microseconds as an **absolute source position** (inside
+`source_timerange`, not 0 and not relative to the segment start). A clip added with
+`--src 90` that punches at offset 0 clamps to a dead hold. Property types seen in the
 user's own projects: `KFTypePositionX`, `KFTypePositionY`, `KFTypeScaleX`, `KFTypeScaleY`,
-`KFTypeRotation`. For a punch-in, animate ScaleX **and** ScaleY together.
+`KFTypeRotation`. For a punch-in, animate ScaleX **and** ScaleY together. `capcutctl
+keyframe` writes this correctly — do not invent the offsets by hand.
 ## Masks (split-screen)
 
 A `common_mask` entry referenced from `extra_material_refs`. The user's split-screen uses the

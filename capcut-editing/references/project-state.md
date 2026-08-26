@@ -52,8 +52,7 @@ from may be deleted without loss. Do not re-derive the numbers from a live proje
 
 ## Known open, project-wide
 
-- **No SFX or speed ramps in the CLI.** His signature uses 24 SFX cues across 3 lanes and ramps
-  from 0.4× to 100×. Until `capcutctl` can place them, an automated cut will be correctly timed
-  and still not sound like his edit. This is the biggest functional gap.
 - **B-roll matching is unsolved** — see `capcut-editing-screen-recording`, phases 2 and 3.
-- **No punch-in zooms.**
+  `capcutctl polish` (transitions + SFX), `pace` (speed ramps), `wrap` / `zoom` / `logo`
+  (signature) are built. Use them. Do not skip the signature pass because this file once
+  said they did not exist.
