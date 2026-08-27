@@ -1,6 +1,6 @@
 # `rl2` — the instrumented recorder (Phase 1)
 
-Source: `~/Projects/recording-layout-v2`. Binary symlinked at `~/.local/bin/rl2`.
+Source: `~/Documents/Devving/rl2`. Binary symlinked at `~/.local/bin/rl2`.
 Rebuild with `swift build -c release` in that directory.
 
 Replaces `~/Applications/Recording Layout.app`, which positioned a window to 720×1280 and quit.

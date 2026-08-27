@@ -8,7 +8,7 @@ Making the *capture* better is higher leverage than making the *editor* smarter.
 `{100, 50, 820, 1330}` = **720×1280, exactly 9:16**, presets the macOS screenshot rectangle to
 match, then exits. It emits no telemetry; the user starts the recording by hand.
 
-**It is replaced by `rl2` (`~/Projects/recording-layout-v2`).** See `recorder.md`. The four
+**It is replaced by `rl2` (`~/Documents/Devving/rl2`).** See `recorder.md`. The four
 upgrades proposed here are now built:
 
 | Was proposed | Now |
