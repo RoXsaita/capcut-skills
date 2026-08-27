@@ -1,7 +1,10 @@
 import sys,subprocess,os
-sys.path.insert(0,"/private/tmp/claude-501/-Users-roxsa/0832a1d1-cbc4-4d25-a86b-4bbad0c63b60/scratchpad")
+# Legacy one-off. The media constants below came from the single take this was
+# written for; nothing here ships with sample media. Point them at your own files:
+#   CAPCUT_CAM=... CAPCUT_BROLL=... CAPCUT_SCRATCH=... python <script>.py
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from render import render, S
-CAM="/Users/roxsa/Downloads/E32F9DC9-C213-4EAD-B7D2-C4F61FC731C8.mp4"
+CAM = os.environ.get("CAPCUT_CAM", "")          # talking-head source
 # (vo_start, vo_dur, [ (b_dur, grok_t, roi, speed, layout) ... ])
 BEATS=[
  (121.20,8.20,[(2.00,1772.3,900,1.0,"full_screen"),(1.70,1774.3,900,0.8,"split"),(4.50,1758,200,1.0,"split")]),

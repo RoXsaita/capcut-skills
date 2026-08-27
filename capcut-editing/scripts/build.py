@@ -1,8 +1,11 @@
 import json, os, uuid, copy, shutil
 D=os.path.expanduser("~/Movies/CapCut/User Data/Projects/com.lveditor.draft")
 P=f"{D}/Grok Build"
-CAM="/Users/roxsa/Downloads/E32F9DC9-C213-4EAD-B7D2-C4F61FC731C8.mp4"
-GROK="/Users/roxsa/Downloads/Screen_Recording_20260822_095151_Grok.mp4"
+# Legacy one-off. The media constants below came from the single take this was
+# written for; nothing here ships with sample media. Point them at your own files:
+#   CAPCUT_CAM=... CAPCUT_BROLL=... CAPCUT_SCRATCH=... python <script>.py
+CAM = os.environ.get("CAPCUT_CAM", "")          # talking-head source
+GROK = os.environ.get("CAPCUT_BROLL", "")       # screen-recording B-roll source
 SFXDIR=os.path.expanduser("~/Library/Containers/com.lemon.lvoverseas/Data/Movies/CapCut/User Data/Cache/music")
 U=lambda: str(uuid.uuid4()).upper()
 us=lambda s: int(round(s*1_000_000))

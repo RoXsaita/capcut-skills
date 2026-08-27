@@ -1,6 +1,9 @@
 import glob, os, re, json, subprocess
-S="/private/tmp/claude-501/-Users-roxsa/0832a1d1-cbc4-4d25-a86b-4bbad0c63b60/scratchpad"
-GROK="/Users/roxsa/Downloads/Screen_Recording_20260822_095151_Grok.mp4"
+# Legacy one-off. The media constants below came from the single take this was
+# written for; nothing here ships with sample media. Point them at your own files:
+#   CAPCUT_CAM=... CAPCUT_BROLL=... CAPCUT_SCRATCH=... python <script>.py
+S = os.environ.get("CAPCUT_SCRATCH", os.path.expanduser("~/.cache/capcut-scratch"))
+GROK = os.environ.get("CAPCUT_BROLL", "")       # screen-recording B-roll source
 
 def load_index():
     idx={}

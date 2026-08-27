@@ -1,7 +1,10 @@
 import subprocess, os, json, sys
-S="/private/tmp/claude-501/-Users-roxsa/0832a1d1-cbc4-4d25-a86b-4bbad0c63b60/scratchpad"
-CAM="/Users/roxsa/Downloads/E32F9DC9-C213-4EAD-B7D2-C4F61FC731C8.mp4"
-GROK="/Users/roxsa/Downloads/Screen_Recording_20260822_095151_Grok.mp4"
+# Legacy one-off. The media constants below came from the single take this was
+# written for; nothing here ships with sample media. Point them at your own files:
+#   CAPCUT_CAM=... CAPCUT_BROLL=... CAPCUT_SCRATCH=... python <script>.py
+S = os.environ.get("CAPCUT_SCRATCH", os.path.expanduser("~/.cache/capcut-scratch"))
+CAM = os.environ.get("CAPCUT_CAM", "")          # talking-head source
+GROK = os.environ.get("CAPCUT_BROLL", "")       # screen-recording B-roll source
 CAM_Y=640          # verified good face framing
 W,H=1080,1920; HALF=960
 
