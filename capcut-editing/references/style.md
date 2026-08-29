@@ -51,7 +51,6 @@ evidence about his style. The lead is roughly constant across transition duratio
 | **Horizontal Triptych** (layout change) | 0.27s / 8f | `Woosh` (or `swish_whoosh (large)` at 0.33s) | 0.40s |
 | Flash · White Flash 2 · Glitch Flash II | 0.20–0.27s | `Decision / choice / stationery / click` | 0.50s |
 | Glitch (the machine doing something) | 0.27s | `Glitch sound that matches the sound logo` | 0.63s |
-| Flash, once, on the last cut into the CTA | 0.27s | `Coin cashier shop item get 4` | 0.77s |
 
 Volume is `1.0` on every seam sound. No fades.
 
@@ -106,10 +105,11 @@ and reusable. Keep to these — they are his established sound.
 
 Placement conventions observed:
 - **Woosh / Decision / Pop** on seams — see "The seam formula" for the exact offset
+- **Enter / click / select** (either variant) when a rectangle, arrow, or circle callout appears — coincident, not leading
 - **Mouse click** on every visible on-screen click
 - **Typing** under keyboard activity
 - **Stopwatch** under a long speed ramp (sells the time passing)
-- **Coin / cashier** on a success or payoff moment
+- **Coin / cashier** on a success or payoff moment — not as a scene-transition on the last cut
 - **Impact / RISER** on the opening hook
 - **Pop** on reveals and number beats
 

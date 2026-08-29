@@ -16,7 +16,7 @@ capcutctl qa       --project NAME --times …
 
 1. **A transition is a scene change the viewer can see.** B-roll shot change or layout class (split ↔ full-face). An A-roll splice over the same files list gets a hard cut, not a Flash. `polish --motivated` is this rule. Default `polish` still fires on every splice — do not use that on a finishing pass.
 2. **Do not recut speech to a beat.** Voice stays locked. Beat-sync means: generate a bed whose hits are *prompted* at picture-change times, then offset the audio so detected beats land on those times (clamped to ±0.4s). Picture does not move.
-3. **Music is background.** Volume ~0.16, fade in 0.4s, fade out into the CTA. Instrumental, no vocals, no drop. Out before he asks for the comment.
+3. **Music is background.** Volume ~0.08, fade in 0.4s, fade out into the CTA. Instrumental, no vocals, no drop. Out before he asks for the comment.
 4. **Do not burn captions** and do not invent a colour grade. Those are a style change; captions have a separate system.
 5. **Watch mute, then on a phone.** If an effect is the first thing you notice, it goes.
 

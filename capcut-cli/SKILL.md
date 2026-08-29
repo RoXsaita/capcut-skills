@@ -62,7 +62,7 @@ capcutctl harvest  [--projects A,B] [--out FILE] [--plan]
 
 capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
 capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
-capcutctl music    --project NAME [--plan] [--regen] [--volume 0.16]
+capcutctl music    --project NAME [--plan] [--regen] [--volume 0.08]
 capcutctl polish   --project NAME [--motivated]         # --motivated = picture changes only
 ```
 
@@ -244,12 +244,15 @@ from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
 | layout change | `Horizontal Triptych` | `Woosh` / `swish_whoosh` (5/5 in his projects) |
 | jump inside a scene | `Flash` / `White Flash 2` / `Glitch Flash II` | `Decision / choice / click` (6/7) |
 | the machine doing something | `Glitch` | `Glitch sound that matches the sound logo` (2/2) |
-| the payoff, once, on the last cut | `Flash` | `Coin cashier shop item get 4` |
 
 **The sound leads the picture by 0.14s** — measured median across 20 paired cuts, not invented.
 (Re-measured 2026-08-26 on 22 seams: **0.133s = exactly 4 frames at 30fps**, with the sound
 starting when the transition starts. 0.14 is within a fifth of a frame; either is right.)
 Volume 1.0, transitions 0.20–0.33s. Never the same pair twice running.
+
+**Callouts click.** Every rectangle / arrow / circle highlight (the GIFs, not the indigo seam bar) gets `Enter / click / select` — alternating the two variants — coincident with the picture. `polish` writes these as `polish:callout`.
+
+**Cashier is not a scene transition.** Coin/cashier is a success accent, not the last-cut pair.
 
 **Sweeps alternate.** A layout change gets a sweep, but `sweep` and `sweepL` take turns. They used
 to be exempt from never-twice-running, so a video whose every scene changes layout got the
@@ -283,7 +286,7 @@ capcutctl finish   --project NAME --music      # Lyria bed, beat-offset to pictu
 The last pass. `timeline` is a one-screen dump of stacked tracks (the view that makes
 same-screen Flashes obvious). `finish --music` generates an instrumental via Gemini Lyria 3
 Pro (`GEMINI_API_KEY` in `cli/.env`, gitignored), caches it at `.capcutctl/music.mp3`, and
-places it at ~0.16 with fades. Beats are detected with ffmpeg PCM; the clip is shifted so
+places it at ~0.08 with fades. Beats are detected with ffmpeg PCM; the clip is shifted so
 downbeats land on **picture changes**. The talking head is never recut. See
 `capcut-editing/references/finish.md`.
 
