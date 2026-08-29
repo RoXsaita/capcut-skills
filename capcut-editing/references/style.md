@@ -204,7 +204,7 @@ These are not "probably nots". Each was counted across the whole library:
 | Loudness normalisation | all 592 `loudnesses` have `enable: false` | never — CapCut's own LUFS tool is one he has never switched on |
 | Beat sync | all 1225 `beats` are `mode: 404`, `enable_ai_beats: false` (auto-generated per audio, ignored) | never |
 | Animations | 1493 `material_animations`, of which **3** are a real "Fade In" | effectively never |
-| Music bed | 4 stray tracks across 88 projects | never |
+| Music bed | 4 stray tracks across 88 projects | historically never *in CapCut* — he added it after export. `capcutctl finish --music` now writes a quiet generated bed; see `finish.md`. Do not turn on CapCut's `enable_ai_beats`. |
 | Captions | 106 `texts` across 31 projects, 0–1 per video | essentially never |
 | Rotation | `KFTypeRotation` present 435× but the value is `0.0` everywhere | never tilts |
 
