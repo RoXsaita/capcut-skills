@@ -56,6 +56,11 @@ capcutctl keyframe --project NAME --at S --track NAME [--to 2.4] [--hold 1.6] [-
 capcutctl preview  --project NAME --out preview.mp4 [--fps 6]
 capcutctl diff     --project NAME --snapshot NAME | --against NAME
 capcutctl harvest  [--projects A,B] [--out FILE] [--plan]
+
+capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
+capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
+capcutctl music    --project NAME [--plan] [--regen] [--volume 0.16]
+capcutctl polish   --project NAME [--motivated]         # --motivated = picture changes only
 ```
 
 Everything that writes takes `--dry-run`.
@@ -223,10 +228,12 @@ so a 0.2s punch-in at 10× would collapse to 0.02s — under one frame, reading 
 ## SFX and transitions — `polish`
 
 ```bash
-capcutctl polish --project NAME [--lead 0.14] [--track N] [--no-transitions]
+capcutctl polish --project NAME [--lead 0.14] [--track N] [--no-transitions] [--motivated]
 ```
 
-Puts a transition and its matching sound on every visible cut, using the grammar measured
+`--motivated` keeps a transition only when the **picture** changes (B-roll shot or layout class). An A-roll splice over the same screen is left as a hard cut. Use this on the finish pass. Without the flag, polish still fires on every visible cut.
+
+Puts a transition and its matching sound on those cuts, using the grammar measured
 from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
 
 | pair | transition | sound |
@@ -260,6 +267,22 @@ layer stack.
 `polish` owns the transitions: it clears and rebuilds all of them, because CapCut strips any
 marker it could use to recognise its own. Pass `keepExisting` in a spec to protect hand-made
 ones. Otherwise re-running is idempotent — same timeline, same result.
+
+## Finish — `timeline` / `finish` / `music`
+
+```bash
+capcutctl timeline --project NAME
+capcutctl finish   --project NAME              # ASCII + scorecard (read-only)
+capcutctl polish   --project NAME --motivated
+capcutctl finish   --project NAME --music      # Lyria bed, beat-offset to picture changes
+```
+
+The last pass. `timeline` is a one-screen dump of stacked tracks (the view that makes
+same-screen Flashes obvious). `finish --music` generates an instrumental via Gemini Lyria 3
+Pro (`GEMINI_API_KEY` in `cli/.env`, gitignored), caches it at `.capcutctl/music.mp3`, and
+places it at ~0.16 with fades. Beats are detected with ffmpeg PCM; the clip is shifted so
+downbeats land on **picture changes**. The talking head is never recut. See
+`capcut-editing/references/finish.md`.
 
 ## B-roll framing — `layout broll`
 
@@ -427,4 +450,4 @@ capcutctl harvest                                      # catalogue transitions /
 
 ## What it does NOT do
 
-No captions, OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `rl2`, not `find` upgrades.
+No captions (those stay in his separate system), OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `rl2`, not `find` upgrades. Music beds are `finish --music`, not CapCut's stock library.

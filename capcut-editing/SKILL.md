@@ -54,6 +54,7 @@ capcutctl cut VIDEO --keep 0,2-9 --project NAME  # A-roll: build the project
 capcutctl add --project NAME --media FILE --at S --dur S --track broll
 capcutctl layout auto|split-screen|circle|background --project NAME
 capcutctl polish|pace|wrap --project NAME
+capcutctl timeline|finish|music --project NAME   # last pass: ASCII, scorecard, generated bed
 capcutctl scenes|inspect|doctor --project NAME
 capcutctl qa --project NAME --times 3,9,15       # composite real frames
 capcutctl snapshot|history|restore --project NAME
@@ -83,7 +84,13 @@ imports it. Prefer `capcutctl` for anything it covers.
 2. **Give the scenes their looks** — `capcutctl layout …`.
 3. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
    two real defects passed it clean.
-4. **`capcutctl doctor`** must be error-free before you hand it over.
+4. **Finish** — `capcutctl finish --project NAME`, then `polish --motivated` and `finish --music`.
+   Picture-locked first. Music is generated to the picture; speech is never recut to a beat.
+   Captions stay outside CapCut. See `references/finish.md`.
+5. **Look at the finished frames** — those last-pass writes change the picture. Run
+   `capcutctl timeline`, then `capcutctl qa` at the new seams / music-in / CTA, then a mute
+   watch. `doctor` cannot see transition, track-slice, or music-placement defects.
+6. **`capcutctl doctor`** must be error-free before you hand it over.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.
 
@@ -93,6 +100,7 @@ Work **one section at a time** and check end-to-end. He asked for this explicitl
 |---|---|
 | `references/capcut-format.md` | draft_info.json schema, segments, masks, keyframes, the multi-copy write, registration |
 | `references/style.md` | Rule zero, his measured signature, SFX palette |
+| `references/finish.md` | Last pass: motivated seams, ASCII timeline, generated beat-aligned bed |
 | `references/preview-loop.md` | Full-motion ffmpeg preview and contact sheets (frame checks are `capcutctl qa`) |
 | `references/pitfalls.md` | Concrete traps already hit. Read before starting. |
 | `references/project-state.md` | Sources, the signed-off VO EDL, what is done and what is not |

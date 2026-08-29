@@ -54,5 +54,5 @@ from may be deleted without loss. Do not re-derive the numbers from a live proje
 
 - **B-roll matching is unsolved** — see `capcut-editing-screen-recording`, phases 2 and 3.
   `capcutctl polish` (transitions + SFX), `pace` (speed ramps), `wrap` / `zoom` / `logo`
-  (signature) are built. Use them. Do not skip the signature pass because this file once
-  said they did not exist.
+  (signature), `finish` / `music` / `timeline` are built. Use `polish --motivated` and
+  `finish --music` on the last pass. See `finish.md`.
