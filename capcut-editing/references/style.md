@@ -1,7 +1,9 @@
-# The user's editing style
+# Default house style
 
-Measured directly from his own finished projects, not inferred.
-**Match this. Do not invent a vocabulary he doesn't use.**
+Measured from the author's finished projects, not inferred.
+This is the default grammar `capcutctl polish` / `pace` / `wrap` encode.
+Treat it as a profile: match it unless the user asks for a different look.
+**Do not invent a vocabulary that is not in this file.**
 
 **Provenance matters — read this before trusting a number.** The tables below were originally
 measured from `IKEA Refund` ALONE, and that one project is an outlier: it is the only recent

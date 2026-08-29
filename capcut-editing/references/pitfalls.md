@@ -47,8 +47,8 @@ Concrete traps already hit on this project. Read before starting.
   and required for `cliclick` / AppleScript UI scripting. Granting one does not grant the other.
 ## Privacy
 
-- **Personal content in recordings.** The notification shade at 8:25 exposed a personal comment
-  notification and news pushes. Exclude by default; flag it rather than silently including it.
+- **Personal content in recordings.** Notification shade, DMs, lock-screen, and
+  news pushes. Exclude by default; flag rather than silently including.
 - **Never log keystroke content.** If building an input logger, record *timing only*. Content would
   capture passwords.
 ## The edit reverted after CapCut relaunched

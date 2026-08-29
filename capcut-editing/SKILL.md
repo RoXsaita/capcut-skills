@@ -13,12 +13,21 @@ description: >
 
 Programmatic video editing that hands off cleanly to a human.
 
+## First: install, then ask which style
+
+If `capcutctl` is not on PATH, clone and `npm link` [capcut-editor-cli](https://github.com/RoXsaita/capcut-editor-cli) (see its `SETUP.md`). Then **ask the user, once, before writing a project**:
+
+1. **Keep the bundled house style** (Suheil / suheilai) — `style.md`, `presets/layouts.json`, `polish` / `pace` / `wrap` as documented. Default if they already edit this way.
+2. **Harvest their own CapCut edits** — `capcutctl harvest`, then treat *their* drafts as the style source. Do not apply the bundled seam formula or branded endcard unasked.
+3. **Build their own style** — `capcutctl new --blank` (or `--from` a draft they name). Skip `polish` / `wrap` until they say what they want.
+
+Do not silently apply option 1 to a stranger.
+
 ## Why this exists
 
-He rejects code-render tools (HyperFrames, Remotion) for this work — not because they can't
-render, but because **he can't take over and finish the edit in a good UI**. He edits in CapCut.
-So the deliverable is a *CapCut project*, not a rendered file. This works because CapCut stores
-projects as plain JSON on disk.
+The deliverable is a *CapCut project*, not a rendered file. Code-render tools
+(HyperFrames, Remotion) cannot hand the edit back to CapCut's UI. CapCut stores
+projects as plain JSON on disk, which is what `capcutctl` writes.
 
 ## The family
 
@@ -27,7 +36,7 @@ projects as plain JSON on disk.
 | **capcut-cli** | **`capcutctl` — what is already automated: create a project, the three locked layouts, scene listing, snapshots. Check here BEFORE hand-writing JSON.** |
 | **capcut-editing** (this one) | The format, the safe write path, his style, pitfalls, project state |
 | **capcut-editing-talking-head** | Cutting the face: the 3 indexes, seam linting, the locked cut procedure, the 3 layout presets |
-| **capcut-editing-screen-recording** | B-roll: the `rl2` instrumented recorder (built), the OCR index, ROI, content matching. **The editing half is still unsolved — read its status table first.** |
+| **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **The editing half is still unsolved — read its status table first.** |
 
 ## The three rules
 

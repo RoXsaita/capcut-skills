@@ -2,6 +2,10 @@
 
 **The live tooling is `capcutctl`.** Read `capcut-cli` first; everything below predates it.
 
+Several of these still mention a specific video's keep-list or a Downloads
+filename. They are reference implementations, not a live EDL. Do not copy
+those paths into a public note. Prefer `CAPCUT_CAM` / `CAPCUT_BROLL`.
+
 | Superseded by | Was |
 |---|---|
 | `capcutctl cut` | `vo_plan.py`, `vo_cut.py`, `vo_rebuild_capcut.py`, `beats.py` |

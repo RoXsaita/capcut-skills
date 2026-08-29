@@ -1,6 +1,6 @@
 import subprocess, os, sys
-CAM=os.path.expanduser("~/Downloads/E32F9DC9-C213-4EAD-B7D2-C4F61FC731C8.mp4")
-SCR=os.path.expanduser("~/Downloads/Screen_Recording_20260822_095151_Grok.mp4")
+CAM=os.environ.get("CAPCUT_CAM") or ""
+SCR=os.environ.get("CAPCUT_BROLL") or ""
 W,H=1080,1920
 # CapCut: scale 1.0 == FIT whole clip inside canvas; transform in half-canvas units.
 def fit(sw,sh,s=1.0):

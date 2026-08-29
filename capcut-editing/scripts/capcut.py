@@ -24,7 +24,7 @@ Project may be a name or a full path.
 import sys, os, json, glob, shutil, subprocess, hashlib, time
 
 ROOT = os.path.expanduser("~/Movies/CapCut/User Data/Projects/com.lveditor.draft")
-CAM  = os.path.expanduser("~/Downloads/E32F9DC9-C213-4EAD-B7D2-C4F61FC731C8.mp4")
+CAM  = os.environ.get("CAPCUT_CAM", "")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def proj(name): return name if os.path.isdir(name) else os.path.join(ROOT, name)
@@ -106,7 +106,7 @@ def cmd_strip(p, a=None, b=None):
 
 def render_vo(p, out, audio_only=False):
     sp = spans_of(load(p))
-    cache = os.path.expanduser("~/Movies/GrokBuild-wip/vo")
+    cache = os.environ.get("CAPCUT_VO_OUT", os.path.expanduser("~/Movies/capcut-vo"))
     os.makedirs(cache, exist_ok=True)
     out = out or os.path.join(cache, "cli_preview." + ("wav" if audio_only else "mp4"))
     fv,fa,vl,al = [],[],[],[]
@@ -131,7 +131,7 @@ def cmd_preview(p, out=None):
 
 def cmd_sheet(p, out=None):
     sp = spans_of(load(p)); mp4 = render_vo(p, None)
-    out = out or os.path.expanduser("~/Movies/GrokBuild-wip/vo/cli_sheet.png")
+    out = out or os.path.join(os.environ.get("CAPCUT_VO_OUT", os.path.expanduser("~/Movies/capcut-vo")), "cli_sheet.png")
     tmp = os.path.join(os.path.dirname(out), "_sheet"); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
     t=0.0; marks=[]
     for lbl,a,b,_ in sp:

@@ -1,16 +1,21 @@
 ---
 name: capcut-editing-screen-recording
 description: >
-  Select, time and place screen-recording B-roll in a CapCut video, and run the instrumented
-  recorder that makes that possible. Use when matching spoken sentences to on-screen events,
-  recording screen B-roll with telemetry (rl2), building or querying an index of a long screen
-  recording, or choosing crops and zooms. THE EDITING HALF IS STILL UNSOLVED — read the status
-  table below before promising precision. Read the capcut-editing hub first; for what `capcutctl` already automates, read capcut-cli.
+  Select, time and place screen-recording B-roll in a CapCut video. Use when matching spoken
+  sentences to on-screen events, building or querying an index of a long screen recording, or
+  choosing crops and zooms. Use `capcutctl find` for OCR/transcript search. THE EDITING HALF
+  IS STILL UNSOLVED — read the status table below before promising precision. Read the
+  capcut-editing hub first; for what `capcutctl` already automates, read capcut-cli.
 ---
 
 # Screen recording — B-roll
 
 Read `capcut-editing` (the hub) first.
+
+The live search path is `capcutctl find` (OCR + transcript). An instrumented
+recorder (`rl2`) exists in a separate private repo and is **not** part of this
+toolkit; do not tell the user to clone or install it. For ordinary screen
+recordings, index with `find` and place B-roll with `capcutctl add` / `layout`.
 
 ## The premise
 

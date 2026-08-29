@@ -3,6 +3,12 @@
 /*
 !.gitignore
 !README.md
+!LICENSE
+!NOTICE
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!SECURITY.md
+!.github/
 !capcut-cli/
 !capcut-editing/
 !capcut-editing-screen-recording/

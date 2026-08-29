@@ -1,6 +1,6 @@
 import json, os, uuid, copy, shutil
 D=os.path.expanduser("~/Movies/CapCut/User Data/Projects/com.lveditor.draft")
-P=f"{D}/Grok Build"
+P=os.environ.get("CAPCUT_PROJECT", "")
 # Legacy one-off. The media constants below came from the single take this was
 # written for; nothing here ships with sample media. Point them at your own files:
 #   CAPCUT_CAM=... CAPCUT_BROLL=... CAPCUT_SCRATCH=... python <script>.py
@@ -12,7 +12,8 @@ us=lambda s: int(round(s*1_000_000))
 
 d=json.load(open(f"{P}/draft_info.json"))
 M=d["materials"]
-src=json.load(open(f"{D}/IKEA Refund/draft_info.json"))   # template donor
+_donor = os.environ.get("CAPCUT_DONOR", "")
+src=json.load(open(f"{_donor}/draft_info.json" if _donor else f"{D}/draft_info.json"))   # template donor
 
 # ---------- template helpers ----------
 VID_T={k:v for k,v in src["materials"]["videos"][0].items()}
@@ -90,8 +91,8 @@ def mktrack(kind, segs, flag=0):
 print("helpers ready")
 
 # ---------------- TIMELINE ----------------
-CAM_ID  = add_video_material(CAM, 1440,2560, 232.366667, True,  "E32F9DC9 (cam take2)")
-GROK_ID = add_video_material(GROK,1080,2652, 1861.611156, True, "Screen_Recording_Grok")
+CAM_ID  = add_video_material(CAM, 1440,2560, 232.366667, True,  os.path.basename(CAM) or "cam")
+GROK_ID = add_video_material(GROK,1080,2652, 1861.611156, True, os.path.basename(GROK) or "broll")
 
 SFX={n:(f"{SFXDIR}/{h}.mp3",dur) for n,h,dur in [
  ("impact","07d7ecbf820c0a668adb491c04cf76fb",6.47),

@@ -2,8 +2,10 @@ import subprocess, os, sys
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from vo_plan import spans
 
-SRC = os.path.expanduser("~/Downloads/E32F9DC9-C213-4EAD-B7D2-C4F61FC731C8.mp4")
-OUT = os.path.expanduser("~/Movies/GrokBuild-wip/vo")
+SRC = os.environ.get("CAPCUT_CAM")
+OUT = os.environ.get("CAPCUT_VO_OUT", os.path.expanduser("~/Movies/capcut-vo"))
+if not SRC:
+    sys.exit("Set CAPCUT_CAM to the talking-head file")
 os.makedirs(OUT, exist_ok=True)
 
 # one filter_complex, re-encode once, frame accurate. 1440x2560 is already 9:16 -> scale to 1080x1920.

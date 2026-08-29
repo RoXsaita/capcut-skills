@@ -1,0 +1,13 @@
+capcut-skills
+Copyright (c) 2026 Suheil Abu Aittah
+
+Independent, unofficial documentation and agent skills for editing local
+CapCut projects with `capcutctl`. Not affiliated with ByteDance, CapCut,
+or Lemon Inc.
+
+The default house style in `capcut-editing/references/style.md` was measured
+from the author's finished drafts. Treat it as *an* editing grammar, not a
+requirement for using the CLI. Do not copy CapCut binaries, effect packages,
+or third-party logos into this repository.
+
+See also: https://github.com/RoXsaita/capcut-editor-cli

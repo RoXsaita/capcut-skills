@@ -10,8 +10,11 @@ description: >
 
 # capcutctl — what already exists
 
-`capcutctl` is installed (`~/.local/bin/capcutctl`, source at
-`~/Documents/Devving/capcut-cli/cli`, `npm link`ed).
+`capcutctl` is the CLI in the companion repo
+(`https://github.com/RoXsaita/capcut-editor-cli`). Install with `npm link`
+from that clone, or run `node bin/capcutctl.mjs`. See its README → *Style —
+ask once* before the first write: bundled house style, harvest the user's
+own drafts, or `--blank`.
 
 **Do not hand-write `draft_info.json` for anything below.** It is already solved, tested, and
 transactional. Hand-editing loses the snapshot, the root/timeline pairing and the mirror sync.
@@ -450,4 +453,4 @@ capcutctl harvest                                      # catalogue transitions /
 
 ## What it does NOT do
 
-No captions (those stay in his separate system), OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `rl2`, not `find` upgrades. Music beds are `finish --music`, not CapCut's stock library.
+No captions (those stay outside CapCut), OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `capcutctl find`. Music beds are `finish --music`, not CapCut's stock library.
