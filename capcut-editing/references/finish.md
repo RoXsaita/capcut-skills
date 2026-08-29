@@ -26,7 +26,8 @@ capcutctl qa       --project NAME --times …
 
 | Check | Fail when |
 |---|---|
-| same-screen cuts | any transition or `polish` seam on an unchanged picture |
+| same-screen cuts | any A-roll splice over an unchanged picture (do not decorate) |
+| same-screen transitions | any existing transition on those splices — a fail, not a reminder |
 | motivated vs all-cuts | all-cuts count is much higher — that's the grok-build tell |
 | music | missing bed on a Shorts-length video, or volume ≥ 0.4 |
 | B-roll volume | a screen-recording clip at 1.0 fighting the VO |
