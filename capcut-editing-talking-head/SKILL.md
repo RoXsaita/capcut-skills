@@ -28,7 +28,17 @@ It applies your selection, auto-fixes every seam fault it can compute, packs the
 no gaps, lints, and builds the CapCut project. It **refuses to build** if a seam is still bad.
 That is the whole procedure. Two invocations, one command, ~2 minutes.
 
-Then give the scenes their looks — see `capcut-cli`:
+**Stop there.** Hand him the project and wait. Do not add B-roll, layouts, pace, polish, or
+music until he has watched the talking-head cut and signed it off. Recutting the face after
+B-roll is on the timeline desyncs every shot.
+
+The face is **always 1×**. `pace` already refuses the principal track; `clip.trim` that
+lengthens the source window without lengthening the target is a speed ramp — same crime.
+To drop a line, re-run `cut --keep` (that changes *length*, still at 1×). To include a word
+the energy snap dropped, also re-run `cut --keep` after fixing the keep list — never steal
+the word by playing the clip faster.
+
+Then give the signed-off scenes their looks — see `capcut-cli`:
 
 ```bash
 capcutctl layout auto         --project my-video   # split where B-roll covers, full face else

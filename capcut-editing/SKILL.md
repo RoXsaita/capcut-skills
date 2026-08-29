@@ -89,17 +89,20 @@ imports it. Prefer `capcutctl` for anything it covers.
 ## Workflow
 
 1. **Cut the A-roll** — `capcutctl cut VIDEO`, review the table, re-run with `--keep`.
-   See `capcut-editing-talking-head`.
-2. **Give the scenes their looks** — `capcutctl layout …`.
-3. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
+   Face stays **1×**. See `capcut-editing-talking-head`.
+2. **Stop and get the cut signed off.** He watches the talking head in CapCut and confirms
+   the keep list. Do not start B-roll, layouts, or finish until he has. The face is the
+   timeline's clock; everything else hangs off it.
+3. **Give the scenes their looks** — `capcutctl layout …`.
+4. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
    two real defects passed it clean.
-4. **Finish** — `capcutctl finish --project NAME`, then `polish --motivated` and `finish --music`.
+5. **Finish** — `capcutctl finish --project NAME`, then `polish --motivated` and `finish --music`.
    Picture-locked first. Music is generated to the picture; speech is never recut to a beat.
    Captions stay outside CapCut. See `references/finish.md`.
-5. **Look at the finished frames** — those last-pass writes change the picture. Run
+6. **Look at the finished frames** — those last-pass writes change the picture. Run
    `capcutctl timeline`, then `capcutctl qa` at the new seams / music-in / CTA, then a mute
    watch. `doctor` cannot see transition, track-slice, or music-placement defects.
-6. **`capcutctl doctor`** must be error-free before you hand it over.
+7. **`capcutctl doctor`** must be error-free before you hand it over.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.
 

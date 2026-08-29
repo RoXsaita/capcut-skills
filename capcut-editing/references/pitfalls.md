@@ -8,7 +8,13 @@ Concrete traps already hit on this project. Read before starting.
 - **Showing a silent preview.** SFX existed in the CapCut build but not in the ffmpeg preview, so
   the user asked "where are the sounds". Include audio in anything you hand over.
 - **Doing the whole video at once.** The user explicitly asked for one section at a time, checked
-  end-to-end. Do that.
+  end-to-end. Cut the talking head, get it signed off, *then* B-roll. Recutting the face after
+  B-roll is on the timeline desyncs every shot.
+- **Speeding the talking head.** `clip.trim` that lengthens the source window and leaves the
+  target the same is a speed ramp. Used on `hermes-replies-to-comments` to "save" first words
+  the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
+  re-run `cut --keep` so the clip gets *longer*, not faster. `pace` already refuses the
+  principal track; trim does not, so do not reach for it on `content`.
 ## Indexing
 
 - **Loose OCR keywords silently over-match.** `wave` returned 1006 seconds because the *prompt

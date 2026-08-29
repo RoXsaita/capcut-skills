@@ -422,6 +422,8 @@ capcutctl replace-media --project NAME --at 16.3 --track broll --file new.mp4 [-
 
 Nudge after the fact with `trim` / `shift` / `remove` / `volume` / `fade`. `shift` uses the same extend-or-refuse policy as `add`. `fade` clones a verified `audio_fade` extra (`fade_type`, `fade_in_duration`, `fade_out_duration`) harvested from Higgsfield/IKEA — it does not invent fields.
 
+**`trim` on the talking head is a 1× window slip, or it is a mistake.** Speed is `source/target`. Lengthening the source and leaving the target puts the face above 1× — forbidden, same as `pace` touching the principal track. To drop a line or keep a word, recut with `cut --keep` so the clip's *length* changes and speed stays 1. See `capcut-editing-talking-head`.
+
 ## Scale punch — `keyframe`
 
 Scale-only, cloned from logo `popKeyframes`. Offsets are **absolute source positions** (`source.start + ramp`), not 0. A clip added with `--src 90` that punched at offset 0 would clamp to a dead hold. Two keys that clamp to the same offset are refused (`KEYFRAME_CLAMPED`).
