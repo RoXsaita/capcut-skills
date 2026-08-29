@@ -48,8 +48,9 @@ capcutctl restore  --project NAME --snapshot NAME
 capcutctl sync     --project NAME                    # repair mirror drift + collapse duplicate material ids
 
 capcutctl add      --project NAME --media FILE --at S --dur S --track NAME|N
-                   [--src S] [--cover IN-OUT] [--volume 0] [--desc TEXT] [--localize]
-capcutctl replace-media --project NAME --file FILE --at S --track NAME [--retime]
+                   [--src S] [--cover IN-OUT] [--volume 0] [--desc TEXT] [--no-localize]
+capcutctl replace-media --project NAME --file FILE --at S --track NAME [--retime] [--no-localize]
+capcutctl localize --project NAME          # copy outside videos into the draft (fixes Link media)
 capcutctl trim     --project NAME --at S --track NAME --src IN-OUT
 capcutctl shift    --project NAME --at S --track NAME --by SECONDS
 capcutctl remove   --project NAME --at S --track NAME
@@ -141,17 +142,25 @@ capcutctl zoom    --project NAME --auto | --at S[,S...] [--to 1.15] [--hold 1.6]
 ```
 
 `wrap` is the "final touches" pass: brand logos keyed to the moment he says the name, the
-closing card, and a push-in on every talking-head scene. `--plan` shows it without writing.
-`--words` wants a Whisper transcript (`segments[].words`), not `.aroll.json`. Omit it and
-wrap looks in `~/Downloads/.video-index/<stem>.whisper-*.json` (written by `cut`).
+Follow/CTA card **on the talking head**, and a push-in on every talking-head scene. `--plan`
+shows it without writing. `--words` wants a Whisper transcript (`segments[].words`), not
+`.aroll.json`. Omit it and wrap looks in `~/Downloads/.video-index/<stem>.whisper-*.json`
+(written by `cut`).
+
+**Follow is not the leftover.** New projects clone Preset 3 and **park** its clips 30s after
+the talking head — a parts bin for copying attributes, not the video's ending. Do not delete
+them. `wrap` / `endcard` / `music` time themselves to the talking-head end (`contentEnd`),
+never to draft duration (which includes the leftover). Putting Follow on the preset clips is
+the bug.
 
 **Brand logos.** Measured across 11 projects: scale `0.01 → 0.20–0.57` over **0.07–0.17s**,
 held ~2.5s, with `"Pop!" "Pon!" Pitch height` **0.1s ahead** of the picture. Each brand pops
 **once**, when he introduces it — never on later mentions.
 
-**The endcard.** Starts at **93–98% of duration** (default 96%), scale `0.01 → 1.4–3.4` over
-**0.07–0.20s**, with `Culin…` **coincident**, not leading. Text varies by video — `Follow`,
-`نشر`, `دليل`, `CV` — so it is a parameter, defaulting to `Follow`.
+**The endcard.** Starts at **93–98% of the talking head** (default 96% of `contentEnd`, not of
+draft duration), scale `0.01 → 1.4–3.4` over **0.07–0.20s**, with `Culin…` **coincident**, not
+leading. Text varies by video — `Follow`, `نشر`, `دليل`, `CV` — so it is a parameter, defaulting
+to `Follow`.
 
 **The talking-head push-in.** `1.0 → 1.15` over **0.23s**, hold 1.6s, release. That is 25 of
 43 measured face push-ins at 1.15 and 11 more at 1.2; median ramp 0.23s. Much subtler than
@@ -331,7 +340,8 @@ that puts it back.
 ## Creating a project
 
 `new` is a **literal duplicate of `Preset 3`** with the name changed — nothing cleverer. The
-branded endcard comes along and is slid to sit immediately after your scenes. `--from NAME` for a
+preset's own clips are **kept** (do not delete them — he copies attributes off them) and
+**parked 30s after the talking head**, so they are not the video's ending. `--from NAME` for a
 different template. `--blank` empties the timeline (and with `--media`, keeps only your new
 scenes). `--canvas WIDTHxHEIGHT` and `--fps N` write through; they used to be accepted and
 discarded.
@@ -414,6 +424,7 @@ capcutctl add --project NAME --media screen.mp4 \
 - Speed is `source/target`, written to the segment **and its speed material** — `pace` reads the material first, so a clip whose material still says 1× reads as un-ramped. `--cover IN-OUT` or `--src-dur` sets the source window (passing both is refused); otherwise 1×.
 - `--src` defaults to **0**, the start of the media. It defaulted to `--at` until 2026-08-26, so `add --at 30` silently began 30s into the file.
 - Prints the segment id, track name + index, and a `layout broll --at … --track NAME` reminder (name, not a stale N).
+- **Copies the file into the draft** (`Resources/CapcutctlMedia/`, unique name from the parent folder so three `screen.mp4` takes don't collide). CapCut is sandboxed and cannot read Desktop/`rl2` folders it didn't pick itself — that's the "Link media" dialog. `--no-localize` keeps the original path. `capcutctl localize --project NAME` retrofits a draft that was written without the copy.
 
 `replace-media` relinks the material (cloning it if shared) and **must not** go through `segment.clone` — that wipes `keyframe_refs` / `common_keyframes`. It refuses upfront rather than rolling back: a missing file, a selector matching more than one clip, or a current window longer than the new file (pass `--retime` to rebuild the window). `trim` refuses a window past the end of the media the same way.
 
