@@ -15,6 +15,18 @@ Concrete traps already hit on this project. Read before starting.
   the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
   re-run `cut --keep` so the clip gets *longer*, not faster. `pace` already refuses the
   principal track; trim does not, so do not reach for it on `content`.
+- **Cold open.** Handing over 5s+ of full-face with no screen. He recut it to split-screen
+  proof from t=0. `finish` flags `cold-open`. The first picture is the result, sharing the
+  frame. Full-face comes after.
+- **Editing outside CapCut, then importing the result.** The AI Video Editor B-roll was cropped
+  1920×1080 → 1080×960 with ffmpeg in a session scratchpad, imported, and placed with an identity
+  transform. Every check passed: `doctor` clean, the frames looked right, the timing was right.
+  What he got was a project where **no shot could be reframed** — the rows outside the crop no
+  longer existed — and where `media-map.json` pointed the original at a temp directory that had
+  since been deleted, so there was no way back to the recording either. *"I cannot edit it after.
+  I have to re-figure out where the fuck is the video."* The tell is a B-roll segment sitting at
+  `scale 1.0, transform y 0.5` with no mask: the geometry is trivial because ffmpeg already did
+  it. `add` refuses this now; see the hub, rule 3.
 ## Indexing
 
 - **Loose OCR keywords silently over-match.** `wave` returned 1006 seconds because the *prompt

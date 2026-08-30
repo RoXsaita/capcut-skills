@@ -50,5 +50,13 @@ ffmpeg -ss $T -i screen.mp4 -frames:v 1 -vf crop=1080:960:0:$ROI out.png
 Build a grid of candidates with a y-ruler drawn on, pick by eye, then re-render to confirm.
 Eleven ROIs were fixed this way in two passes. This is fast and it is correct.
 
+> **This ffmpeg pass produces a PNG you look at — never media you import.** The `$ROI` you
+> pick is an argument, not an output: it is the source pixel row you hand to
+> `capcutctl layout broll --row $ROI`, which expresses the identical framing as `clip.scale` +
+> `clip.transform` + a seam mask on the **full-frame** recording. Import a cropped .mp4 instead
+> and the rows outside $ROI cease to exist, so the ROI can never be revised in CapCut — the
+> exact complaint that came back from the AI Video Editor video. `add` now refuses such media
+> (`PREFRAMED_MEDIA`); see the `capcut-editing` hub, rule 3.
+
 **The user's Mac recordings do not have this problem** — Recording Layout clamps windows to
 720×1280 (exactly 9:16), so there is no crop decision. ROI hunting is only for phone captures.

@@ -38,7 +38,7 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 | **capcut-editing-talking-head** | Cutting the face: the 3 indexes, seam linting, the locked cut procedure, the 3 layout presets |
 | **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **The editing half is still unsolved — read its status table first.** |
 
-## The three rules
+## The four rules
 
 **0. Overlays only.** His main track is **always empty**. He calls the main track "the cover" and
 never uses it — every clip goes on an overlay track (`flag=2`). Confirm against `Preset 3`
@@ -52,6 +52,33 @@ See `references/preview-loop.md`.
 **2. Edit quality == index quality.** Every cut you cannot verify is a guess, and guesses are
 where the errors were. Never derive geometry either — render it and compare against a frame you
 know is right.
+
+**3. Every edit happens INSIDE CapCut.** His words, after the AI Video Editor video:
+
+> *"the videos were cropped outside of CapCut… I cannot edit it after. I have to re-figure out
+> where the fuck is the video."*
+
+The deliverable is a project he finishes by hand. That only holds if every decision is still a
+CapCut property he can drag. Anything you flatten into the pixels before import is a decision
+he can no longer take back, and `doctor` cannot see it, because the picture is *correct* — it
+is just frozen. **ffmpeg renders previews. It never produces media that goes into the project.**
+
+| Tempting ffmpeg pass | What it costs him | The CapCut-native verb |
+|---|---|---|
+| `crop=` to the split-screen half | Cannot reframe, re-zoom, or move the scene to another layout — those rows are gone | `capcutctl layout broll --row PIXEL_ROW` (writes `clip.scale` + `clip.transform` + the seam mask) |
+| `crop=` a landscape/window capture | Same, plus the measured window treatment is lost | `capcutctl layout screen --media FULL.mp4` |
+| `-ss`/`-t` to cut a subclip | He can only extend inside the window you chose | `add --src S --dur S` — the segment's `source_timerange` on the whole file |
+| `setpts=`/`atempo=` for speed | Speed stops being a slider | `add --cover IN-OUT`, or `capcutctl pace` |
+| `zoompan` for a punch-in | A camera move he cannot retime | `capcutctl keyframe --to 2.4 --hold 1.6` |
+| `concat` a montage | One clip where there were eight | one `add` per shot |
+
+Import the **full-frame original**, from a path that still exists next week. `add` and
+`replace-media` now enforce this: media exactly half the canvas is refused as `PREFRAMED_MEDIA`,
+and a source in `/tmp` or a session scratchpad is refused as `EPHEMERAL_MEDIA` — that is how the
+last project lost the trail back to its screen recordings for good. `--generated` is the honest
+escape for a Remotion/AE render with no editable original; `--derived-from ORIGINAL` records the
+source when pre-processing really was unavoidable. `capcutctl doctor` reports both faults on
+projects built before the contract existed.
 
 ## The CLI — the only sanctioned way to write
 
@@ -93,7 +120,9 @@ imports it. Prefer `capcutctl` for anything it covers.
 2. **Stop and get the cut signed off.** He watches the talking head in CapCut and confirms
    the keep list. Do not start B-roll, layouts, or finish until he has. The face is the
    timeline's clock; everything else hangs off it.
-3. **Give the scenes their looks** — `capcutctl layout …`.
+3. **Give the scenes their looks** — `capcutctl layout …`. The first picture is proof
+   (split-screen or circle + 80% recording), not a 5s+ full-face talking-head. `finish`
+   reports a cold-open if you miss this.
 4. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
    two real defects passed it clean.
 5. **Finish** — `capcutctl finish --project NAME`, then `polish --motivated` and `finish --music`.

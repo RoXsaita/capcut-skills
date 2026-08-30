@@ -104,6 +104,10 @@ it reproduces grok-build-final's hand-made choices **18 out of 18** — sixteen 
 beats and two full-face ones, zero disagreements. Layout plates (PNG/GIF bars and rings) do
 not count as B-roll.
 
+The open is not a judgement either. The first seconds must have B-roll — proof on screen,
+sharing the frame. A 5s+ full-face start is a cold-open; `finish` reports it. Put the result
+on the timeline at t=0, then `layout auto` will split it.
+
 There is now a third layout, `full-face`: scale 1.0, transform 0, **no mask** — and applying
 it also removes the seam bar the split screen left behind, which a mask-only change would
 strand on screen.
@@ -245,6 +249,14 @@ capcutctl polish --project NAME [--lead 0.14] [--track N] [--no-transitions] [--
 
 `--motivated` keeps a transition only when the **picture** changes (B-roll shot or layout class). An A-roll splice over the same screen is left as a hard cut. Use this on the finish pass. Without the flag, polish still fires on every visible cut.
 
+**Clicks and typing come from the rl2 take, not from guessing at the picture.** `add` copies
+`trace.ndjson` / `session.json` into `.capcutctl/rl2/<take>/` next to the localized
+`screen.mp4`. `polish` then maps each `click` / `typing_burst` through the chopped B-roll
+(`source` window → timeline, speed-aware). A moment that was cut out of the B-roll has no
+cue — that is the index, not a bug. `in_capture: false` is the recorder's own UI and is
+skipped. `--no-interactions` skips the pass. Today's traces are often thin (one click, no
+typing); the mapping is what makes a richer take just work.
+
 Puts a transition and its matching sound on those cuts, using the grammar measured
 from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
 
@@ -357,7 +369,7 @@ recompute these numbers, never invent new ones.
 | | subject | companion |
 |---|---|---|
 | `split-screen` | fills the BOTTOM half from y=960; `Split`/line mask, `rotation 180` | indigo bar on the seam |
-| `circle` | upper-left circular avatar (`transform.y = +0.644`, y up) | white ring (**which carries its own circle mask**) |
+| `circle` | upper-left circular avatar (`transform.y = +0.669`, y up) | white ring (**which carries its own circle mask**, `y = +0.664`) |
 | `background` | — | blurred copy of the subject, `scale 1.12`, `alpha 0.72`, on a track BELOW |
 
 `background` auto-detects circle-scenes-with-a-ring and skips the cloned preset's endcard
@@ -405,7 +417,33 @@ capcutctl qa --project NAME --times 3,9,15 --guide 960 --out qa/
 It composites any frame outside CapCut and prints each segment's on-canvas rect. Check the numbers
 first, then look at the frame.
 
+It also cannot see a frame that is correct but **frozen**. `MEDIA_PREFRAMED` and
+`MEDIA_ORIGIN_LOST` are the two warnings for that: media whose framing was cropped in before
+import, and media whose recorded original no longer exists. Neither is an error — they report
+projects built before the origin contract, and the repair (relink the original, re-express the
+framing with `layout broll --row`) is the human's call.
+
 ## Adding B-roll — `add` / `replace-media`
+
+**The origin contract runs first.** Both verbs refuse media whose framing was baked in before
+import, and media that came from a directory the human will not have next week:
+
+| Code | What triggered it | The fix |
+|---|---|---|
+| `PREFRAMED_MEDIA` | The file is exactly half the canvas (1080×960 on a 1080×1920 project). Nothing records at that size — it is a crop. | Import the full-frame source, then `layout broll --row` / `layout screen`. |
+| `EPHEMERAL_MEDIA` | The source path is under `/tmp`, `$TMPDIR`, or a `scratchpad/` directory. The bytes get copied in, but the recorded origin becomes a dead link. | Render/move it somewhere durable first. |
+| `DERIVED_SOURCE_MISSING` / `_EPHEMERAL` | `--derived-from` named a file that does not exist, or one that is itself temporary. | Point it at the recording that survives. |
+
+Escapes, both recorded in `media-map.json` and on the material:
+`--generated` (a Remotion/AE render with no editable original — nothing to relink) and
+`--derived-from ORIGINAL [--derived-offset S]` (you pre-processed anyway; the source stays
+findable). Neither is a way to skip thinking: pre-framed B-roll is the one defect the user
+called out by name, because it is the one he cannot repair in the UI.
+
+Enforced by `add`, `replace-media`, `layout screen` and `new --media`. It is checked in the
+*operation*, so an `apply --spec` carrying `clip.add` / `replace.media` / `layout.screen` obeys it
+too. A project whose own directory is temporary is exempt from the ephemeral half — it cannot
+outlive its own media.
 
 Do **not** hand-write `material.clone` + `track.clone` + N `segment.clone` for B-roll. `add` is the verb:
 

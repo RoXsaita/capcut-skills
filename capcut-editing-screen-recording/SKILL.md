@@ -16,6 +16,8 @@ The live search path is `capcutctl find` (OCR + transcript). An instrumented
 recorder (`rl2`) exists in a separate private repo and is **not** part of this
 toolkit; do not tell the user to clone or install it. For ordinary screen
 recordings, index with `find` and place B-roll with `capcutctl add` / `layout`.
+`add` persists the take's `trace.ndjson` beside the draft; `polish` maps
+`click` / `typing_burst` onto the chopped B-roll as mouse-click and typing SFX.
 
 ## The premise
 
@@ -57,6 +59,16 @@ dump over a 31-minute (1,862 s) recording. That asymmetry *was* the problem:
 
 `rl2` attacks all four at the capture stage, which is cheaper than attacking them at the edit
 stage. See `references/recorder.md`.
+
+## Standing rule: the recording goes in whole
+
+Every B-roll clip is imported at its **full capture resolution**, from a path that will still
+exist next week. Crop, pan, zoom, trim and speed are CapCut properties — `layout broll --row`,
+`layout screen`, `add --src/--dur`, `keyframe`, `pace` — not ffmpeg filters applied on the way
+in. The AI Video Editor B-roll was cropped 1920×1080 → 1080×960 in a session scratchpad and
+imported flat; the picture was right and nothing could be changed afterwards, which is the one
+outcome this whole toolkit exists to avoid. `add` refuses it now (`PREFRAMED_MEDIA`,
+`EPHEMERAL_MEDIA`). See the `capcut-editing` hub, rule 3, for the full translation table.
 
 ## Standing rule: never full-frame B-roll over his face
 
