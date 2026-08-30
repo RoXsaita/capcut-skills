@@ -223,7 +223,7 @@ hand-compute these numbers again — and do not invent new ones.
 | | subject | companion |
 |---|---|---|
 | `split-screen` | `scale 1.0`, `transform.y -0.5208333333333334`, `Split`/line mask `centerY 0.5415114961139896` `rotation 180` → fills the BOTTOM half from y=960 | indigo bar, `scale (1.8272246516061672, 0.7521039538453399)`, `transform.y -0.6036269430051813` |
-| `circle` | `scale 0.19`, `transform (-0.5559524128804151, 0.6442708333333333)`, `Circle` mask `height 0.5618028307506959` `centerY -0.04329882358536104` | white ring, `scale 0.2728009828009824`, `transform (-0.5559524128804151, 0.6328125)`, **plus its own circle mask** |
+| `circle` | `scale 0.19`, `transform (-0.5559524128804151, 0.6692708333333334)`, `Circle` mask `height 0.5618028307506959` `centerY -0.04329882358536104` | white ring, `scale 0.2728009828009824`, `transform (-0.5559524128804151, 0.6640625)`, **plus its own circle mask** |
 | `background` | — | blurred copy of the subject, `scale 1.12`, `alpha 0.72`, `Blur` effect, on a track BELOW |
 
 ```bash
@@ -274,7 +274,7 @@ is the model that matches what he sees.
 
 The indigo rect appears at two different heights because it does two different jobs:
 
-- framing the **screen recording** (circle-inset scenes) → *below* the face, `s=(1.05, 0.75) t=(0, 0)`
+- framing the **screen recording** (circle-inset scenes) → *below* the face, `s=(1.05, 0.783582) t=(0, 0)`
 - framing the **talking head** (split-screen scenes) → *above* the face, `s=(1.4777, 0.7211) t=(-0.0710, -0.5725)`
 
 His words: *"the purple cover usually sits at the absolute top … however, in case the scene

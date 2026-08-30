@@ -38,7 +38,8 @@ To drop a line, re-run `cut --keep` (that changes *length*, still at 1×). To in
 the energy snap dropped, also re-run `cut --keep` after fixing the keep list — never steal
 the word by playing the clip faster.
 
-Then give the signed-off scenes their looks — see `capcut-cli`:
+Then give the signed-off scenes their looks — see `capcut-cli`. The first picture is
+proof (B-roll sharing the frame from t=0), not a 5s+ full-face talking-head:
 
 ```bash
 capcutctl layout auto         --project my-video   # split where B-roll covers, full face else

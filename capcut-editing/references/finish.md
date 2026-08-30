@@ -32,6 +32,7 @@ capcutctl qa       --project NAME --times …
 | music | missing bed on a Shorts-length video, or volume ≥ 0.4 |
 | B-roll volume | a screen-recording clip at 1.0 fighting the VO |
 | layout class | a 15s+ stretch that never leaves split-screen and never punches full-screen B-roll |
+| cold-open | first 5s are full-face with no screen — hook on the payoff |
 
 ## Music
 

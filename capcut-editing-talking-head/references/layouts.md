@@ -26,7 +26,7 @@ is wrong.
 ```python
 # the cam segment
 clip = {"scale": {"x": 0.19, "y": 0.19},
-        "transform": {"x": -0.5559524128804151, "y": 0.6442708333333333}}
+        "transform": {"x": -0.5559524128804151, "y": 0.6692708333333334}}
 uniform_scale = {"on": True, "value": 1.0}
 mask = {"name": "Circle", "resource_type": "circle", "config": {
         "width": 1.0032193406262426, "height": 0.5618028307506959,
@@ -36,13 +36,13 @@ mask = {"name": "Circle", "resource_type": "circle", "config": {
 
 # the white frame -- suheilai-circle-white-1080x1920.png, same timerange, render_index ABOVE the cam
 clip = {"scale": {"x": 0.2728009828009824, "y": 0.2728009828009824},
-        "transform": {"x": -0.5559524128804151, "y": 0.6328125}}
+        "transform": {"x": -0.5559524128804151, "y": 0.6640625}}
 mask = {"name": "Circle", "resource_type": "circle", "config": {
         "width": 0.8681592039800995, "height": 0.48616915422885576,
         "centerX": 0.01608984799212853, "centerY": 0.0392156862745098, ...}}
 ```
 
-Note the frame sits 0.0114 higher than the head — that offset is deliberate, keep it.
+The ring rides just below the head (Δy 0.0052). Both were lifted together so the pip sits on the taller rl2 window frame; do not restore the old 0.644 / 0.633 pair.
 ## Preset 2 — FULL
 
 Nothing to do. `scale 1.0`, `transform (0,0)`, no mask. This is the default state of a clip.
@@ -95,23 +95,28 @@ Bottom to top by `render_index`:
 | # | Layer | scale | transform | uniform | notes |
 |---|---|---|---|---|---|
 | 1 | MacBook screen recording | `0.80` | `(0, 0)` | on | centred |
-| 2 | purple frame `suheilai-rect-indigo-1080x1920 (2).png` | `(1.05, 0.75)` | `(0, 0)` | **off** | border around the recording |
-| 3 | talking head, `Circle` mask | `0.19` | `(-0.5559524, 0.6442708)` | on | **top-left** |
-| 4 | white circle frame, `Circle` mask | `0.2728010` | `(-0.5559524, 0.6328125)` | on | rides 0.0114 lower |
+| 2 | purple frame `suheilai-rect-indigo-1080x1920 (2).png` | `(1.05, 0.783582)` | `(0, 0)` | **off** | border around the recording |
+| 3 | talking head, `Circle` mask | `0.19` | `(-0.5559524, 0.6692708)` | on | **top-left** |
+| 4 | white circle frame, `Circle` mask | `0.2728010` | `(-0.5559524, 0.6640625)` | on | rides 0.0052 lower |
 
 The circle deliberately **overlaps the frame's top-left corner** — it is not inset. See the user's
 reference frame; this is the look.
 
-Note the purple frame here is `(1.05, 0.75)`, which is **not** the SPLIT preset's frame
+Note the purple frame here is `(1.05, 0.783582)`, which is **not** the SPLIT preset's frame
 `(1.8272, 0.7521)`. Two different framings of the same PNG. Do not mix them up.
+
+The Y scale was `0.75` when recordings came from Recording Layout at **1440×1998**. `rl2`
+window captures are **720×1050** — same displayed width at 0.80 (864px), 61px taller. The
+frame's Y was remeasured against a composited frame so the indigo stroke sits on the
+window's top and bottom edges. Numbers live in `presets/layouts.json` → `screenRecording`.
 
 ### Why the screen recording is always 0.80
 
-He records with **Recording Layout**, which pins the capture to fixed bounds every time, so every
-MacBook screen recording arrives at the same dimensions (the endcard's is 1440x1998). That is what
-makes a single hard-coded scale safe across videos — there is no per-clip fitting to do. If a
-recording ever arrives at different dimensions, it did not come from Recording Layout and the 0.80
-does not transfer.
+He records with **rl2** (was Recording Layout), which pins the capture to fixed bounds every
+time, so every MacBook window recording arrives at the same dimensions (720×1050). That is
+what makes a single hard-coded scale safe across videos — there is no per-clip fitting to
+do. If a recording ever arrives at different dimensions, it did not come from rl2's window
+preset and the 0.80 does not transfer.
 ## Rendering a preview of these layouts
 
 `scripts/layout_preview.py` composites a preset in ffmpeg so you can look before writing CapCut.

@@ -132,6 +132,11 @@ Standard workflow: duplicate it, build content in front, shift the endcard to th
 
 Hook on the payoff (show the result first), then chronological build-up, then proof/receipts,
 then CTA. His CTA is consistently *"write [keyword] in the comments"*.
+
+**The first picture is proof.** A 5–7s full-face talking-head with nothing else on screen is a
+miss — he recut that open to split-screen with the result already happening. `finish` reports
+it as `cold-open`. Put the result on screen from t=0 (split-screen, or circle + 80% recording)
+and only then cut to him alone.
 ## He edits on OVERLAYS ONLY — the main track stays empty
 
 His words: *"i never use the 'Main' which is cover, i use overlays, fully, so just use overlays,
