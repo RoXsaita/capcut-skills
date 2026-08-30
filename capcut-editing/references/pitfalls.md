@@ -46,6 +46,9 @@ Concrete traps already hit on this project. Read before starting.
   list. Add `forbid` terms.
 - **Avoid failure states unless intentional.** `"We can't generate this image / didn't pass the
   moderation"` appears repeatedly and should be excluded (`forbid=["moderation"]`).
+- **"No logos fired" is usually a missed alias, not a missing logo.** Whisper wrote
+  `شات جي بيتي`, `brands.json` had `شات جي بي تي` — folding fixes dots and hamza, not spacing.
+  Diagnose with `wrap --plan` before fetching artwork; see `capcut-cli` → *Logo assets*.
 ## CapCut writing
 
 - **CapCut rewrites `root_meta_info.json` on quit** — register only when it is closed.

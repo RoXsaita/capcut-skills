@@ -215,6 +215,22 @@ onto opaque white, so `tools/rasterize.py` keys the white back out and reports w
 python3 tools/rasterize.py ~/Downloads/Logos/grok.svg --out ~/Downloads/Logos/.raster/grok.png
 ```
 
+Artwork lives in `cli/Logos/` — **gitignored, trademarked, never push it**, and never move one
+into the published `assets/`.
+
+**No logo fired? Read both `wrap --plan` fields before fetching anything.** `skippedNoLogo` names
+the brand = artwork missing, go get it. `detected` **and** `skippedNoLogo` both empty = the name
+was never recognised and a logo will not help — fix `aliases`. (Whisper wrote `شات جي بيتي`,
+brands.json had `شات جي بي تي`; folding normalises dots and hamza, **not spacing** — a brand with
+a fine logo popped zero times.)
+
+**A missing logo is something to fetch, not a reason to skip the pass.** Official brand page
+first; needs real alpha. `tools/rasterize.py` gates it — under 0.5% ink is white-on-white, over
+60% is a block, both mean fetch a different file. Save to `cli/Logos/`, add aliases in the form
+Whisper actually produced, then `qa --times <pop>` to see it composited. Ask first if the mark is
+contested (a person, a small creator). **A versus video pops both brands or neither** — popping
+only the side you have reads as taking a side.
+
 ## Pace — `pace`
 
 ```bash
@@ -477,7 +493,7 @@ capcutctl add --project NAME --media screen.mp4 \
 
 - `--track broll` (name) creates/reuses that overlay (`flag=2`) **below** the talking head. Never `track.clone`.
 - `--track N` (number) uses that index and **refuses to create** — inserting a track renumbers everything above it.
-- **Never the main track (`flag=0`) — from any verb.** `remove` / `volume` / `trim` / `shift` / `fade` / `keyframe` all resolve through one gate (`resolveClip`), which refuses a flag=0 segment and makes the main track invisible to a bare `--at`. It filtered on track *type* only until 2026-08-26, so all six could edit the cover track.
+- **Never the main track (`flag=0` *video*) — from any verb.** `remove` / `volume` / `trim` / `shift` / `fade` / `keyframe` all resolve through one gate (`resolveClip`), which refuses the cover track and makes it invisible to a bare `--at`. It filtered on track *type* only until 2026-08-26, so all six could edit the cover. The guard is scoped to **video**: CapCut writes `flag=0` on every audio and text track too, and matching on the flag alone made polish's SFX lane, the music bed and the endcard text unreachable to all six verbs.
 - Overlap on that named overlay is refused by the op (`CLIP_OVERLAP`). Doctor's `TRACK_OVERLAP` is only a warning.
 - Running past `doc.duration` slides the preset endcard and **rewrites** `.capcutctl/created.json` `preserved: {start,end}`. That window feeds `layout background` / scene filters — leaving it stale includes or drops the wrong scenes.
 - Endcard sliding is measured from where the endcard **is now**, shared across every op in a spec and across both mirror documents. Two `add`s in one spec each push it once. A clip that already sits *inside* the window refuses (`INSIDE_ENDCARD`) rather than pushing it again — otherwise a 1ms nudge grew the project by 1ms, forever.
