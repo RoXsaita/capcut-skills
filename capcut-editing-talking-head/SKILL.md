@@ -8,7 +8,7 @@ description: >
   split-screen looks. Read the capcut-editing hub for the format and the write path.
 ---
 
-# Talking head — one command, one review
+# Talking head — deterministic cut, semantic review
 
 ```bash
 capcutctl cut VIDEO.mp4 --lang ar
@@ -16,17 +16,40 @@ capcutctl cut VIDEO.mp4 --lang ar
 
 Transcribes (mlx large-v3-turbo), builds the acoustic energy index, splits beats on dead air,
 snaps every boundary to a real onset/trough, detects takes and repeated lines, and prints a
-numbered table. **~10s for a 107s source; cached after that.**
+numbered table plus `VIDEO.aroll.json`. A cold analysis normally takes seconds to tens of
+seconds; cached review and build passes are usually sub-second.
 
-Read the table. Decide what to keep. Then:
+Read the transcript in narrative order, not just the suggested keep list. Decide what to keep
+and how it should flow. Then dry-run the exact reviewed plan:
 
 ```bash
-capcutctl cut VIDEO.mp4 --keep 0,2,3,6-10,13-14,16-19,22 --project my-video
+capcutctl cut VIDEO.mp4 \
+  --keep 0,2,3,6-10,13-14,16-19,22 \
+  --order 0,2,3,6,7,8,9,10,13,14,16,17,18,19,22 \
+  --dry-run
 ```
 
-It applies your selection, auto-fixes every seam fault it can compute, packs the timeline with
-no gaps, lints, and builds the CapCut project. It **refuses to build** if a seam is still bad.
-That is the whole procedure. Two invocations, one command, ~2 minutes.
+If the final order, ranges, repairs, and lint are sound, close CapCut and run the same reviewed
+decision with `--project my-video` instead of `--dry-run`. It applies the selection, auto-fixes
+every computable seam fault, packs the timeline with no gaps, preserves the face at 1×, and
+writes an editable CapCut project. `--order` is the final narrative order; without it, `--keep`
+stays in source order.
+
+Use repeatable `--trim-beat ID:in=SECONDS` or `ID:out=SECONDS` only for an excessive edge the
+acoustic index can safely move inward. It is not a general micro-editor: it refuses clipped first
+words, source overlap, unsafe expansion, and trims that land inside sound. For a reusable agent
+handoff, put `sourceToken`, `keep`, `order`, and `boundaries` in a v1 decision file and pass it as
+`cut --review decisions.json`. This is different from the top-level `capcutctl review` command,
+which renders optional viewing artifacts.
+
+This is the normal fast path: **one analysis → one semantic review → one dry run → one project
+build → one watch in CapCut.** Do not render, re-transcribe, or contact-sheet every ordinary
+A-roll before building it. Escalate to those diagnostics only when lint, playback, or the user
+reveals a boundary, audio, or visual problem. See `references/procedure.md`.
+
+After the build, run `doctor` and watch the actual content in CapCut from start to finish. The
+watch is where you confirm that the script is coherent and that no word, retake, or seam escaped
+the transcript review. A structurally valid project is not an editorially valid cut.
 
 **Stop there.** Hand him the project and wait. Do not add B-roll, layouts, pace, polish, or
 music until he has watched the talking-head cut and signed it off. Recutting the face after
@@ -34,9 +57,9 @@ B-roll is on the timeline desyncs every shot.
 
 The face is **always 1×**. `pace` already refuses the principal track; `clip.trim` that
 lengthens the source window without lengthening the target is a speed ramp — same crime.
-To drop a line, re-run `cut --keep` (that changes *length*, still at 1×). To include a word
-the energy snap dropped, also re-run `cut --keep` after fixing the keep list — never steal
-the word by playing the clip faster.
+To drop or reorder a line, re-run `cut` with the reviewed keep/order plan. `--trim-beat` cannot
+expand a boundary; if the acoustic boundary clips a necessary word, choose another complete beat
+or report the boundary limitation. Never steal the word by playing the face faster.
 
 Then give the signed-off scenes their looks — see `capcut-cli`. The first picture is
 proof (B-roll sharing the frame from t=0), not a 5s+ full-face talking-head:
@@ -49,10 +72,11 @@ capcutctl layout background   --project my-video
 capcutctl qa --project my-video --times 4,12,30 --guide 960 --out qa/
 ```
 
-## What you decide, and nothing else
+## Your small but essential job
 
-The tool proposes "last take, last instance of every repeat". That is a starting point, not an
-answer. Yours are the calls a transcript cannot make:
+The tool does most of the work, but it cannot understand the finished argument. Its proposed
+"last take, last instance of every repeat" is a starting point, not an answer. Read the complete
+surviving script aloud or in sequence and make the calls a transcript cannot make:
 
 - **which take** — he warms up as he goes, so the last is usually best
 - **which instance of a repeated line** — his rule: *"generally the last cut of a specific thing
@@ -60,10 +84,14 @@ answer. Yours are the calls a transcript cannot make:
 - **false starts** — a short beat whose full version appears later. These often do *not* cluster
   as duplicates, because the complete version continues past the shared opening
 - **near-duplicates the clustering missed** — different phrasings of one idea
-- **running order**, if a beat lands badly
+- **running order** — use `--order` when later retakes belong earlier, or when source order is not
+  the clearest hook → explanation → proof → payoff → CTA
+- **whole-script coherence** — no missing premise, contradictory claim, duplicated payoff, or CTA
+  fragment; the first and last scenes deserve explicit scrutiny because retakes collect there
 
 Everything else — timings, boundaries, dead air, frame quantisation, seam repair — is arithmetic.
-Do not do it by hand and do not second-guess it without reading `references/procedure.md`.
+Do not hand-pick timestamps. Read `references/procedure.md` only when a boundary needs diagnosis
+or you are considering overriding a refusal.
 
 ## The one idea that matters
 
@@ -80,19 +108,22 @@ accident any more.
 
 | File | Use it for |
 |---|---|
-| `references/procedure.md` | Why each step exists, and the known-weak list — read before overriding |
+| `references/procedure.md` | Fast path, escalation triggers, and known weaknesses — read when diagnosing or overriding |
 | `references/indexing.md` | The indexes, the linter's calibration, take/beat selection |
 | `references/layouts.md` | The three layouts as raw numbers (`capcutctl layout` applies them for you) |
 
-## Still done by eye
+## Escalate when needed
 
-Not yet automated, so still yours:
+The normal full-project watch is enough when the script and seams are clean. Use
+`capcutctl review`, `preview`, `qa`, seam contact sheets, or render re-transcription when a
+specific risk justifies them:
 
-- **Loudness across seams** — two clips can differ by a few dB and the join is audible even with
-  perfect timing.
-- **Breaths** sit near −45 dB and read as silence. Usually keep at a sentence start, cut
-  mid-phrase.
-- **The video side of a seam.** `capcutctl qa` renders the frames; nothing yet checks head
-  position holds across a cut.
-- The lint margin is **one example wide** (0.28s good vs 0.35s bad). Flag any bad seam you hear
-  by timecode — each one is a labelled negative worth keeping.
+- unresolved lint or any use of `--force`
+- a clipped word, breath, loudness jump, or unnatural pause heard in playback
+- a visible head-position jump at a cut
+- a user-reported bad seam or a cut whose transcript is ambiguous
+- composed visual work after A-roll approval, where `doctor` cannot validate pixels
+
+`--force` is not an editorial shortcut. Use it only after inspecting the named finding and
+recording why it is safe, such as two adjacent selected beats whose source ranges are exactly
+contiguous. Flag any bad seam by timecode; each one is useful calibration evidence.

@@ -43,7 +43,7 @@ design is not there yet, and the user needs to know which is which.
 ## Commands
 
 ```bash
-capcutctl cut VIDEO [--keep …] [--project NAME]      # talking-head cleanup (see below)
+capcutctl cut VIDEO [--keep …] [--order …] [--trim-beat …] [--project NAME] # A-roll
 capcutctl qa  --project NAME --times 3,9,15 --sheet  # composite real frames + contact sheet
 capcutctl find "agent running" --media F --shows --strip   # when is it on screen
 capcutctl find "قروك بيلد"     --media F --says            # when was it said
@@ -94,21 +94,36 @@ Everything that writes takes `--dry-run`.
 ## Cleaning the talking head
 
 ```bash
-capcutctl cut VIDEO.mp4 --lang ar                       # -> numbered review table
-capcutctl cut VIDEO.mp4 --keep 0,2,3,6-10 --project NAME  # -> built project
+capcutctl cut VIDEO.mp4 --lang ar                         # -> numbered table + .aroll.json
+capcutctl cut VIDEO.mp4 --keep 0,2,3,6-10 \
+  --order 0,2,3,6,7,8,9,10 --dry-run                     # -> reviewed plan
+capcutctl cut VIDEO.mp4 --keep 0,2,3,6-10 \
+  --order 0,2,3,6,7,8,9,10 --project NAME                # -> built project
 ```
 
-One command, run twice. The first pass transcribes (mlx `large-v3-turbo`), builds the acoustic
+One command, run as analysis then reviewed plan/build. The first pass transcribes (mlx
+`large-v3-turbo`), builds the acoustic
 energy index, splits beats on dead air, snaps every boundary to a real onset/trough, detects
 takes and repeated lines, and prints a table with a copy-paste command for the second pass.
-~10s for a 107s source, cached in `~/Downloads/.video-index` afterwards.
+Cold analysis normally takes seconds to tens of seconds depending on hardware and source length;
+cached passes from `~/Downloads/.video-index` are usually sub-second.
 
-The second pass applies the selection, **auto-repairs** every seam fault the linter can compute
+The reviewed pass applies the selection, **auto-repairs** every seam fault the linter can compute
 (an OUT on a rising envelope slides to the trough; dead air at an IN slides to the onset), packs
-the timeline with no gaps, and refuses to build while findings remain (`--force` overrides).
+the timeline with no gaps, and refuses to build while findings remain. `--force` can override an
+inspected lint finding, but not clipped-first-word protection; it is not a routine build flag.
 
-The agent decides only: which take, which instance of a repeated line, what is a false start,
-and the running order. Everything else is arithmetic.
+`--keep` selects beats; without `--order` they remain in source order. `--order` must be an exact
+permutation of the kept ids and defines the final story. Repeatable `--trim-beat ID:in=SECONDS`
+and `ID:out=SECONDS` hints can only move inward; the acoustic index resolves and quantises them,
+and unsafe trims are refused. `cut --review decisions.json` consumes a source-tokened v1 decision
+file for a durable agent handoff; it is unrelated to the top-level `capcutctl review` artifact
+command. The same reviewed plan can target `--project NAME` or transactionally recut `--into NAME`.
+
+The agent decides only: which complete take, which instance of a repeated line, what is a false
+start or fragment, and the final coherent order. It must read the complete surviving script;
+the CLI cannot decide whether a retake recorded at the end belongs in the middle. Everything
+else is arithmetic.
 
 **Non-negotiable:** boundaries come from `onset_after()` and `trough()`, never from a Whisper
 timestamp — Whisper's word starts are contiguous-filled and lie by up to ~0.7s. Enforced in code.
@@ -440,8 +455,10 @@ for `VALIDATION_FAILED`, but a plain object for `ROLLED_BACK` (`{snapshot}`) and
 Iterating it blindly threw a `TypeError` that buried the real message under a stack trace — worst
 on rollback, exactly when you need to be told which snapshot saved you.
 
-**`--dry-run` works while CapCut is open.** A dry run writes nothing, so refusing it cost a
-quit-and-relaunch just to see a plan. Only real writes still require CapCut closed.
+**Plan-only `cut --dry-run` works while CapCut is open.** Omit `--project`/`--into` when reviewing
+the editorial plan; it writes only the sidecar plan, not a CapCut draft. Real writes require
+CapCut closed. The current new-project delegation can still hit the running guard when
+`cut --project NAME --dry-run` is used, so prefer the destination-free form above.
 
 ## doctor cannot see the picture
 

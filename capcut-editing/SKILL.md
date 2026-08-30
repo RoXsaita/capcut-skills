@@ -43,7 +43,7 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 |---|---|
 | **capcut-cli** | **`capcutctl` — what is already automated: create a project, the three locked layouts, scene listing, snapshots. Check here BEFORE hand-writing JSON.** |
 | **capcut-editing** (this one) | The format, the safe write path, his style, pitfalls, project state |
-| **capcut-editing-talking-head** | Cutting the face: the 3 indexes, seam linting, the locked cut procedure, the 3 layout presets |
+| **capcut-editing-talking-head** | Cutting the face: deterministic mechanics, semantic keep/order review, escalation diagnostics, and the 3 layout presets |
 | **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **The editing half is still unsolved — read its status table first.** |
 
 ## The four rules
@@ -52,10 +52,13 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 never uses it — every clip goes on an overlay track (`flag=2`). Confirm against `Preset 3`
 (main track `n=0`). See `references/style.md`.
 
-**1. Never build blind.** The first attempt failed ("quality is like 1/100") because 83 seconds of
-timeline were written from arithmetic and handed over without a single frame being looked at.
-Render an ffmpeg preview → **look at the frames** → fix → repeat → only then write CapCut.
-See `references/preview-loop.md`.
+**1. Never hand off blind.** The first attempt failed ("quality is like 1/100") because 83 seconds
+of timeline were written from arithmetic and handed over without being watched. For an A-roll,
+build the editable project, then watch its actual content start to finish in CapCut before the
+approval handoff. For B-roll, layouts, crops, and finish work, render/composite representative
+frames with `qa` because `doctor` cannot see the picture. Full preview renders, contact sheets,
+and render re-transcription are targeted diagnostics when playback or lint identifies a risk;
+they are not mandatory before every ordinary A-roll build. See `references/preview-loop.md`.
 
 **2. Edit quality == index quality.** Every cut you cannot verify is a guess, and guesses are
 where the errors were. Never derive geometry either — render it and compare against a frame you
@@ -94,7 +97,8 @@ projects built before the contract existed.
 
 ```bash
 capcutctl cut VIDEO --lang ar                    # A-roll: index, review table
-capcutctl cut VIDEO --keep 0,2-9 --project NAME  # A-roll: build the project
+capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --dry-run
+capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --project NAME
 capcutctl add --project NAME --media FILE --at S --dur S --track broll
 capcutctl layout auto|split-screen|circle|background --project NAME
 capcutctl polish|pace|wrap --project NAME
@@ -123,8 +127,10 @@ imports it. Prefer `capcutctl` for anything it covers.
 
 ## Workflow
 
-1. **Cut the A-roll** — `capcutctl cut VIDEO`, review the table, re-run with `--keep`.
-   Face stays **1×**. See `capcut-editing-talking-head`.
+1. **Cut the A-roll** — `capcutctl cut VIDEO`, read the full script, then dry-run and build with
+   `--keep` plus `--order` when the story differs from source order. Use safe inward
+   `--trim-beat` only for a justified edge. Face stays **1×**. Watch the built content from start
+   to finish in CapCut. See `capcut-editing-talking-head`.
 2. **Stop and get the cut signed off.** He watches the talking head in CapCut and confirms
    the keep list. Do not start B-roll, layouts, or finish until he has. The face is the
    timeline's clock; everything else hangs off it.
