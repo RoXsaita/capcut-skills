@@ -15,7 +15,15 @@ Programmatic video editing that hands off cleanly to a human.
 
 ## First: install, then ask which style
 
-If `capcutctl` is not on PATH, clone and `npm link` [capcut-editor-cli](https://github.com/RoXsaita/capcut-editor-cli) (see its `SETUP.md`). Then **ask the user, once, before writing a project**:
+If `capcutctl` is not on PATH, clone and `npm link` [capcut-editor-cli](https://github.com/RoXsaita/capcut-editor-cli) (see its `SETUP.md`). It needs Node 20+ and **ffmpeg**.
+
+Then run `capcutctl preflight` once. It reports the dependencies, the bundled overlay artwork,
+the SFX palette and the drafts folder, and names the fix for anything missing. The layouts work
+on any machine; the SFX palette is CapCut's per-machine cache, so `polish` may report
+`unavailableSfx` and place no sound — that is a degraded edit, not a broken one, and it belongs
+in the hand-off. See `capcut-cli`.
+
+Then **ask the user, once, before writing a project**:
 
 1. **Keep the bundled house style** (Suheil / suheilai) — `style.md`, `presets/layouts.json`, `polish` / `pace` / `wrap` as documented. Default if they already edit this way.
 2. **Harvest their own CapCut edits** — `capcutctl harvest`, then treat *their* drafts as the style source. Do not apply the bundled seam formula or branded endcard unasked.

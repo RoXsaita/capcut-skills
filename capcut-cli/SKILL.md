@@ -19,6 +19,27 @@ own drafts, or `--blank`.
 **Do not hand-write `draft_info.json` for anything below.** It is already solved, tested, and
 transactional. Hand-editing loses the snapshot, the root/timeline pairing and the mirror sync.
 
+## On a machine you have not used before — `preflight`
+
+```bash
+capcutctl preflight        # deps, overlay artwork, SFX palette, drafts folder; exit 1 if unusable
+```
+
+Run it before blaming an edit. What is and is not portable:
+
+| | |
+|---|---|
+| **Bundled, always works** | The indigo bar and white ring the layouts need ship in the package's `assets/`. `new --blank` needs no local draft either — it builds from `presets/blank-draft.json`. |
+| **Per-machine, degrades** | The SFX and transition palette is CapCut's own effect/music cache, minted where the sound was downloaded. `polish` **skips** any sound that is not present and lists it in `unavailableSfx` — it does not fail, and it does not write a dead reference. A missing CapCut resource is a `MISSING_CAPCUT_RESOURCE` warning, never an error, because CapCut re-downloads its own effects and masks. |
+| **Required** | `ffmpeg` / `ffprobe` on PATH. A missing one now says so (`MISSING_DEPENDENCY`) instead of `spawnSync ENOENT`. |
+
+Bring your own instead of re-downloading someone else's: `CAPCUTCTL_ASSET_DIR` for overlay
+artwork (searched before the bundle) and `CAPCUTCTL_PRESET_DIR` for your own
+`sfx.json` / `brands.json` / `layouts.json` (falls back to the bundled preset per file).
+
+**If `polish` reports `unavailableSfx`, say so in the hand-off.** The edit is real; the sound
+design is not there yet, and the user needs to know which is which.
+
 ## Commands
 
 ```bash
@@ -29,6 +50,7 @@ capcutctl find "قروك بيلد"     --media F --says            # when was it
 capcutctl close                                      # quit CapCut, wait for it to exit
 capcutctl rm --project NAME                          # to .recycle_bin, registry cleaned
 
+capcutctl preflight                                  # will this machine work? deps, assets, SFX
 capcutctl projects                                   # list drafts
 capcutctl scenes   --project NAME [--name SUBSTR] [--transcript]  # time, track, desc, media, source
 capcutctl inspect  --project NAME                    # tracks, canvas, active timeline
