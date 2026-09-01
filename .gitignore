@@ -13,6 +13,9 @@
 !capcut-editing/
 !capcut-editing-screen-recording/
 !capcut-editing-talking-head/
+# The CLI contract these skills are validated against, and the validator itself.
+!.capcut/
+!scripts/
 __pycache__/
 *.pyc
 .DS_Store
