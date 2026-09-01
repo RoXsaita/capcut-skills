@@ -88,11 +88,13 @@ capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
 capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
 capcutctl music    --project NAME [--plan] [--regen] [--volume 0.08]
 capcutctl polish   --project NAME [--motivated]         # --motivated = picture changes only
+capcutctl grade    --project NAME [--measure|--plan|--apply] [--dry-run]
 
-capcutctl status   [--json] [--wait-for-close]       # is CapCut running; optionally ask it to quit
+capcutctl status   [--json] [--wait-for-close] [--timeout MS] # is CapCut running; optionally ask it to quit
 capcutctl review   --project NAME                    # outputs/<id>/proxy.mp4 + edl.json + contact sheet
 capcutctl init-spec [--output FILE]                  # a blank v1 spec to fill in
 capcutctl contract                                   # the machine-readable command surface
+capcutctl version                                    # installed CLI version
 capcutctl layout screen --project NAME --at S --media FILE [--dur S] [--src S] [--track NAME]
 capcutctl layout auto   --project NAME [--plan]      # split-screen where B-roll covers
 capcutctl layout audit  --project NAME               # what each clip is vs what it should be

@@ -26,8 +26,8 @@ documents are written against, and `.capcut/cli-contract.json` is a verbatim cop
 CLI's published command surface (`capcutctl contract`).
 
 `scripts/validate.py` checks every `capcutctl` command and flag written in a code block
-here against that contract, so a skill cannot document a flag the CLI does not have — or
-quietly miss one it grew. It also checks skill frontmatter, the files each `Files` table
+here against that contract, so a skill cannot document a flag the CLI does not have. It
+also checks skill frontmatter, the files each `Files` table
 lists, and every relative link. CI runs it, plus `scripts/test_validate.py`, which
 reintroduces each defect the checker exists to catch and asserts it is still caught.
 

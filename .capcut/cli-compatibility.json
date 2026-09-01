@@ -10,8 +10,8 @@
   "requiredContractVersion": 1,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "1231b9f0c7d40322ec838ea20fc1c80fba237b4c",
-    "branch": "claude/new-session-m4lqja",
+    "commit": "f2309d9c1f4ef1417c0e3ff5fc5a024508e0b395",
+    "branch": "main",
     "cliVersion": "0.1.1"
   }
 }
