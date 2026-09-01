@@ -7,7 +7,8 @@ as a pair.
 
 That is now enforced rather than remembered. `scripts/validate.py` checks every
 `capcutctl` command and flag in these documents against
-`.capcut/cli-contract.json`, the CLI's own published surface, and CI runs it on
+`.capcut/cli-contract.json`, the CLI's own published surface — and checks the
+reverse too, so a command the CLI grows cannot go unmentioned here. CI runs it on
 every pull request:
 
 ```bash

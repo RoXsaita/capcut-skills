@@ -4,9 +4,16 @@
     "cli-contract.json is a verbatim copy of docs/cli-contract.json from the CLI repository",
     "at the commit named below. Refresh both together, never one alone:",
     "  capcutctl contract > .capcut/cli-contract.json",
-    "then update contractSyncedFrom and run scripts/validate.py."
+    "then update contractSyncedFrom and run scripts/validate.py.",
+    "",
+    "undocumentedCommands exempts a contract command from the coverage check, which",
+    "otherwise requires every command and subcommand the CLI publishes to be written down",
+    "in some skill. Map each one to the reason it is not for agents to read. The list is",
+    "checked itself: an entry that is not a real command, or names a command that is in",
+    "fact documented, is a finding — so it cannot rot into a place findings go to die."
   ],
   "repository": "https://github.com/RoXsaita/capcut-editor-cli",
+  "undocumentedCommands": {},
   "requiredContractVersion": 1,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {

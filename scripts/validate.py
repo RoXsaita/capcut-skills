@@ -20,6 +20,13 @@ So this checks four things:
   cli parity    every `capcutctl` command and flag written in a code block or code span
                 exists in the CLI's published contract, and the contract we hold is the
                 version we say we are compatible with
+  cli coverage  and the reverse: every command and subcommand in that contract is written
+                down somewhere here, so a CLI that grows a command cannot leave these
+                documents quietly behind
+
+Parity is the cheap direction and it is not the one that broke. The command table was not
+wrong about `capcutctl`; it was *incomplete* about it, and no check that only reads what
+the docs say can ever see what they fail to say. Coverage reads the contract instead.
 
 Run:  python3 scripts/validate.py         (exit 1 on any finding)
 """
@@ -185,17 +192,37 @@ def check_cli_parity() -> None:
             scan_invocations(region, commands, f"{path.relative_to(ROOT)}:{number}")
 
 
-def scan_invocations(region: str, commands: dict, where: str) -> None:
+def iter_invocations(region: str):
+    """Yield (command, remainder) for every `capcutctl ...` written in a code region.
+
+    Shared by the two directions so they can never disagree about what counts as an
+    invocation: a command the coverage check cannot see is one the parity check would not
+    have validated either.
+    """
     for match in re.finditer(r"\bcapcutctl\s+([a-z][a-z0-9-]*)([^\n|]*)", region):
-        name, rest = match.group(1), match.group(2)
+        yield match.group(1), match.group(2)
+
+
+def subcommand_in(rest: str, subcommands: set) -> str | None:
+    """The subcommand token in `rest`, if it is a real one rather than a placeholder.
+
+    `capcutctl layout …` and `capcutctl trim PROJECT` are not claims about a subcommand;
+    only a bare lowercase token is.
+    """
+    first = rest.strip().split(" ")[0] if rest.strip() else ""
+    if not re.fullmatch(r"[a-z][a-z0-9-]*", first or ""):
+        return None
+    return first if first in subcommands else None
+
+
+def scan_invocations(region: str, commands: dict, where: str) -> None:
+    for name, rest in iter_invocations(region):
         entry = commands.get(name)
         if entry is None:
             fail(where, f"`capcutctl {name}` is not a command in the CLI contract")
             continue
         allowed = set(entry["options"])
         subcommands = set(entry.get("subcommands", []))
-        # A placeholder (`capcutctl layout …`, `capcutctl trim PROJECT`) is not a claim
-        # about a subcommand. Only a real lowercase token is.
         first = rest.strip().split(" ")[0] if rest.strip() else ""
         looks_like_subcommand = bool(re.fullmatch(r"[a-z][a-z0-9-]*", first))
         if subcommands and looks_like_subcommand and first not in subcommands:
@@ -204,6 +231,67 @@ def scan_invocations(region: str, commands: dict, where: str) -> None:
         for flag in re.findall(r"--[a-z][a-z0-9-]*", rest):
             if flag not in allowed:
                 fail(where, f"`capcutctl {name}` has no {flag} in the CLI contract")
+
+
+def check_cli_coverage() -> None:
+    """Every command in the contract has to be written down somewhere here.
+
+    This is the direction that actually broke. `status`, `--wait-for-close`, `init-spec`,
+    `layout screen`, `layout auto`, `layout audit` and the media-origin flags were all real
+    commands on a real CLI, and these documents did not mention them. Nothing in a check
+    that reads the docs and validates them against the contract can see that, because the
+    evidence is an absence: there is no line to fail on.
+
+    Commands and subcommands only, deliberately. Flags are not required, and requiring them
+    would be a mistake rather than mere strictness — these skills teach judgement and route
+    to `capcutctl help` for the exhaustive surface, so demanding all 217 flags would fail on
+    the day it landed, and a gate that is red on arrival gets switched off in the week after.
+    A missing command is a different order of problem: an agent that cannot see `init-spec`
+    does not use a worse flag, it hand-writes draft_info.json.
+
+    A command that genuinely should not be documented goes in `undocumentedCommands` in
+    cli-compatibility.json with a reason. That list is itself checked, so it cannot rot into
+    a place where inconvenient findings go to be forgotten.
+    """
+    if not CONTRACT.exists() or not COMPAT.exists():
+        return  # check_cli_parity has already reported the missing file.
+    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+    compat = json.loads(COMPAT.read_text(encoding="utf-8"))
+    commands = contract["commands"]
+
+    documented: dict[str, set] = {}
+    for path in markdown_files():
+        for _number, region in scan_regions(path):
+            for name, rest in iter_invocations(region):
+                seen = documented.setdefault(name, set())
+                sub = subcommand_in(rest, set((commands.get(name) or {}).get("subcommands", [])))
+                if sub:
+                    seen.add(sub)
+
+    exempt = dict(compat.get("undocumentedCommands") or {})
+    for name in sorted(exempt):
+        if name not in commands:
+            fail(".capcut/cli-compatibility.json",
+                 f"undocumentedCommands lists {name!r}, which is not a command in the "
+                 f"contract — drop it")
+        elif name in documented:
+            fail(".capcut/cli-compatibility.json",
+                 f"undocumentedCommands lists {name!r} as deliberately undocumented, but it "
+                 f"is documented — drop the exemption rather than leaving it to go stale")
+
+    for name in sorted(commands):
+        if name in exempt or name in documented:
+            continue
+        fail("skills", f"`capcutctl {name}` exists in the CLI contract but no skill "
+                       f"documents it — add it, or exempt it with a reason in "
+                       f".capcut/cli-compatibility.json")
+
+    for name, entry in sorted(commands.items()):
+        if name in exempt:
+            continue
+        for sub in sorted(set(entry.get("subcommands", [])) - documented.get(name, set())):
+            fail("skills", f"`capcutctl {name} {sub}` exists in the CLI contract but no "
+                           f"skill documents it")
 
 
 def check_dry_run_claim() -> None:
@@ -224,13 +312,15 @@ def main() -> int:
     check_referenced_files()
     check_links()
     check_cli_parity()
+    check_cli_coverage()
     check_dry_run_claim()
     if findings:
         print(f"{len(findings)} finding(s):\n", file=sys.stderr)
         for finding in sorted(set(findings)):
             print(f"  {finding}", file=sys.stderr)
         return 1
-    print("skills validate: frontmatter, referenced files, links and CLI parity all pass")
+    print("skills validate: frontmatter, referenced files, links, and CLI parity "
+          "and coverage all pass")
     return 0
 
 

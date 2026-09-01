@@ -7,6 +7,7 @@ copy, and asserts the checker reports it.
 """
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -91,6 +92,62 @@ def _(repo: Path) -> str:
     return "broken link to"
 
 
+def add_command(repo: Path, name: str, subcommands: list[str] | None = None) -> None:
+    """Give the vendored contract a command the documents have never heard of."""
+    path = repo / ".capcut" / "cli-contract.json"
+    contract = json.loads(path.read_text(encoding="utf-8"))
+    contract["commands"][name] = {"options": ["--project"],
+                                  "subcommands": subcommands or []}
+    path.write_text(json.dumps(contract, indent=2), encoding="utf-8")
+
+
+@case("a CLI command that no skill documents")
+def _(repo: Path) -> str:
+    # The drift that actually happened, in its original direction: the CLI grew `status`,
+    # `init-spec` and `layout screen`, and the command table simply did not mention them.
+    add_command(repo, "teleport")
+    return "`capcutctl teleport` exists in the CLI contract but no skill documents it"
+
+
+@case("a CLI subcommand that no skill documents")
+def _(repo: Path) -> str:
+    path = repo / ".capcut" / "cli-contract.json"
+    contract = json.loads(path.read_text(encoding="utf-8"))
+    contract["commands"]["layout"]["subcommands"].append("hologram")
+    path.write_text(json.dumps(contract, indent=2), encoding="utf-8")
+    return "`capcutctl layout hologram` exists in the CLI contract but no skill documents it"
+
+
+@case("an exemption for a command that is in fact documented")
+def _(repo: Path) -> str:
+    # The allowlist is the obvious place for a finding to go and quietly die, so it is
+    # checked too: an exemption that is no longer earned has to be removed.
+    edit(repo / ".capcut" / "cli-compatibility.json",
+         '"requiredContractVersion"',
+         '"undocumentedCommands": {"doctor": "pretend reason"},\n  "requiredContractVersion"')
+    return "is documented — drop the exemption"
+
+
+@case("an exemption for a command the CLI does not have")
+def _(repo: Path) -> str:
+    edit(repo / ".capcut" / "cli-compatibility.json",
+         '"requiredContractVersion"',
+         '"undocumentedCommands": {"teleport": "pretend reason"},\n  "requiredContractVersion"')
+    return "which is not a command in the contract"
+
+
+@case("a documented command exempted rather than written down")
+def _(repo: Path) -> str:
+    # An exemption must actually suppress the coverage finding — otherwise the escape
+    # hatch does not work and the gate is unusable the first time it is needed.
+    add_command(repo, "teleport")
+    edit(repo / ".capcut" / "cli-compatibility.json",
+         '"requiredContractVersion"',
+         '"undocumentedCommands": {"teleport": "machine-facing, not for agents"},\n'
+         '  "requiredContractVersion"')
+    return "EXPECT_PASS"
+
+
 @case("a vendored contract from a different CLI version")
 def _(repo: Path) -> str:
     edit(repo / ".capcut" / "cli-compatibility.json",
@@ -118,6 +175,15 @@ def main() -> int:
         try:
             expected = mutate(repo)
             code, output = run(repo)
+            if expected == "EXPECT_PASS":
+                # Not every case is a defect. This one proves the documented escape hatch
+                # actually suppresses the finding it claims to.
+                if code == 0:
+                    print(f"caught      {name}")
+                else:
+                    print(f"NOT SILENCED {name}\n{output}", file=sys.stderr)
+                    failures += 1
+                continue
             if code == 0:
                 print(f"NOT CAUGHT  {name}", file=sys.stderr)
                 failures += 1
