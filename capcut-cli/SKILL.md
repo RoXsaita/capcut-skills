@@ -71,6 +71,7 @@ capcutctl sync     --project NAME                    # repair mirror drift + col
 
 capcutctl add      --project NAME --media FILE --at S --dur S --track NAME|N
                    [--src S] [--cover IN-OUT] [--volume 0] [--desc TEXT] [--no-localize]
+                   [--generated] [--derived-from ORIGINAL [--derived-offset S]] [--allow-ephemeral]
 capcutctl replace-media --project NAME --file FILE --at S --track NAME [--retime] [--no-localize]
 capcutctl localize --project NAME          # copy outside videos into the draft (fixes Link media)
 capcutctl trim     --project NAME --at S --track NAME --src IN-OUT
@@ -87,9 +88,35 @@ capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
 capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
 capcutctl music    --project NAME [--plan] [--regen] [--volume 0.08]
 capcutctl polish   --project NAME [--motivated]         # --motivated = picture changes only
+capcutctl grade    --project NAME [--measure|--plan|--apply] [--dry-run]
+
+capcutctl status   [--json] [--wait-for-close] [--timeout MS] # is CapCut running; optionally ask it to quit
+capcutctl review   --project NAME                    # outputs/<id>/proxy.mp4 + edl.json + contact sheet
+capcutctl init-spec [--output FILE]                  # a blank v1 spec to fill in
+capcutctl contract                                   # the machine-readable command surface
+capcutctl version                                    # installed CLI version
+capcutctl layout screen --project NAME --at S --media FILE [--dur S] [--src S] [--track NAME]
+capcutctl layout auto   --project NAME [--plan]      # split-screen where B-roll covers
+capcutctl layout audit  --project NAME               # what each clip is vs what it should be
 ```
 
-Everything that writes takes `--dry-run`.
+**`--dry-run` is a guarantee about transactional edit commands** — the ones that go through
+the snapshot-validate-commit machinery. Each of them takes it and each means the same thing
+by it: resolve, validate, report what would change, write nothing.
+
+It is **not** a claim about everything that writes a file. `snapshot`, `init-spec --output`,
+`harvest --out` and `review` all produce output and none of them take `--dry-run`, because a
+no-op flag added for symmetry would make the guarantee weaker rather than broader.
+
+The exact list is `dryRun.commands` in the CLI contract:
+
+```bash
+capcutctl contract | jq -r '.dryRun.commands[]'
+```
+
+`.capcut/cli-contract.json` in this repository is the vendored copy that
+`scripts/validate.py` checks these documents against — every `capcutctl` command and flag
+written in a code block here must exist in it.
 
 ## Cleaning the talking head
 

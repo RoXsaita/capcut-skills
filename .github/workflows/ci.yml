@@ -31,3 +31,18 @@ jobs:
           done
           test -f LICENSE
           test -f NOTICE
+
+      - name: Use Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      # Frontmatter, referenced files, internal links, and parity with the CLI contract
+      # vendored in .capcut/. Existence checks alone missed every drift that actually
+      # happened: a moved command surface and a false --dry-run guarantee.
+      - name: Validate skills
+        run: python3 scripts/validate.py
+
+      # And prove the validator still fails on each defect it exists to catch.
+      - name: Test the validator
+        run: python3 scripts/test_validate.py

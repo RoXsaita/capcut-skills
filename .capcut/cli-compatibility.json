@@ -1,0 +1,17 @@
+{
+  "$comment": [
+    "Which capcutctl these skills are written against.",
+    "cli-contract.json is a verbatim copy of docs/cli-contract.json from the CLI repository",
+    "at the commit named below. Refresh both together, never one alone:",
+    "  capcutctl contract > .capcut/cli-contract.json",
+    "then update contractSyncedFrom and run scripts/validate.py."
+  ],
+  "repository": "https://github.com/RoXsaita/capcut-editor-cli",
+  "requiredContractVersion": 1,
+  "minimumCliVersion": "0.1.1",
+  "contractSyncedFrom": {
+    "commit": "f2309d9c1f4ef1417c0e3ff5fc5a024508e0b395",
+    "branch": "main",
+    "cliVersion": "0.1.1"
+  }
+}
