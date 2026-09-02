@@ -43,17 +43,16 @@ handoff, put `sourceToken`, `keep`, `order`, and `boundaries` in a v1 decision f
 which renders optional viewing artifacts.
 
 This is the normal fast path: **one analysis → one semantic review → one dry run → one project
-build → one watch in CapCut.** Do not render, re-transcribe, or contact-sheet every ordinary
+build → one doctor-gated handoff.** Do not render, re-transcribe, or contact-sheet every ordinary
 A-roll before building it. Escalate to those diagnostics only when lint, playback, or the user
 reveals a boundary, audio, or visual problem. See `references/procedure.md`.
 
-After the build, run `doctor` and watch the actual content in CapCut from start to finish. The
-watch is where you confirm that the script is coherent and that no word, retake, or seam escaped
-the transcript review. A structurally valid project is not an editorially valid cut.
+After the build, run `capcutctl doctor`. If it is error-free, tell the user the project is
+available in CapCut.
 
-**Stop there.** Hand him the project and wait. Do not add B-roll, layouts, pace, polish, or
-music until he has watched the talking-head cut and signed it off. Recutting the face after
-B-roll is on the timeline desyncs every shot.
+**Stop there.** Hand off the project and wait for the user's sign-off before adding B-roll,
+layouts, pace, polish, or music. Recutting the face after B-roll is on the timeline desyncs
+every shot.
 
 The face is **always 1×**. `pace` already refuses the principal track; `clip.trim` that
 lengthens the source window without lengthening the target is a speed ramp — same crime.
@@ -110,15 +109,22 @@ accident any more.
 |---|---|
 | `references/procedure.md` | Fast path, escalation triggers, and known weaknesses — read when diagnosing or overriding |
 | `references/indexing.md` | The indexes, the linter's calibration, take/beat selection |
-| `references/layouts.md` | The three layouts as raw numbers (`capcutctl layout` applies them for you) |
+| `references/layouts.md` | The layouts as raw numbers (`capcutctl layout` applies them for you) |
 
 ## Escalate when needed
 
-The normal full-project watch is enough when the script and seams are clean. Use
-`capcutctl review`, `preview`, `qa`, seam contact sheets, or render re-transcription when a
-specific risk justifies them:
+**Before A-roll approval, do not run a full-project `qa --preview`, top-level
+`capcutctl review`, `preview`, `--at-cuts`, contact sheet, or render re-transcription.** The
+doctor check is the structural review. Use a rendered diagnostic before approval only when the
+user explicitly asks for a proxy/render, or lint or the user reports a named problem which
+cannot be answered from the transcript, acoustic index, or source ranges.
 
-- unresolved lint or any use of `--force`
+`--force` alone is not a render trigger. If every remaining finding is an exact 1×
+source-contiguous neighbor, verify those ranges and document the linter false positive; do not
+render hundreds of frames to prove that no source audio was removed.
+
+After approval, or for a specific observed defect, use the smallest targeted diagnostic:
+
 - a clipped word, breath, loudness jump, or unnatural pause heard in playback
 - a visible head-position jump at a cut
 - a user-reported bad seam or a cut whose transcript is ambiguous

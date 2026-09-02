@@ -28,7 +28,7 @@ Indexes cache under `~/Downloads/.video-index/` as
 
 ## The geometry source of truth
 
-The three layouts were measured from a real timeline and live as data:
+The layouts were measured from a real timeline and live as data:
 `presets/layouts.json` in the capcutctl repo. **That file is the record** —
 the project it came from may be deleted without loss. Do not re-derive the
 numbers from a live project.

@@ -34,21 +34,26 @@ This produced a cut the user reviewed and called perfect, with "literally no mis
 12. **Dry-run the reviewed decision.** Pass `--keep`, an exact-permutation `--order`, and only
     acoustically safe inward `--trim-beat` hints. Read the final order, source/target ranges,
     repairs and lint. A v1 `cut --review` JSON file is the durable form of the same decision.
-13. **Write CapCut, then watch it.** Close CapCut and run the same reviewed decision with
+13. **Write CapCut, then hand it off.** Close CapCut and run the same reviewed decision with
     `--project NAME` instead of `--dry-run`; build overlays-only with the main track empty, run
-    `doctor`, and watch the actual content start to finish in CapCut. Stop for A-roll approval
-    before layouts, B-roll, pace, polish, music, or finish work.
+    `doctor`, and if it is error-free tell the user the project is available in CapCut. Stop for
+    A-roll approval before layouts, B-roll, pace, polish, music, or finish work.
 
 ## Diagnostic escalation
 
-Do not generate these artifacts routinely. Use the smallest check that answers the observed
-risk:
+Before A-roll approval, the `doctor` check is the default structural QA. Do not generate a full
+motion proxy, all-cuts contact sheet, top-level `capcutctl review` bundle, or render
+re-transcription unless the user explicitly requests a portable artifact or lint or the user
+reports a named defect that needs one. `--force` by itself does not justify a render; exact 1×
+source-contiguous findings are resolved by inspecting the joined source ranges.
+
+When a specific defect exists, use the smallest check that answers it:
 
 - **Render and re-transcribe** when playback suggests missing/repeated words, a hallucinated tail,
   or a transcript-to-edit mismatch.
 - **Contact-sheet or `qa` the seam** when a visible jump, crop, or head-position change is at
   issue.
-- **Inspect audio around the seam** when lint remains, `--force` is being considered, or playback
+- **Inspect audio around the named seam** when a non-contiguous lint finding remains, or playback
   reveals a clipped onset, breath, loudness change, or unnatural pause.
 - **Top-level `capcutctl review`** may generate a proxy, EDL, and contact sheet for portable
   review. It is not the same as `capcutctl cut --review decisions.json`, which consumes an
@@ -87,6 +92,6 @@ Known-weak, in the order worth fixing:
 - **Semantic defects are only proposed, not decided.** Incomplete sentences, repeated CTA starts,
   and retakes recorded at the end still need an agent to remove/reorder them. Future handout
   warnings can make that review faster, but should not pretend to understand the argument.
-- **End-to-end verification remains human.** `doctor` validates the project structure; the
-  start-to-finish CapCut watch validates the actual editorial result. Render-based checks are
-  available when that watch exposes a specific discrepancy.
+- **End-to-end editorial review remains with the user.** `doctor` validates the project
+  structure; the user can review the actual editorial result in CapCut. Render-based checks are
+  available when a specific discrepancy is reported.

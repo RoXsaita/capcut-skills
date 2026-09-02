@@ -2,8 +2,8 @@
 name: capcut-cli
 description: >
   What the `capcutctl` command line tool can already do to a local CapCut project, so you use it
-  instead of hand-writing draft_info.json. Covers creating a project, the three locked layouts
-  (split-screen, circle, background), scene listing, the transactional safety model, and the
+  instead of hand-writing draft_info.json. Covers creating a project, the locked layouts
+  (split-screen, circle, full-face, background, screen), scene listing, the transactional safety model, and the
   invariants that make a project unopenable. Read this BEFORE editing any CapCut JSON by hand.
   For the format itself, the user's style and project state, read the capcut-editing hub.
 ---
@@ -84,6 +84,7 @@ capcutctl preview  --project NAME --out preview.mp4 [--fps 6]
 capcutctl diff     --project NAME --snapshot NAME | --against NAME
 capcutctl harvest  [--projects A,B] [--out FILE] [--plan]
 
+capcutctl grade    --project NAME [--measure|--plan] [--apply] [--strength 1]
 capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
 capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
 capcutctl music    --project NAME [--plan] [--regen] [--volume 0.08]
@@ -204,7 +205,11 @@ swiftc -O -o tools/vision/ocr tools/vision/ocr.swift
 ```bash
 capcutctl brands                                       # what is known, and which need a PNG
 capcutctl wrap    --project NAME --words TRANSCRIPT.json [--text Follow] [--plan]
-capcutctl logo    --project NAME --at 8.25 --brand grok [--scale 0.36] [--hold 2.5] [--pos x,y]
+capcutctl logo    --project NAME --logo MARK.png --at 8.25 [--name Acme] [--scale] [--hold] [--pos]
+capcutctl logo    --project NAME --logo a.png,b.png --at 4.4,5.0   # a row, a time each
+capcutctl logo    --project NAME --logo ~/assets/marks/ --at 6      # a folder, all together
+capcutctl logo    --project NAME --auto                             # brands he names, off the transcript
+capcutctl logo    --project NAME --brand chatgpt,hermes             # registered lookup, auto-timed
 capcutctl endcard --project NAME [--text Follow] [--at S]
 capcutctl zoom    --project NAME --auto | --at S[,S...] [--to 1.15] [--hold 1.6]
 ```
@@ -257,8 +262,9 @@ onto opaque white, so `tools/rasterize.py` keys the white back out and reports w
 python3 tools/rasterize.py ~/Downloads/Logos/grok.svg --out ~/Downloads/Logos/.raster/grok.png
 ```
 
-Artwork lives in `cli/Logos/` — **gitignored, trademarked, never push it**, and never move one
-into the published `assets/`.
+Artwork lives wherever each brand's `logo` in `presets/brands.json` points (the bundled preset uses
+`~/Downloads/…`; a `Logos/` folder inside the CLI clone is gitignored for a local copy). It is
+**trademarked — never push it**, and never move one into the published `assets/`.
 
 **No logo fired? Read both `wrap --plan` fields before fetching anything.** `skippedNoLogo` names
 the brand = artwork missing, go get it. `detected` **and** `skippedNoLogo` both empty = the name
@@ -266,12 +272,115 @@ was never recognised and a logo will not help — fix `aliases`. (Whisper wrote 
 brands.json had `شات جي بي تي`; folding normalises dots and hamza, **not spacing** — a brand with
 a fine logo popped zero times.)
 
+**The artwork is the primitive, not the brand.** `--logo` takes a path, a comma-separated list,
+or a **folder** (every png/webp/gif/jpg in it, sorted); the mark's name falls back to the filename
+and `--name` overrides it. A registered brand is only a named lookup for one file — `--brand` and
+`--auto` still work, and they are the only forms that can time themselves off the transcript,
+because detection matches spoken aliases. Anything unregistered carries its own `--at`. One `--at`
+for several marks brings the whole row in together; a crowded row scales down as one to fit the
+frame.
+
+### The glow reveal — `logo` is the "with everything" verb
+
+`logo` writes the **glow reveal** by default; `--plain` gives the measured two-key pop, which is
+what `wrap` still uses. The reveal is four layers, every structure harvested, none invented:
+
+| layer | what it is | where it came from |
+|---|---|---|
+| overshoot + settle + drift | `KFTypeScaleX` 0.15 → **1.15** → 1.00 → 1.04 | shape from the reference video, **ramp 0.13s = his own `logoPop.rampSeconds`** |
+| rise | `KFTypePositionY` lifts the mark into place | `FreeCurveInOut` block, Higgsfield Refund |
+| fade | `KFTypeAlpha` 0 → 1 over 0.087s | Claude Chrome Ep 3 |
+| glow underlay | same mark on the track **below**, 1.08×, `Insane Glow` + `Blur@0.45`, alpha bursts to 1.0 and decays to 0.35 | Primary Preset-copy / Ep 3 |
+| `Screen` blend on the underlay | so the halo **adds light** instead of laying a pale copy over the picture | hand-set in CapCut 9.3 and harvested, 2026-08-31 |
+
+**A blend mode is a `materials.effects` record of `type: "mix_mode"`**, referenced from
+`segment.extra_material_refs`. The nine other modes are in
+`/Applications/CapCut.app/Contents/Resources/MixMode/MixMode.json`, labelled in
+`Resources/po/en.po` — `color_filter`=Screen, `color_dodge`, `bright_en`=Brighten,
+`over_lay`, `multiply_blend_mode`. Swap `effect_id`/`resource_id`/`name`/`path` in
+`presets/signature.json` → `mixModeScreen`.
+
+**Marks that share the screen are laid out side by side** (`spreadOverlapping`), because he
+names both contenders of a versus video in one breath and the house position would stack them.
+A single logo keeps the house position. `--pos` overrides.
+
+**Base clip values are the RESTING state, not the first keyframe.** CapCut animates from the
+keyframes and ignores them, but anything that does not read keyframes falls back to them — a
+base of `alpha 0` renders the logo as nothing at all in every such reader.
+
+**Two brands can share one artwork file** (chatgpt/openai). `detectBrands` returns one hit per
+*file*, so the identical glyph never pops twice on one beat.
+
 **A missing logo is something to fetch, not a reason to skip the pass.** Official brand page
 first; needs real alpha. `tools/rasterize.py` gates it — under 0.5% ink is white-on-white, over
-60% is a block, both mean fetch a different file. Save to `cli/Logos/`, add aliases in the form
+60% is a block, both mean fetch a different file. Save it where `brands.json` will point, add aliases in the form
 Whisper actually produced, then `qa --times <pop>` to see it composited. Ask first if the mark is
 contested (a person, a small creator). **A versus video pops both brands or neither** — popping
 only the side you have reads as taking a side.
+
+## Colour — `grade`
+
+```bash
+capcutctl grade --project NAME --measure     # scopes as numbers, per source
+capcutctl grade --project NAME               # the solved plan (read-only, default)
+capcutctl grade --project NAME --apply
+capcutctl grade --project NAME --apply --set 'face.mp4:temperature=-0.2,white=0.28'
+capcutctl qa    --project NAME --times 8 --no-grade   # the before half of a before/after
+```
+
+**Colour is arithmetic here too, and the numbers are the deliverable.** `--measure` reports,
+per source file: black point (1st percentile luma), white point (99th), contrast, mean
+saturation, and `warmth` = R−B over the lit 40% of the frame, which is the white-balance tell.
+A source whose black sits at 22 and whose white stops at 212 is using 75% of the range — that
+is the flat, milky look, and it is invisible to `doctor` because the structure is perfect.
+
+**Two roles, because one target would be wrong for half the timeline.** The talking head is a
+*face*: it has a correct answer (real black under it, near-full white above it, warm-but-not-
+orange skin), and it is found the same way `polish` finds where transitions ride —
+`principalTrack`. Everything else is a *screen*: it gets the range half only (setting black and
+reaching white is what makes small UI text legible), a saturation **ceiling** so one neon
+capture cannot shout over the rest, and a white-balance target taken from the **median of the
+other screen sources** — so shots stop fighting each other — never from skin.
+
+The solver is coordinate descent against that target with an L2 penalty on slider magnitude, so
+it prefers doing nothing: a 3s clip that is already right does not get a 0.4 slider chasing the
+last two points. Temperature is solved **before** saturation, because both move R−B and with
+saturation first the solver will happily fix a warm cast by draining the colour out of a face.
+
+**Harvested, not invented.** `presets/adjust.json` is a real `effects` material out of draft
+0411, where CapCut's own Adjust panel wrote it: one material per slider, `value` in −1..+1 (the
+UI's −100..+100), referenced from `segment.extra_material_refs` with `enable_adjust: true`. The
+per-type `version` strings are CapCut's own, consistent across all 88 drafts (brightness `v2`,
+contrast `v3`, saturation `v1`, temperature `v3`, white/black `""`). `path` is rebuilt from the
+local effect cache so it survives a different machine.
+
+**`grade` owns its materials the way `polish` owns transitions** — re-running replaces rather
+than stacks. Photos and layout plates are never graded.
+
+### The one soft edge: slider scale
+
+The forward model is CapCut's own fragment shader, read out of
+`Cache/effect/7501974767453474064/<hash>/AmazingFeature_adjustColor/xshader/colorAdjust.frag`
+and transcribed into both `src/grade.mjs` and `tools/frame_qa.py`. Four mappings fall straight
+out of it, because the shader shows where the identity is:
+
+| slider | uniform | why it is certain |
+|---|---|---|
+| saturation | `u = 1 + v` | `u=1` is the identity matrix, `u=0` is monochrome |
+| highlight | `p = 1 − v/2` | `p=1` makes `adjustHighlight` the identity |
+| shadow | `p = 1 − v/2` | `p=1` makes `adjustShadow` the identity |
+| brightness | raw `v` | the shader derives its own exponent from the slider |
+
+Contrast, the black/white affine and the temperature matrix are computed **CPU-side inside
+CapCut**, so their *scale* is a calibrated constant here (`CONTRAST_GAIN`, `BLACK_REACH`,
+`WHITE_REACH`, `TEMP_REACH`). Direction and identity are certain; magnitude is a good-faith fit.
+**Treat the first look in CapCut as a calibration pass** — if the grade reads too strong or too
+weak, scale it with `--strength 0.6` rather than re-deriving anything.
+
+**`qa` renders the grade.** `doctor` cannot see the picture, and a graded project that QA'd as
+its ungraded self would make the one pass whose entire output *is* the picture the one pass
+nobody could look at. `qa` applies each segment's adjust materials before compositing and labels
+the row `+grade(black,white,…)`; `--no-grade` renders the before.
 
 ## Pace — `pace`
 
@@ -329,9 +438,10 @@ capcutctl polish --project NAME [--lead 0.14] [--track N] [--no-transitions] [--
 
 `--motivated` keeps a transition only when the **picture** changes (B-roll shot or layout class). An A-roll splice over the same screen is left as a hard cut. Use this on the finish pass. Without the flag, polish still fires on every visible cut.
 
-**Clicks and typing come from the rl2 take, not from guessing at the picture.** `add` copies
-`trace.ndjson` / `session.json` into `.capcutctl/rl2/<take>/` next to the localized
-`screen.mp4`. `polish` then maps each `click` / `typing_burst` through the chopped B-roll
+**Clicks and typing come from the rl2 take, not from guessing at the picture.** `add`,
+`replace-media` and `layout screen` copy `trace.ndjson` / `session.json` into
+`.capcutctl/rl2/<take>__<take-id>/` next to the localized `screen.mp4`, keyed by the source
+take's identity so two takes both named `screen.mp4` never share one folder. `polish` then maps each `click` / `typing_burst` through the chopped B-roll
 (`source` window → timeline, speed-aware). A moment that was cut out of the B-roll has no
 cue — that is the index, not a bug. `in_capture: false` is the recorder's own UI and is
 skipped. `--no-interactions` skips the pass. Today's traces are often thin (one click, no
@@ -441,16 +551,18 @@ discarded.
 `--scenes` is `START:END` on the timeline, `@SOURCE` for the media in-point, seconds throughout.
 It prints **`contentTrack`** — the track index your scenes landed on. The layout commands need it.
 
-## The three layouts
+## The locked layouts
 
 Exact measured geometry from `presets/layouts.json`, captured from `grok-build-claude`. Never
-recompute these numbers, never invent new ones.
+recompute these numbers, never invent new ones. `capcutctl layout list` prints them.
 
 | | subject | companion |
 |---|---|---|
 | `split-screen` | fills the BOTTOM half from y=960; `Split`/line mask, `rotation 180` | indigo bar on the seam |
 | `circle` | upper-left circular avatar (`transform.y = +0.669`, y up) | white ring (**which carries its own circle mask**, `y = +0.664`) |
+| `full-face` | scale 1, no mask — the whole picture (what `layout auto` gives a clip no B-roll covers) | — |
 | `background` | — | blurred copy of the subject, `scale 1.12`, `alpha 0.72`, on a track BELOW |
+| `screen` | — | a centred rl2 window recording inside the indigo frame, plus the circle pip (`layout screen --media FILE --at S`) |
 
 `background` auto-detects circle-scenes-with-a-ring and skips the cloned preset's endcard
 (`.capcutctl/created.json` records its range); `--include-template` overrides.
@@ -498,6 +610,23 @@ capcutctl qa --project NAME --times 3,9,15 --guide 960 --out qa/
 
 It composites any frame outside CapCut and prints each segment's on-canvas rect. Check the numbers
 first, then look at the frame.
+
+**It can now see keyframed motion — it could not before.** `qa` handed the compositor
+`segment["clip"]` verbatim, so every animated property drew at its BASE value: a logo whose pop
+runs 0.15 → 1.0 rendered at 0.15, and one fading in from `alpha 0` rendered as *nothing*, while
+the frame was reported as if it were the picture. Logo pops, `zoom`, every face push-in were all
+outside what qa could see — the exact class of defect it exists to catch. `effective_clip()`
+resolves `common_keyframes` at the sampled instant (scale, position, alpha, rotation; ScaleX
+mirrors onto Y the way CapCut aspect-locks). It interpolates **straight between keys**: exact at
+every key, and it will never invent motion that is not in the file. Easing character is CapCut's
+to render, not qa's to guess.
+
+**`MEDIA_NOT_LOCALIZED` is the check that was missing.** A path can exist on disk and still be
+unopenable — CapCut is sandboxed and refuses files it did not pick itself, which surfaces as the
+**"Link media"** dialog. `doctor` only `stat`'d the path, so it passed a project CapCut could not
+open: structurally perfect, practically broken, and invisible to `qa` too because qa reads media
+with its own ffmpeg. Anything outside the draft now warns, deduped by path. The fix is
+`capcutctl localize`.
 
 It also cannot see a frame that is correct but **frozen**. `MEDIA_PREFRAMED` and
 `MEDIA_ORIGIN_LOST` are the two warnings for that: media whose framing was cropped in before

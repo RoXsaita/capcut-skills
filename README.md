@@ -17,7 +17,7 @@ See [capcut-editor-cli SETUP.md](https://github.com/RoXsaita/capcut-editor-cli/b
 
 **Agents: before the first write, ask which style to use** — bundled house style
 (Suheil / suheilai), harvest the user's own CapCut drafts, or start blank. See
-the CLI README → *Style — ask once*, and `capcut-editing/SKILL.md`.
+the CLI README → *Presets and machine-local resources*, and `capcut-editing/SKILL.md`.
 
 ## Which `capcutctl` these skills describe
 

@@ -214,9 +214,9 @@ the layout commands need. `--blank` for an empty timeline.
 New scenes never inherit the template's mask/effect/animation materials. Preset 3's
 backdrop segment carries a Blur; cloning it wholesale blurs every scene in the project.
 
-## The three layouts are a command, not a judgement call
+## The layouts are a command, not a judgement call
 
-`capcutctl layout split-screen | circle | background` writes the exact measured
+`capcutctl layout split-screen | circle | full-face | background | screen` writes the exact measured
 geometry from `presets/layouts.json` (captured from `grok-build-claude`). Do not
 hand-compute these numbers again — and do not invent new ones.
 
@@ -224,7 +224,9 @@ hand-compute these numbers again — and do not invent new ones.
 |---|---|---|
 | `split-screen` | `scale 1.0`, `transform.y -0.5208333333333334`, `Split`/line mask `centerY 0.5415114961139896` `rotation 180` → fills the BOTTOM half from y=960 | indigo bar, `scale (1.8272246516061672, 0.7521039538453399)`, `transform.y -0.6036269430051813` |
 | `circle` | `scale 0.19`, `transform (-0.5559524128804151, 0.6692708333333334)`, `Circle` mask `height 0.5618028307506959` `centerY -0.04329882358536104` | white ring, `scale 0.2728009828009824`, `transform (-0.5559524128804151, 0.6640625)`, **plus its own circle mask** |
+| `full-face` | `scale 1.0`, `transform (0, 0)`, no mask — the unmasked principal clip | — |
 | `background` | — | blurred copy of the subject, `scale 1.12`, `alpha 0.72`, `Blur` effect, on a track BELOW |
+| `screen` | — | the rl2 window recording centred inside the indigo frame, with the circle pip (`layout screen`) |
 
 ```bash
 capcutctl scenes  --project NAME                       # what each scene currently is
