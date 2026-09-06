@@ -224,12 +224,14 @@ The premium feel is entirely **pace, motion, and the seam formula**.
 Both grok builds are 100% `Line`. A linear scale punch reads mechanical; an eased one reads like
 a camera. Harvest one `FreeCurveInOut` point from a real draft rather than inventing handles.
 
-### Motion coverage is the biggest single quality gap
+### Motion should follow a visible subject
 
-*(library)* `IKEA Refund` keyframes **10 of 30** A-roll segments. The unaided-CLI
-`GrokBuild-20260825` keyframes **1 of 25**, and its B-roll track has **zero**. Camera moves are
-half the signature and they are the first thing an automated build drops. Roughly **a third of
-A-roll segments should carry a move**.
+The measured reference had keyframes on **10 of 30 screen clips**; those were
+incorrectly described here as A-roll. Do not turn that count into a quota or
+treat any reference as a flawless template. Full-face punches are welcome when they support emphasis.
+Screen punches should reveal the control/result being discussed. Skip hidden voice
+carriers, preserve the split seam or linked border, and check the resting frame,
+peak and return. A high keyframe count is not evidence of a good edit.
 
 ### B-roll audio level is an open decision, not a style
 

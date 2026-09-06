@@ -40,9 +40,10 @@ fill the gaps, and spend model calls only on discriminating between a handful of
 | 2 | Event compiler — trace + video into a queryable session DB, four levels L0–L3 | not built |
 | 3 | The editing skill — obligation contracts, global alignment, zoom synthesis, verification | not built |
 
-Build order is a gate, not a preference: **do not start Phase 3 until a real recording
-round-trips through Phase 2.** Every confident-but-wrong result in the one full build came from
-guessing at this layer.
+This table describes the recorder roadmap, not a gate on ordinary video editing.
+Use the current `find`, `layout` and `keyframe` commands with inspected frames.
+Semantic sentence-to-event alignment still requires judgement; do not claim OCR
+hits prove that an action happened.
 
 ## Why it was hard before the recorder
 
@@ -91,7 +92,8 @@ split can go only one way. Neither was verified by rendering.
    recording takes below the split line was never determined.
 2. **Sentence → moment binding** for unguided footage. Guided mode makes this a verification
    problem; footage recorded without it still needs the Phase 2 aligner.
-3. **Zoom/keyframe synthesis** — designed in `references/roadmap.md`, not built.
+3. **Automatic semantic zoom selection** remains manual. `keyframe --focus` now
+   computes native position/scale from an inspected source rectangle; see `capcut-cli`.
 
 ## Files
 

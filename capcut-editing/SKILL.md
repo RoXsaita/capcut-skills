@@ -46,9 +46,10 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 | **capcut-editing-talking-head** | Cutting the face: deterministic mechanics, semantic keep/order review, escalation diagnostics, and the 3 layout presets |
 | **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **The editing half is still unsolved — read its status table first.** |
 
-**Colour lives in `capcut-cli` (`grade`).** It is measured, not judged: scopes per source, two
-role targets, and CapCut's own Adjust materials. Read it before touching anything tonal — the
-`effects` structure is harvested from a real draft and must not be hand-written.
+**Colour lives in `capcut-cli` (`grade`).** Preserve source colour by default.
+Scopes help diagnose exposure; whole-frame RGB averages do not establish correct
+skin colour or justify changing UI whites. Use explicit correction and compare in
+CapCut. The native Adjust material structure must not be hand-written.
 
 ## The four rules
 
@@ -105,7 +106,7 @@ capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --project NAME
 capcutctl add --project NAME --media FILE --at S --dur S --track broll
 capcutctl layout auto|split-screen|circle|background --project NAME
 capcutctl polish|pace|wrap --project NAME
-capcutctl grade    --project NAME [--measure] [--apply]   # colour: match every source
+capcutctl grade    --project NAME [--measure] [--apply]   # colour: preserve unless explicitly corrected
 capcutctl timeline|finish|music --project NAME   # last pass: ASCII, scorecard, generated bed
 capcutctl scenes|inspect|doctor --project NAME
 capcutctl qa --project NAME --times 3,9,15       # composite real frames
@@ -133,8 +134,13 @@ imports it. Prefer `capcutctl` for anything it covers.
 
 1. **Cut the A-roll** — `capcutctl cut VIDEO`, read the full script, then dry-run and build with
    `--keep` plus `--order` when the story differs from source order. Use safe inward
-   `--trim-beat` only for a justified edge. Face stays **1×**. Run `capcutctl doctor`; when it is
-   error-free, tell the user the project is available in CapCut. See `capcut-editing-talking-head`.
+   `--trim-beat` only for a justified edge. Face stays **1×**. Before handoff, read back the
+   current script with the existing `capcutctl scenes --project NAME --track CONTENT_TRACK
+   --transcript`; compare its timeline-order `says` rows with the raw word-level transcript and
+   remove accidental repeats, false starts, and filler by recutting the A-roll. This is an audit
+   feed, not proof: overlapping transcript segments can repeat words at clip boundaries. Re-run
+   it after any user tweak, then run `capcutctl doctor`; when it is error-free, tell the user the
+   project is available in CapCut. See `capcut-editing-talking-head`.
 2. **Stop and get the cut signed off.** Hand off the project and wait for the user to confirm
    the keep list. Do not start B-roll, layouts, or finish until then. The face is the timeline's
    clock; everything else hangs off it.
@@ -143,14 +149,14 @@ imports it. Prefer `capcutctl` for anything it covers.
    reports a cold-open if you miss this.
 4. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
    two real defects passed it clean.
-5. **Match the colour** — `capcutctl grade --project NAME --measure` first: it reports each
-   source's black point, white point, contrast, saturation and R−B white balance as numbers,
-   because "the colours are off" is not something you can act on and "the face reaches white at
-   212 while the B-roll above it reaches 245" is. Then `--apply`. The talking head gets a face
-   target; screen recordings get the range half plus a saturation ceiling. See `capcut-cli`.
-6. **Finish** — `capcutctl finish --project NAME`, then `polish --motivated` and `finish --music`.
-   Picture-locked first. Music is generated to the picture; speech is never recut to a beat.
-   Captions stay outside CapCut. See `references/finish.md`.
+5. **Check colour** — measure if a source looks wrong, then make a small explicit
+   correction with `grade --set`. Default `grade` leaves sources unchanged. Compare
+   before/after in CapCut; the proxy's slider model is approximate. Preserve screen
+   recordings unless a specific capture defect needs correction.
+6. **Finish** — run `finish`, then `polish --motivated`. Choose music from the actual
+   story: mood, energy arc, texture and pacing. Pass that brief with `music --prompt`
+   or use a suitable local track with `music --file`. Avoid a generic tech-demo bed.
+   Picture stays locked; speech is never recut to a beat. See `references/finish.md`.
 7. **Look at the finished frames** — those last-pass writes change the picture. Run
    `capcutctl timeline`, then `capcutctl qa` at the new seams / music-in / CTA, then a mute
    watch. `doctor` cannot see transition, track-slice, or music-placement defects.

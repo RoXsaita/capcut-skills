@@ -1,14 +1,16 @@
 ## Screen — OCR (B-roll)
 
 ```bash
-ffmpeg -i screen.mp4 -vf 'fps=1,scale=810:-1' -q:v 3 ocrframes/o_%05d.jpg
-ls ocrframes/*.jpg | xargs -P 8 -I{} sh -c 'tesseract "$1" "ocrtxt/$(basename $1 .jpg)" --psm 6 -l eng' _ {}
+capcutctl find "agent running" --media /absolute/take/screen.mp4 --shows --strip
+capcutctl find "agent running" --media /absolute/take/screen.mp4 --shows --refresh
 ```
 
-`tesseract` is at `/opt/homebrew/bin/tesseract`. 1,862 frames took ~4 minutes at `-P 8`.
-810px wide is enough for UI text; 240px is **not**.
-
-Then `{second: text.lower()}` and query it. See `scripts/match.py` for `load_index` / `spans`.
+`find --shows --refresh` builds a missing or stale index using Vision OCR. Caches are bound
+to the canonical source and its fingerprint, with duration and sampled coverage.
+An unverified basename-only `screen.ocr.json` is not evidence for another take.
+Check the reported coverage; a 132-second dump cannot stand in for a 796-second
+recording. `--says` requires a verified transcript from `cut`; it does not accept
+an unrelated legacy transcript with the same basename.
 
 ### Querying — keyword discipline
 
@@ -20,8 +22,8 @@ Loose keywords are worse than useless because they look like they worked.
 | `imagine` | matches the nav tab, always present | `image to image` |
 | `agents.md` | fine, but only 4s long | pair with `workspace instructions` |
 
-Always pass `forbid` terms too (e.g. `moderation` to skip failed generations, `cinderkeep` to
-exclude the finished-app screen when you want the build screen).
+Reject misleading matches during frame review (e.g. a failed-generation notice or
+a prompt describing a result). `find` does not have a `--forbid` option.
 
 **Verify span length against the beat's need.** A 4-second match cannot fill an 8-second beat —
 either shorten the shot, split the beat across two shots, or pick a different moment.
@@ -58,5 +60,6 @@ Eleven ROIs were fixed this way in two passes. This is fast and it is correct.
 > exact complaint that came back from the AI Video Editor video. `add` now refuses such media
 > (`PREFRAMED_MEDIA`); see the `capcut-editing` hub, rule 3.
 
-**The user's Mac recordings do not have this problem** — Recording Layout clamps windows to
-720×1280 (exactly 9:16), so there is no crop decision. ROI hunting is only for phone captures.
+**Check geometry throughout every recording**, including Mac captures. Windows can
+resize or move mid-take. The source dimensions alone do not establish the content
+bounds; inspect before and after layout changes.

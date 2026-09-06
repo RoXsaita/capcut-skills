@@ -5,7 +5,7 @@ Run after A-roll, B-roll and layouts are picture-locked. Captions happen **outsi
 ```bash
 capcutctl timeline --project NAME
 capcutctl finish   --project NAME                 # scorecard + ASCII (read-only)
-capcutctl finish   --project NAME --music         # generate + place the bed
+capcutctl finish   --project NAME --music --prompt "VIDEO-SPECIFIC MUSIC BRIEF"
 capcutctl polish   --project NAME --motivated     # seams only where the picture changes
 capcutctl qa       --project NAME --times …
 ```
@@ -36,13 +36,17 @@ capcutctl qa       --project NAME --times …
 
 ## Music
 
-Needs `GEMINI_API_KEY` in `cli/.env` (gitignored) or the environment. Lyria 3 Pro, one call, cached at `.capcutctl/music.mp3` until the picture-change prompt changes or you pass `--regen`.
+Needs `GEMINI_API_KEY` in `cli/.env` (gitignored) or the environment. Lyria 3 Pro, cached at `.capcutctl/music.mp3`. The creative brief persists separately from picture timings. A first run needs `--prompt` or `--file`; a generic stock brief is not filled in for you.
 
 ```bash
 capcutctl music --project NAME --plan     # prompt + whether a cache exists
-capcutctl music --project NAME            # generate if needed, place, beat-offset
+capcutctl music --project NAME --prompt "Playful dry percussion, curious opening, warmer payoff, sparse under voice"
+capcutctl music --project NAME --file /absolute/music/selected.mp3
+capcutctl music --project NAME            # reuse saved choice/brief and current timing
 capcutctl music --project NAME --regen
 ```
+
+Choose genre, instrumentation, mood and energy from the story. Do not copy the example brief into unrelated videos. If the style is wrong, change `--prompt`; `--regen` alone retries the same creative direction. Audition with the voice at the hook, a dense explanation and the CTA.
 
 The prompt lists picture-change timestamps so the model puts downbeats there. After the file lands, `detectBeats` (ffmpeg PCM, no extra deps) measures the real onsets and `beatOffset` slides the clip. Speech is not a beat target.
 
@@ -55,3 +59,5 @@ The prompt lists picture-change timestamps so the model puts downbeats there. Af
 5. `timeline` then `qa` then a mute watch.
 
 Do not add a fifth skill for this. The verbs live in `capcutctl`; the taste lives here.
+
+Use the existing interaction/callout operations for event cues; reserve `polish:sfx` for transition sounds rebuilt by `polish`. Manual cues need their own description and lane. A scorecard checks structure and timing, not musical suitability or native colour.

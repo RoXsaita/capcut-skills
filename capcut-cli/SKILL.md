@@ -79,7 +79,7 @@ capcutctl shift    --project NAME --at S --track NAME --by SECONDS
 capcutctl remove   --project NAME --at S --track NAME
 capcutctl volume   --project NAME --at S --track NAME --level 0
 capcutctl fade     --project NAME --at S --track NAME [--in 0.08] [--out 0.12]
-capcutctl keyframe --project NAME --at S --track NAME [--to 2.4] [--hold 1.6] [--plan]
+capcutctl keyframe --project NAME --at S --track NAME [--to SCALE|--focus X,Y,W,H] [--hold 1.6] [--plan]
 capcutctl preview  --project NAME --out preview.mp4 [--fps 6]
 capcutctl diff     --project NAME --snapshot NAME | --against NAME
 capcutctl harvest  [--projects A,B] [--out FILE] [--plan]
@@ -235,10 +235,11 @@ draft duration), scale `0.01 → 1.4–3.4` over **0.07–0.20s**, with `Culin�
 leading. Text varies by video — `Follow`, `نشر`, `دليل`, `CV` — so it is a parameter, defaulting
 to `Follow`.
 
-**The talking-head push-in.** `1.0 → 1.15` over **0.23s**, hold 1.6s, release. That is 25 of
-43 measured face push-ins at 1.15 and 11 more at 1.2; median ramp 0.23s. Much subtler than
-a B-roll punch, which goes to 2.0–4.5. `--auto` finds the scenes: a principal-track clip
-carrying **no mask** is him alone in frame; a Split or Circle mask means he is sharing it.
+**The talking-head push-in.** A useful starting move is current scale ×1.15 over
+0.23s, hold up to 1.6s, then return. Choose emphasis and preserve face framing;
+these are defaults, not a motion quota. `--auto` selects visible principal-track
+clips with no active mask and skips hidden voice carriers and masked insets.
+Use a separately framed screen detail when the point is a UI control or result.
 
 ### The piece that makes it work: source time → timeline time
 
@@ -322,30 +323,18 @@ only the side you have reads as taking a side.
 
 ```bash
 capcutctl grade --project NAME --measure     # scopes as numbers, per source
-capcutctl grade --project NAME               # the solved plan (read-only, default)
-capcutctl grade --project NAME --apply
+capcutctl grade --project NAME               # measurements and unchanged source plan
+capcutctl grade --project NAME --apply --set 'face.mp4:temperature=-0.05'
 capcutctl grade --project NAME --apply --set 'face.mp4:temperature=-0.2,white=0.28'
 capcutctl qa    --project NAME --times 8 --no-grade   # the before half of a before/after
 ```
 
-**Colour is arithmetic here too, and the numbers are the deliverable.** `--measure` reports,
-per source file: black point (1st percentile luma), white point (99th), contrast, mean
-saturation, and `warmth` = R−B over the lit 40% of the frame, which is the white-balance tell.
-A source whose black sits at 22 and whose white stops at 212 is using 75% of the range — that
-is the flat, milky look, and it is invisible to `doctor` because the structure is perfect.
-
-**Two roles, because one target would be wrong for half the timeline.** The talking head is a
-*face*: it has a correct answer (real black under it, near-full white above it, warm-but-not-
-orange skin), and it is found the same way `polish` finds where transitions ride —
-`principalTrack`. Everything else is a *screen*: it gets the range half only (setting black and
-reaching white is what makes small UI text legible), a saturation **ceiling** so one neon
-capture cannot shout over the rest, and a white-balance target taken from the **median of the
-other screen sources** — so shots stop fighting each other — never from skin.
-
-The solver is coordinate descent against that target with an L2 penalty on slider magnitude, so
-it prefers doing nothing: a 3s clip that is already right does not get a 0.4 slider chasing the
-last two points. Temperature is solved **before** saturation, because both move R−B and with
-saturation first the solver will happily fix a warm cast by draining the colour out of a face.
+**Preserve source colour by default.** `grade` reports measurements and proposes no
+sliders until an explicit target/reference is supplied. For a known defect, use
+`--set 'EXACT_SOURCE:temperature=-0.05'` and inspect a before/after in CapCut.
+Keep screen recordings unchanged unless the capture itself has a diagnosed problem.
+Whole-frame black/white/saturation statistics include backgrounds and UI; they are
+not skin measurements. The solver is an optional approximation, not a colourist.
 
 **Harvested, not invented.** `presets/adjust.json` is a real `effects` material out of draft
 0411, where CapCut's own Adjust panel wrote it: one material per slider, `value` in −1..+1 (the
@@ -354,8 +343,11 @@ per-type `version` strings are CapCut's own, consistent across all 88 drafts (br
 contrast `v3`, saturation `v1`, temperature `v3`, white/black `""`). `path` is rebuilt from the
 local effect cache so it survives a different machine.
 
-**`grade` owns its materials the way `polish` owns transitions** — re-running replaces rather
-than stacks. Photos and layout plates are never graded.
+**`grade` replaces its own marked materials** on selected sources and preserves foreign
+adjustments. `grade --reset --source EXACT_SOURCE` removes owned corrections; omit
+`--source` to reset all CLI-owned grades. Legacy unmarked grades cannot safely be
+distinguished from manual work, so inspect those in CapCut. Duplicate basenames are
+rejected: use the exact source identity/path shown by `--measure`. Photos are not graded.
 
 ### The one soft edge: slider scale
 
@@ -495,7 +487,9 @@ capcutctl finish   --project NAME --music      # Lyria bed, beat-offset to pictu
 ```
 
 The last pass. `timeline` is a one-screen dump of stacked tracks (the view that makes
-same-screen Flashes obvious). `finish --music` generates an instrumental via Gemini Lyria 3
+same-screen Flashes obvious). Supply a story-specific `--prompt` or a suitable local
+`--file` for music. The saved creative brief is reused independently of current picture
+timing; `--regen` alone retries the same direction. `finish --music` generates via Gemini Lyria 3
 Pro (`GEMINI_API_KEY` in `cli/.env`, gitignored), caches it at `.capcutctl/music.mp3`, and
 places it at ~0.08 with fades. Beats are detected with ffmpeg PCM; the clip is shifted so
 downbeats land on **picture changes**. The talking head is never recut. See
@@ -521,7 +515,11 @@ capcutctl find "publish"       --media cam.mp4    --says --context  # spoken, wo
 ```
 
 `--shows` searches the OCR index, `--says` the Whisper transcript. Runs are collapsed and
-reported from their first *stable* second.
+reported from their first *stable* second. Missing/stale OCR is rejected with an actionable message;
+`--refresh` builds a verified index. Each cache records canonical source identity, fingerprint,
+duration and sampled coverage. Unverified basename-only caches are rejected.
+
+For picture checks, repeat flags: `qa --project NAME --expect '9.2=Build' --expect '45.5=Publish'`. Do not join timestamps with commas.
 
 **`--strip` is not optional in practice.** OCR matches text it cannot tell is occluded or
 scrolled off. A search for "read file" reported a run starting at 168s; at 168s the sidebar
@@ -687,24 +685,34 @@ Nudge after the fact with `trim` / `shift` / `remove` / `volume` / `fade`. `shif
 
 **`trim` on the talking head is a 1× window slip, or it is a mistake.** Speed is `source/target`. Lengthening the source and leaving the target puts the face above 1× — forbidden, same as `pace` touching the principal track. To drop a line or keep a word, recut with `cut --keep` so the clip's *length* changes and speed stays 1. See `capcut-editing-talking-head`.
 
-## Scale punch — `keyframe`
-
-Scale-only, cloned from logo `popKeyframes`. Offsets are **absolute source positions** (`source.start + ramp`), not 0. A clip added with `--src 90` that punched at offset 0 would clamp to a dead hold. Two keys that clamp to the same offset are refused (`KEYFRAME_CLAMPED`).
+## Camera move — `keyframe`
 
 ```bash
-capcutctl keyframe --project NAME --at 43.2 --track broll --to 2.4 --hold 1.6
+capcutctl keyframe --project NAME --segments ID --at 43.2 --to 1.15 --hold 1.6
+capcutctl keyframe --project NAME --segments ID --at 43.2 --focus 400,80,500,250 --viewport 0,0,1080,960 --plan
+capcutctl keyframe --project NAME --segments ID --clear
 ```
 
-Position punches wait on a harvested `KFTypePositionX/Y` block. `capcutctl harvest` now walks
-**all 88 drafts** and writes two: `positionScale` (a `Line` block from IKEA Refund) and
-`positionScaleEased` (a real `FreeCurveInOut` block from Higgsfield Refund, with genuine
-`left_control` / `right_control` bezier handles, covering PositionX + PositionY + ScaleX).
-Copy one of those; do not invent the fields.
+`--to` is an absolute native scale; omit it for current scale ×1.15. `--focus`
+uses an inspected rectangle in original source pixels; `--viewport` is its desired
+canvas region, not a crop mask. Do not guess either from OCR text alone. Focus
+computes scale and position together, so do not also pass `--from` or `--to`.
+The split seam stays fixed; a screen window's linked border follows its recording.
+Moves that push the framed window off canvas are refused. A tight UI detail belongs
+in a split-screen detail shot; `--viewport` does not crop inside a fixed border.
+Circle/rotated masks are refused: select a full-face scene or the visible screen.
+Full-face punches are normal and welcome when they support the spoken emphasis.
 
-**Prefer the eased block.** 57 keyframe points across 10 of his projects use `FreeCurveInOut`;
-a linear scale punch reads mechanical where an eased one reads like a camera. Note CapCut writes
-`left_control`/`right_control` objects on `Line` points too, so their presence does not mean
-eased — test `curveType === 'FreeCurveInOut'`.
+Moves use absolute source offsets and account for playback speed. Existing unrelated
+channels and camera keys outside the move survive. `--clear` removes camera channels
+only, including those on the linked frame. `--hold 0` explicitly leaves a push in;
+an impossible requested hold/return fails instead of silently losing the return.
+Default shortened holds are reported. `--plan` validates without writing.
+
+These moves use native `Line` keys. Existing eased moves are preserved outside the
+new interval; starting inside an eased curve is refused because its current value
+is not reliably evaluated. Inspect rest, peak and return with `qa`, then check the
+motion in CapCut. Do not claim a still-frame or linear proxy proves native easing.
 
 ## Watchable proxy — `preview` / `diff`
 
@@ -719,3 +727,16 @@ capcutctl harvest                                      # catalogue transitions /
 ## What it does NOT do
 
 No captions (those stay outside CapCut), OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `capcutctl find`. Music beds are `finish --music`, not CapCut's stock library.
+
+## Compact screen layouts
+
+Use `layout screen` for the recording, its frame, face inset/ring and blurred face
+background together. Sequential shots reuse compatible helper lanes; overlapping
+shots and foreign content retain separate lanes. Aim for a small stack by role,
+not a hard five-track limit. Use `timeline` to inspect it. Changing a shot back to
+full-face should remove its owned helpers, not hide or delete another recording.
+
+Before building, keep one compact shot list: narration phrase, timeline range,
+source take/range, inspected evidence frame, layout, focus rectangle if needed,
+motion intent and sound cue. Repair the failed section after targeted QA rather
+than rebuilding the entire video.

@@ -43,12 +43,18 @@ handoff, put `sourceToken`, `keep`, `order`, and `boundaries` in a v1 decision f
 which renders optional viewing artifacts.
 
 This is the normal fast path: **one analysis → one semantic review → one dry run → one project
-build → one doctor-gated handoff.** Do not render, re-transcribe, or contact-sheet every ordinary
-A-roll before building it. Escalate to those diagnostics only when lint, playback, or the user
-reveals a boundary, audio, or visual problem. See `references/procedure.md`.
+build → one final-script audit → one doctor-gated handoff.** Do not render, re-transcribe, or
+contact-sheet every ordinary A-roll before building it. Escalate to those diagnostics only when
+lint, playback, or the user reveals a boundary, audio, or visual problem. See
+`references/procedure.md`.
 
-After the build, run `capcutctl doctor`. If it is error-free, tell the user the project is
-available in CapCut.
+After the build, run the existing current-draft audit:
+`capcutctl scenes --project NAME --track CONTENT_TRACK --transcript`.
+Read the `says` rows in timeline order against the raw word-level transcript/`.aroll.json` and
+remove accidental duplicate lines, false starts, and filler by re-running the reviewed A-roll cut.
+Do not treat `says` as a clean script automatically: it joins transcript segments that overlap a
+clip boundary, so boundary words can appear twice. Repeat this audit after any user CapCut tweak.
+Then run `capcutctl doctor`; if it is error-free, tell the user the project is available in CapCut.
 
 **Stop there.** Hand off the project and wait for the user's sign-off before adding B-roll,
 layouts, pace, polish, or music. Recutting the face after B-roll is on the timeline desyncs
