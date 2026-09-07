@@ -145,21 +145,28 @@ imports it. Prefer `capcutctl` for anything it covers.
    the keep list. Do not start B-roll, layouts, or finish until then. The face is the timeline's
    clock; everything else hangs off it.
 3. **Give the scenes their looks** — `capcutctl layout …`. The first picture is proof
-   (split-screen or circle + 80% recording), not a 5s+ full-face talking-head. `finish`
-   reports a cold-open if you miss this.
+   (split-screen or circle + 80% recording). Bind each narration phrase to an inspected
+   action/result using the [screen-recording skill](../capcut-editing-screen-recording/SKILL.md).
+   Compress waiting, keep actions legible, and hold results until they can be understood.
+   Pick one focus per shot; a zoom or highlight must point to that focus. `finish` checks
+   opening coverage; it cannot verify that the picture proves the words.
 4. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
    two real defects passed it clean.
 5. **Check colour** — measure if a source looks wrong, then make a small explicit
    correction with `grade --set`. Default `grade` leaves sources unchanged. Compare
    before/after in CapCut; the proxy's slider model is approximate. Preserve screen
    recordings unless a specific capture defect needs correction.
-6. **Finish** — run `finish`, then `polish --motivated`. Choose music from the actual
-   story: mood, energy arc, texture and pacing. Pass that brief with `music --prompt`
+6. **Finish** — run `finish` and review the proposed seams before applying polish.
+   A picture change is eligible for a transition; a clean cut is still a valid choice.
+   Choose music from the story: mood, energy arc, texture and pacing. Pass that brief with `music --prompt`
    or use a suitable local track with `music --file`. Avoid a generic tech-demo bed.
-   Picture stays locked; speech is never recut to a beat. See `references/finish.md`.
-7. **Look at the finished frames** — those last-pass writes change the picture. Run
-   `capcutctl timeline`, then `capcutctl qa` at the new seams / music-in / CTA, then a mute
-   watch. `doctor` cannot see transition, track-slice, or music-placement defects.
+   Balance the voice first, then the bed and SFX underneath it. Picture stays locked;
+   speech is never recut to a beat. See `references/finish.md` for mixing and selected seams.
+7. **Watch the finished edit** — check changed frames with `qa`, then play the current
+   project in CapCut at normal speed, with sound, at phone size. Check proof readability,
+   cut syllables, music/SFX balance and native effects. Inspect the actual export too.
+   A proxy or a clean `doctor` result cannot replace this playback check. If native playback
+   is unavailable, report it as pending instead of claiming the edit passed.
 8. **`capcutctl doctor`** must be error-free before you hand it over.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.
@@ -171,7 +178,7 @@ Work **one section at a time** and check end-to-end. He asked for this explicitl
 | `references/capcut-format.md` | draft_info.json schema, segments, masks, keyframes, the multi-copy write, registration |
 | `references/style.md` | Rule zero, his measured signature, SFX palette |
 | `references/finish.md` | Last pass: motivated seams, ASCII timeline, generated beat-aligned bed |
-| `references/preview-loop.md` | Full-motion ffmpeg preview and contact sheets (frame checks are `capcutctl qa`) |
+| `references/preview-loop.md` | Bounded frame/proxy checks and final native playback |
 | `references/pitfalls.md` | Concrete traps already hit. Read before starting. |
 | `references/project-state.md` | Sources, the signed-off VO EDL, what is done and what is not |
 

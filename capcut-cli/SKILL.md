@@ -717,12 +717,16 @@ motion in CapCut. Do not claim a still-frame or linear proxy proves native easin
 ## Watchable proxy — `preview` / `diff`
 
 ```bash
-capcutctl preview --project NAME --out preview.mp4     # 6fps compositor stills + principal audio
+capcutctl preview --project NAME --out preview.mp4     # 6fps proxy with speech + audio tracks
 capcutctl diff --project NAME --snapshot BEFORE        # what changed since a snapshot
 capcutctl harvest                                      # catalogue transitions / SFX / masks / Line + eased Position+Scale blocks
 ```
 
-`preview` reuses `qa`'s compositor (speed-aware source time). It is not CapCut's export. `harvest` is catalogue-only — there is no `--apply`.
+`preview` reuses `qa`'s compositor (speed-aware source time). Both preview paths apply
+clip volume and native fade durations, including when `--from` begins inside a fade;
+the compositor mix preserves stereo. Native audio processing/volume keyframes and effect
+rendering still need a normal-speed CapCut watch. It is not CapCut's export.
+`harvest` is catalogue-only — there is no `--apply`.
 
 ## What it does NOT do
 
@@ -737,6 +741,7 @@ not a hard five-track limit. Use `timeline` to inspect it. Changing a shot back 
 full-face should remove its owned helpers, not hide or delete another recording.
 
 Before building, keep one compact shot list: narration phrase, timeline range,
-source take/range, inspected evidence frame, layout, focus rectangle if needed,
-motion intent and sound cue. Repair the failed section after targeted QA rather
+source take/range, inspected action/result evidence, layout, one viewer focus and its
+rectangle if needed, waiting/action/result timing, motion intent and sound cue (or none).
+Repair the failed section after targeted QA rather
 than rebuilding the entire video.

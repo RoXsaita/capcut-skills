@@ -45,6 +45,25 @@ Use the current `find`, `layout` and `keyframe` commands with inspected frames.
 Semantic sentence-to-event alignment still requires judgement; do not claim OCR
 hits prove that an action happened.
 
+## Build each shot from evidence
+
+Use the existing compact shot list in `capcut-cli`; keep the exact narration phrase,
+source file/range, timeline range and inspected evidence together.
+
+- **Verify the verb.** For a click or change, inspect before/action/after frames or a short
+  source playback. A labelled button alone proves neither a click nor a successful result.
+  If the evidence is missing, find another take or flag the claim as unverified.
+- **Separate waiting, action and result.** Trim or accelerate idle loading; keep the useful
+  interaction readable and give its result a stable hold. Play that hold at phone size to
+  judge its length. `pace --auto` only infers source gaps. If a source span includes both
+  waiting and useful action, place them as separate shots first; apply per-clip
+  `pace --at … --speed …` to the waiting shot and recheck the action/result timing.
+- **Choose one focus.** Write what the viewer should notice. Crop/zoom to an inspected
+  rectangle and leave caption space; use a highlight only if it makes that target clearer.
+  Avoid simultaneous competing callouts, zooms and transitions. A stable shot is valid.
+- **Check the assembled timing.** Verify the action/result against the spoken phrase after
+  trimming or changing speed. Recheck rest, peak and return when adding camera movement.
+
 ## Why it was hard before the recorder
 
 The voice side has three indexes and word-level precision. The screen side had a 1 fps OCR text
