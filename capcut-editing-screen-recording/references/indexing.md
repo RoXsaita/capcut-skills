@@ -46,17 +46,18 @@ hint, not an answer.
 **What actually works:** render the candidate crops and look at a contact sheet.
 
 ```bash
-ffmpeg -ss $T -i screen.mp4 -frames:v 1 -vf crop=1080:960:0:$ROI out.png
+ffmpeg -ss "$T" -i screen.mp4 -frames:v 1 -vf "crop=1080:960:0:$CROP_TOP" out.png
 ```
 
 Build a grid of candidates with a y-ruler drawn on, pick by eye, then re-render to confirm.
 Eleven ROIs were fixed this way in two passes. This is fast and it is correct.
 
-> **This ffmpeg pass produces a PNG you look at — never media you import.** The `$ROI` you
-> pick is an argument, not an output: it is the source pixel row you hand to
-> `capcutctl layout broll --row $ROI`, which expresses the identical framing as `clip.scale` +
-> `clip.transform` + a seam mask on the **full-frame** recording. Import a cropped .mp4 instead
-> and the rows outside $ROI cease to exist, so the ROI can never be revised in CapCut — the
+> **This ffmpeg pass produces a PNG you look at — never media you import.** `CROP_TOP` is
+> the top of this 1080×960 source crop. `layout broll --row` takes the **centre** of the
+> visible source window: for this example use `--row "$((CROP_TOP + 480))"` on the
+> **full-frame** recording. For other source widths/scales, use the inspected centre row
+> and check the command's reported `window`; 480 is specific to this unscaled example.
+> Import a cropped .mp4 instead and the rows outside the crop cease to exist, so the ROI can never be revised in CapCut — the
 > exact complaint that came back from the AI Video Editor video. `add` now refuses such media
 > (`PREFRAMED_MEDIA`); see the `capcut-editing` hub, rule 3.
 

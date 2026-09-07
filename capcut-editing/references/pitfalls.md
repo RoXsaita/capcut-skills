@@ -4,14 +4,15 @@ Concrete traps already hit on this project. Read before starting.
 ## Process
 
 - **Building blind.** The #1 failure. 83s of timeline written from arithmetic, never previewed,
-  rated *"1/100"* by the user. Always render and look.
+  rated *"1/100"* by the user. For composed visual work, render representative frames and
+  look. Ordinary A-roll uses the transcript/acoustic review and approval gate first.
 - **Showing a silent preview.** SFX existed in the CapCut build but not in the ffmpeg preview, so
   the user asked "where are the sounds". Include audio in anything you hand over.
 - **Doing the whole video at once.** The user explicitly asked for one section at a time, checked
   end-to-end. Cut the talking head, get it signed off, *then* B-roll. Recutting the face after
   B-roll is on the timeline desyncs every shot.
 - **Speeding the talking head.** `clip.trim` that lengthens the source window and leaves the
-  target the same is a speed ramp. Used on `hermes-replies-to-comments` to "save" first words
+  target the same is a speed ramp. Used on `a previous speech-recovery edit` to "save" first words
   the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
   re-run `cut --keep` so the clip gets *longer*, not faster. `pace` already refuses the
   principal track; trim does not, so do not reach for it on `content`.
@@ -35,7 +36,8 @@ Concrete traps already hit on this project. Read before starting.
 - **OCR TSV-derived ROI is unreliable.** Multi-word keys never match single-word TSV tokens; after
   loosening, most results pinned to the clamp value. Use it as a hint; confirm visually.
 - **240px frames are too small to OCR.** Use ~810px wide.
-- **Whisper hallucinates a trailing Arabic subtitle credit.** Drop the last line.
+- **Whisper can hallucinate a trailing Arabic subtitle credit.** Check the source audio and
+  remove it only when it was not actually spoken.
 ## Content selection
 
 - **Check the END of a shot, not just its start.** Screen content changes underneath a shot. Three
@@ -43,9 +45,10 @@ Concrete traps already hit on this project. Read before starting.
 - **Real content windows can be seconds long.** The working game appeared for ~4s in a 31-minute
   recording. Slowing a shot (0.7–0.8×) stretches a narrow window without drifting past it.
 - **Sidebars and menus look like content to OCR.** Several timestamps landed on the conversation
-  list. Add `forbid` terms.
+  list. Inspect candidate frames and reject mismatches; `find` has no `--forbid` flag.
 - **Avoid failure states unless intentional.** `"We can't generate this image / didn't pass the
-  moderation"` appears repeatedly and should be excluded (`forbid=["moderation"]`).
+  moderation"` may appear in the source. Reject those candidate frames unless the failure is
+  part of the story.
 - **"No logos fired" is usually a missed alias, not a missing logo.** Whisper wrote
   `شات جي بيتي`, `brands.json` had `شات جي بي تي` — folding fixes dots and hamza, not spacing.
   Diagnose with `wrap --plan` before fetching artwork; see `capcut-cli` → *Logo assets*.
@@ -54,16 +57,16 @@ Concrete traps already hit on this project. Read before starting.
 - **CapCut rewrites `root_meta_info.json` on quit** — register only when it is closed.
 - **Duplicating an existing project beats building one from scratch** — `draft_meta_info.json` has
   many fields whose purpose is unknown.
-- **Duplication carries empty tracks.** Strip tracks with no segments.
+- **Preserve the empty main video track.** It is required by the overlays-only structure;
+  do not strip every empty track from a cloned draft.
 - **The speed invariant** (`source = target × speed`) must hold on every segment.
 - **Speed caps**: the user's own projects top out around 100×. To compress 900s into 1.5s you need
   600×, which is out of range — pick a shorter source span instead.
 ## Media / environment
 
-- **Python 3.14 has no wheels for mlx-whisper.** Pin 3.12. Use `uv`, not `pip` (pip timed out at
-  5 minutes; uv needed `UV_HTTP_TIMEOUT=300` for a large wheel).
-- **`SendUserFile` caps at 30 MiB.** Downscale previews.
-- **PIL lives in system python3**, not necessarily in the uv venv.
+- **Use the CLI's selected Python environment.** `pyproject.toml` and SETUP.md are the
+  dependency source of truth; `capcutctl preflight` diagnoses the current machine. Do not
+  assume Pillow or Whisper exists in an ambient system interpreter.
 - **Screen recording permission** is required for `screencapture`; **Accessibility** is separate
   and required for `cliclick` / AppleScript UI scripting. Granting one does not grant the other.
 ## Privacy
@@ -78,10 +81,11 @@ Symptom: you write `draft_info.json` with CapCut closed, verify it on disk, repo
 the next time CapCut opens, the old timeline is back and your file is overwritten.
 
 Cause: `Timelines/<uuid>/draft_info.json` is the copy CapCut restores from. See
-`capcut-format.md` → "CapCut keeps a second copy of the timeline".
+[capcut-format.md](capcut-format.md) → "Root draft, active timeline and mirrors".
 
-Guard: after writing, `md5 -q` every copy and confirm they match. Then reopen CapCut and re-check
-the duration before telling the user it is done.
+Guard: use CLI transactions and run `doctor`; each document must agree with its own mirrors,
+while root and active-timeline documents may differ. Use `sync` for drift. Reopen CapCut and
+verify current playback before final delivery.
 ## "Cover" means the main track
 
 Do not read "cover" as "B-roll covering his face". In his vocabulary the **main track is the

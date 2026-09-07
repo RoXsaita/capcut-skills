@@ -3,8 +3,8 @@ name: capcut-editing-screen-recording
 description: >
   Select, time and place screen-recording B-roll in a CapCut video. Use when matching spoken
   sentences to on-screen events, building or querying an index of a long screen recording, or
-  choosing crops and zooms. Use `capcutctl find` for OCR/transcript search. THE EDITING HALF
-  IS STILL UNSOLVED — read the status table below before promising precision. Read the
+  choosing crops and zooms. Use `capcutctl find` for OCR/transcript search, then inspect
+  source frames to verify actions and results; automatic semantic alignment is not implemented. Read the
   capcut-editing hub first; for what `capcutctl` already automates, read capcut-cli.
 ---
 
@@ -99,7 +99,7 @@ Tried and rejected outright:
 B-roll shares the frame with him via a layout preset (circle inset, or split screen) — it does not
 replace him. See the `capcut-editing-talking-head` skill, `references/layouts.md`.
 
-Historical note: an older project (`IKEA Refund`) used a **different** `Split` mask config —
+Historical note: an older project (`reference A`) used a **different** `Split` mask config —
 `centerX 0.0435, centerY 0.4969`, with the screen on top and the face on the bottom — versus the
 locked preset's `centerX -0.0046, centerY 0.5415`. The locked values come from a scene he
 positioned by hand and are authoritative; the older ones are recorded only so nobody assumes the
@@ -107,8 +107,9 @@ split can go only one way. Neither was verified by rendering.
 
 ## Still open
 
-1. **The SPLIT preset's bottom half** — the face geometry is locked; what scale/position the
-   recording takes below the split line was never determined.
+1. **Shot-specific framing** — `layout broll --row` places a tall source in the TOP half;
+   the locked face occupies the bottom. Inspect the chosen centre row and source window.
+   `layout screen` handles framed window recordings.
 2. **Sentence → moment binding** for unguided footage. Guided mode makes this a verification
    problem; footage recorded without it still needs the Phase 2 aligner.
 3. **Automatic semantic zoom selection** remains manual. `keyframe --focus` now
@@ -126,5 +127,7 @@ split can go only one way. Neither was verified by rendering.
 ## Privacy — hard constraint
 
 Log **that** a key was pressed and **when**, never **which**. Content would capture passwords.
-Personal content (notification shades, DMs) is excluded by default and flagged, never silently
-included. In `rl2` this is enforced in code, not by convention — see `references/recorder.md`.
+Inspect recordings for personal content (notification shades, DMs) and exclude or flag it
+before placement. Whole-screen capture can include notifications even with a privacy-aware
+trace logger. The historical recorder notes describe trace restrictions, not a guarantee
+that arbitrary video pixels are private.

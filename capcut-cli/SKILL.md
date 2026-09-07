@@ -69,8 +69,8 @@ capcutctl history  --project NAME
 capcutctl restore  --project NAME --snapshot NAME
 capcutctl sync     --project NAME                    # repair mirror drift + collapse duplicate material ids
 
-capcutctl add      --project NAME --media FILE --at S --dur S --track NAME|N
-                   [--src S] [--cover IN-OUT] [--volume 0] [--desc TEXT] [--no-localize]
+capcutctl add      --project NAME --media FILE --at S --dur S --track TRACK \
+                   [--src S] [--cover IN-OUT] [--volume 0] [--desc TEXT] [--no-localize] \
                    [--generated] [--derived-from ORIGINAL [--derived-offset S]] [--allow-ephemeral]
 capcutctl replace-media --project NAME --file FILE --at S --track NAME [--retime] [--no-localize]
 capcutctl localize --project NAME          # copy outside videos into the draft (fixes Link media)
@@ -115,9 +115,10 @@ The exact list is `dryRun.commands` in the CLI contract:
 capcutctl contract | jq -r '.dryRun.commands[]'
 ```
 
-`.capcut/cli-contract.json` in this repository is the vendored copy that
-`scripts/validate.py` checks these documents against — every `capcutctl` command and flag
-written in a code block here must exist in it.
+`.capcut/cli-contract.json` in this repository is the vendored copy used by
+`scripts/validate.py` to check documented command names and flags. The checker supports
+fenced blocks, inline code and shell continuations; it does not execute examples or verify
+argument values and behavioral claims.
 
 ## Cleaning the talking head
 
@@ -165,7 +166,7 @@ capcutctl layout auto  --project NAME [--plan] # make it so
 
 **If moving picture covers the moment from a lower track, he is sharing the frame:
 split-screen. If nothing does, he is alone in it: full face.** That is the whole rule, and
-it reproduces grok-build-final's hand-made choices **18 out of 18** — sixteen split-screen
+it reproduced a reviewed test edit's hand-made choices **18 out of 18** — sixteen split-screen
 beats and two full-face ones, zero disagreements. Layout plates (PNG/GIF bars and rings) do
 not count as B-roll.
 
@@ -289,9 +290,9 @@ what `wrap` still uses. The reveal is four layers, every structure harvested, no
 | layer | what it is | where it came from |
 |---|---|---|
 | overshoot + settle + drift | `KFTypeScaleX` 0.15 → **1.15** → 1.00 → 1.04 | shape from the reference video, **ramp 0.13s = his own `logoPop.rampSeconds`** |
-| rise | `KFTypePositionY` lifts the mark into place | `FreeCurveInOut` block, Higgsfield Refund |
-| fade | `KFTypeAlpha` 0 → 1 over 0.087s | Claude Chrome Ep 3 |
-| glow underlay | same mark on the track **below**, 1.08×, `Insane Glow` + `Blur@0.45`, alpha bursts to 1.0 and decays to 0.35 | Primary Preset-copy / Ep 3 |
+| rise | `KFTypePositionY` lifts the mark into place | `FreeCurveInOut` block, reference C |
+| fade | `KFTypeAlpha` 0 → 1 over 0.087s | reference G |
+| glow underlay | same mark on the track **below**, 1.08×, `Insane Glow` + `Blur@0.45`, alpha bursts to 1.0 and decays to 0.35 | the harvested preset / reference G |
 | `Screen` blend on the underlay | so the halo **adds light** instead of laying a pale copy over the picture | hand-set in CapCut 9.3 and harvested, 2026-08-31 |
 
 **A blend mode is a `materials.effects` record of `type: "mix_mode"`**, referenced from
@@ -395,13 +396,13 @@ it races through. Measured from his own projects:
 
 | project | source | screen | compression | at 1× |
 |---|---|---|---|---|
-| IKEA Refund | 1317.6s | 66.8s | **19.7×** | 38% |
-| Hermes-agent | 61.8s | 40.4s | 1.5× | 62% |
-| grok-build-final *(before)* | 76.4s | 40.9s | 1.9× | **79%** |
-| grok-build-final *(after `--auto`)* | — | — | **8.1×** | 42% |
+| reference A | 1317.6s | 66.8s | **19.7×** | 38% |
+| reference B | 61.8s | 40.4s | 1.5× | 62% |
+| reviewed test edit *(before)* | 76.4s | 40.9s | 1.9× | **79%** |
+| reviewed test edit *(after `--auto`)* | — | — | **8.1×** | 42% |
 
 79% at real time means the viewer watches a phone scroll at the speed it actually
-scrolled. That is the single loudest "not premium" tell. IKEA crushes 260s of an agent
+scrolled. That is the single loudest "not premium" tell. Reference A compresses 260s of an agent
 working into 2.6s at 100× and drops its final beat to 0.4×.
 
 **What `--auto` does, and what it refuses to do.** For each B-roll clip it looks at how
@@ -440,7 +441,7 @@ skipped. `--no-interactions` skips the pass. Today's traces are often thin (one 
 typing); the mapping is what makes a richer take just work.
 
 Puts a transition and its matching sound on those cuts, using the grammar measured
-from Hermes-agent, Higgsfield Refund, Content System and IKEA Refund:
+from reference B, reference C, reference E and reference A:
 
 | pair | transition | sound |
 |---|---|---|
@@ -460,13 +461,13 @@ Volume 1.0, transitions 0.20–0.33s. Never the same pair twice running.
 **Sweeps alternate.** A layout change gets a sweep, but `sweep` and `sweepL` take turns. They used
 to be exempt from never-twice-running, so a video whose every scene changes layout got the
 identical `Horizontal Triptych` + `Woosh` on every cut — **18 of 24 seams** in
-`GrokBuild-20260825`. Identical seams are the loudest tell that a machine made the edit; his own
-hand-cut projects keep any one transition under ~45% (Hermes-agent 4/9, Higgsfield 2/6).
+`generated test edit`. Identical seams are the loudest tell that a machine made the edit; his own
+hand-cut projects keep any one transition under ~45% (reference B 4/9, reference C 2/6).
 `polish` now reports this as `variety: {cuts, distinct, top, topShare, lopsided}` — read it,
 it is a quality signal, not an error.
 
 **Every transition goes on the principal track** — the one gapless video track that spans the
-timeline, which is the talking head. That is where all 9 of Hermes-agent's transitions sit and
+timeline, which is the talking head. That is where all 9 of reference B's transitions sit and
 none sit anywhere else. `polish` finds it automatically (`--track N` overrides) and **slices it
 at every cut that lacks a boundary**, frame-continuously, so the transition has a clip on both
 sides. Without a clip after it, CapCut silently drops the transition on load: the file is right
@@ -501,7 +502,7 @@ downbeats land on **picture changes**. The talking head is never recut. See
 capcutctl layout broll --project NAME --at 35 --track 4 --row 2336
 ```
 
-Frames a B-roll clip in the TOP half of a split screen on a chosen **source row**, and cuts it
+Frames a B-roll clip in the TOP half of a split screen with a chosen **source row at its centre**, and cuts it
 at the seam. It computes the transform and the mask line, refuses a scale that would leave
 background at the sides, and clamps the window inside the frame so it can never run off the edge.
 Omit `--scale` for exact 1:1 full width — anything larger crops the sides, which on a phone UI
@@ -551,7 +552,7 @@ It prints **`contentTrack`** — the track index your scenes landed on. The layo
 
 ## The locked layouts
 
-Exact measured geometry from `presets/layouts.json`, captured from `grok-build-claude`. Never
+Exact measured geometry from `presets/layouts.json`, captured from a verified reference timeline. Never
 recompute these numbers, never invent new ones. `capcutctl layout list` prints them.
 
 | | subject | companion |
@@ -681,7 +682,7 @@ capcutctl replace-media --project NAME --at 16.3 --track broll --file new.mp4 [-
 
 `--track` takes a **name or an index everywhere**, `layout` included — it was `Number()`-parsed there, so the `layout broll --track broll` line `add` prints resolved to `NaN` and matched nothing.
 
-Nudge after the fact with `trim` / `shift` / `remove` / `volume` / `fade`. `shift` uses the same extend-or-refuse policy as `add`. `fade` clones a verified `audio_fade` extra (`fade_type`, `fade_in_duration`, `fade_out_duration`) harvested from Higgsfield/IKEA — it does not invent fields.
+Nudge after the fact with `trim` / `shift` / `remove` / `volume` / `fade`. `shift` uses the same extend-or-refuse policy as `add`. `fade` clones a verified `audio_fade` extra (`fade_type`, `fade_in_duration`, `fade_out_duration`) harvested from the reference drafts — it does not invent fields.
 
 **`trim` on the talking head is a 1× window slip, or it is a mistake.** Speed is `source/target`. Lengthening the source and leaving the target puts the face above 1× — forbidden, same as `pace` touching the principal track. To drop a line or keep a word, recut with `cut --keep` so the clip's *length* changes and speed stays 1. See `capcut-editing-talking-head`.
 

@@ -6,3 +6,4 @@
 
 - [ ] No live media paths, transcripts, or QA frames
 - [ ] `SKILL.md` still matches `capcutctl help`
+- [ ] `python3 scripts/validate.py` and `python3 scripts/test_validate.py` pass

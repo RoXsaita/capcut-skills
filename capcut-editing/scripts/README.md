@@ -1,85 +1,20 @@
-# Scripts — legacy
+# Retired Python helpers
 
-**The live tooling is `capcutctl`.** Read `capcut-cli` first; everything below predates it.
+The maintained tooling is in [capcut-editor-cli](https://github.com/RoXsaita/capcut-editor-cli).
+These one-off helpers were removed because they bypassed project transactions, used
+production-specific edit lists, or duplicated indexes and previews that had since been fixed
+in the CLI. They are available in Git history for historical comparison; do not run them
+against a current project.
 
-Several of these still mention a specific video's keep-list or a Downloads
-filename. They are reference implementations, not a live EDL. Do not copy
-those paths into a public note. Prefer `CAPCUT_CAM` / `CAPCUT_BROLL`.
-
-| Superseded by | Was |
+| Retired helpers | Maintained replacement |
 |---|---|
-| `capcutctl cut` | `vo_plan.py`, `vo_cut.py`, `vo_rebuild_capcut.py`, `beats.py` |
-| `capcutctl layout` | `presets.py`, `layout_preview.py` |
-| `capcutctl qa` | `render.py` frame grabs, `capcut.py sheet` |
-| `capcutctl doctor` / `apply` / `snapshot` | `capcut.py verify|write|backup` |
-| `capcutctl new` | `build.py`, `full.py`, `to_overlays.py` |
+| `vo_plan.py`, `vo_cut.py`, `vo_rebuild_capcut.py`, `beats.py` | `capcutctl cut` for the reviewed A-roll plan and build |
+| `build.py`, `to_overlays.py` | `capcutctl new`, `add` and transactional `apply` |
+| `capcut.py` | `capcutctl scenes`, `doctor`, `snapshot`, `apply` and `preview` |
+| `presets.py`, `layout_preview.py` | `capcutctl layout` and `qa` |
+| `render.py`, `full.py` | `capcutctl preview` for a proxy of the actual current project |
+| `match.py` | `capcutctl find --shows --strip` with verified OCR caches |
+| `audio_index.py` | `capcutctl cut`; its maintained implementation is `tools/audio_index.py` in the CLI repo |
 
-Still live: **`audio_index.py`** — the acoustic energy index. `capcut.py` imports it, and it is
-the same code `capcutctl cut` uses.
-
-Kept because a few of these do things `capcutctl` does not yet (full-motion preview renders,
-ASCII energy strips, OCR matching in `match.py`). Reach for them only when `capcutctl` has no
-answer, and prefer extending `capcutctl` over reviving one.
-
----
-
-## The original notes
-
-## Start here: `capcut.py`
-
-*(Historical. `capcutctl` is the entry point now — see the table above.)* One deterministic
-entry point. Use it instead of hand-rolling a script — every command below existed as ad-hoc code
-first, and each rewrite was a chance to drop a step.
-
-```
-capcut.py spans   <proj>              the live EDL
-capcut.py lint    <proj>              energy-lint every seam
-capcut.py strip   <proj> [a] [b]      ASCII energy map
-capcut.py preview <proj> [out.mp4]    render the VO from live spans
-capcut.py sheet   <proj> [out.png]    contact sheet of every cut frame
-capcut.py verify  <proj>              structure + all-copies md5
-capcut.py backup  <proj> [tag]
-capcut.py write   <proj> <new.json> [--wait]
-```
-
-**`write` was the only sanctioned way to modify a project** *(superseded by `capcutctl apply`,
-which additionally snapshots, applies to both documents, and rolls back on failure).* It validates first and refuses on
-error, refuses while CapCut is running (unless `--wait`, which blocks — background it), writes
-**every** timeline copy, updates meta + registry, keeps a pre-write backup, and md5-verifies.
-
-`verify` checks rule zero (main track empty), material/ref integrity, track overlaps, the speed
-invariant, and that no two segments share a side-material. It found a real bug the first time it
-ran: two still segments whose `source_timerange` was inherited from a donor and no longer matched
-their placed duration — CapCut would have truncated the frames mid-scene.
-
-## Other runnable scripts
-
-| File | What it does |
-|---|---|
-| `audio_index.py` | **The audio energy index + cut linter.** Self-contained, cached, no deps beyond stdlib+ffmpeg. `python3 audio_index.py <media> [a b]` prints an ASCII strip. Import `AudioIndex` / `lint`. |
-| `vo_plan.py` | The signed-off VO cut as data: spans, labels, and what was dropped with the reason. `python3 vo_plan.py` prints the EDL. |
-| `vo_cut.py` | Renders `vo_plan` spans to a single ffmpeg concat (video+audio, frame accurate). |
-| `vo_rebuild_capcut.py` | Writes a VO cut into a CapCut project — retimes the cam track, drops B-roll/SFX, re-anchors the outro, prunes and de-dupes materials, writes **every** timeline copy. Takes the project path as argv[1]. |
-| `to_overlays.py` | Moves everything off the main track onto overlay tracks (rule zero). Idempotent-ish; read before re-running. |
-| `presets.py` | Applies the CIRCLE / SPLIT layout presets by copying `clip`+`uniform_scale` from a reference segment and attaching a **private** mask copy. The pattern to reuse. |
-| `layout_preview.py` | ffmpeg composite of a layout so you can look before writing CapCut. Masks approximated with `geq` alpha — fine for position/size, not feather. |
-
-## Reference implementations (paths point at a dead scratchpad — read, do not run)
-
-| File | What it does |
-|---|---|
-| `match.py` | OCR index loader, `spans()` content search, `roi_for()` TSV ROI hint |
-| `render.py` | ffmpeg split-screen preview renderer (`shot()` / `render()`) |
-| `build.py` | CapCut writer from scratch — materials, `refs_for()` bundles, `mkseg()`, keyframes, outro shift |
-| `full.py` | An EDL as data: beats → (vo span, b-roll shots) |
-| `beats.py` | Beat → screen-content keyword spec |
-
-Start from `build.py::refs_for` and `build.py::mkseg` — they encode the parts of the CapCut schema
-that are easiest to get wrong.
-
-## Order of use on a fresh video
-
-```
-audio_index.py  ->  vo_plan.py  ->  vo_cut.py  ->  (look / re-transcribe)
-                ->  vo_rebuild_capcut.py  ->  to_overlays.py  ->  presets.py
-```
+The CLI owns runtime dependencies; follow its SETUP.md and `capcutctl preflight`.
+This skills repository requires only Python 3.11+ to run its top-level validation scripts.

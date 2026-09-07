@@ -1,10 +1,13 @@
 # `rl2` — the instrumented recorder (Phase 1)
 
-Source: `~/Documents/Devving/rl2`. Binary symlinked at `~/.local/bin/rl2`.
-Rebuild with `swift build -c release` in that directory.
+Historical integration notes for a separate private recorder, captured during its v2.1
+implementation. The recorder is not shipped or installable from either public CapCut repo.
+These commands, defaults and acceptance results may be stale; verify against a user's
+installed recorder before relying on them. Ordinary editing uses `capcutctl find`, `add`,
+`layout` and `qa` without this recorder or any interaction trace.
 
-Replaces `~/Applications/Recording Layout.app`, which positioned a window to 720×1280 and quit.
-`rl2 --layout` still does that; everything else is new.
+Read this reference only when working with an existing trace, or when explicitly asked
+about the recorder integration. Do not treat it as setup instructions for this toolkit.
 
 ## The app
 
@@ -200,7 +203,7 @@ sub-threshold 2-level drift that must **not** register. All pass.
 
 ## What is not yet proven
 
-The first eight real takes (Desktop `Screen Recordings/*-20260823-*`) proved the timing and
+The first eight recorded test takes proved the timing and
 pixel layer and failed the semantic layer. All 17 clicks were `coords_only`; click `host` was
 raw-converted ticks; session 2's static tail left a click past video end; no take used guided
 mode. Those recorder bugs are fixed in v2.1. They have not been re-verified on a new take.

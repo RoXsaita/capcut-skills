@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -142,20 +143,28 @@ def scan_regions(path: Path):
     wolf until someone turns it off.
     """
     fence = False
+    pending, start = "", 0
     for number, line in enumerate(path.read_text(encoding="utf-8").split("\n"), 1):
+        line = re.sub(r"^\s*(?:>\s?)+", "", line)
         if line.lstrip().startswith("```"):
+            if pending:
+                yield start, pending
+                pending = ""
             fence = not fence
             continue
-        # Strip trailing comments. Both shell and Python blocks annotate their commands
-        # (`capcutctl preflight  # will this machine work?`), and the prose after the hash
-        # is exactly the place a sentence like "in the capcutctl repo" turns up. Anchored
-        # on space-hash so a URL fragment survives.
-        code = re.split(r"\s#", line, maxsplit=1)[0]
+        code = line
         if fence:
-            yield number, code
+            if not pending:
+                start = number
+            pending += code.rstrip().removesuffix("\\") + " "
+            if not code.rstrip().endswith("\\"):
+                yield start, pending
+                pending = ""
         else:
             for span in re.findall(r"`([^`\n]+)`", code):
                 yield number, span
+    if pending:
+        yield start, pending
 
 
 def check_cli_parity() -> None:
@@ -186,8 +195,24 @@ def check_cli_parity() -> None:
 
 
 def scan_invocations(region: str, commands: dict, where: str) -> None:
-    for match in re.finditer(r"\bcapcutctl\s+([a-z][a-z0-9-]*)([^\n|]*)", region):
-        name, rest = match.group(1), match.group(2)
+    if not re.search(r"\bcapcutctl\s+[a-z]", region):
+        return
+    lexer = shlex.shlex(region, posix=True, punctuation_chars="|;&")
+    lexer.whitespace_split = True
+    try:
+        tokens = list(lexer)
+    except ValueError as error:
+        fail(where, f"invalid quoted CLI example: {error}")
+        return
+    for index, token in enumerate(tokens[:-1]):
+        if token != "capcutctl" or not re.fullmatch(r"[a-z][a-z0-9-]*", tokens[index + 1]):
+            continue
+        name = tokens[index + 1]
+        rest = []
+        for value in tokens[index + 2:]:
+            if value == "capcutctl" or set(value) <= set("|;&"):
+                break
+            rest.append(value)
         entry = commands.get(name)
         if entry is None:
             fail(where, f"`capcutctl {name}` is not a command in the CLI contract")
@@ -196,12 +221,12 @@ def scan_invocations(region: str, commands: dict, where: str) -> None:
         subcommands = set(entry.get("subcommands", []))
         # A placeholder (`capcutctl layout …`, `capcutctl trim PROJECT`) is not a claim
         # about a subcommand. Only a real lowercase token is.
-        first = rest.strip().split(" ")[0] if rest.strip() else ""
+        first = rest[0] if rest else ""
         looks_like_subcommand = bool(re.fullmatch(r"[a-z][a-z0-9-]*", first))
         if subcommands and looks_like_subcommand and first not in subcommands:
             fail(where, f"`capcutctl {name} {first}` is not a subcommand of {name} "
                         f"({', '.join(sorted(subcommands))})")
-        for flag in re.findall(r"--[a-z][a-z0-9-]*", rest):
+        for flag in re.findall(r"--[a-z][a-z0-9-]*", " ".join(rest)):
             if flag not in allowed:
                 fail(where, f"`capcutctl {name}` has no {flag} in the CLI contract")
 

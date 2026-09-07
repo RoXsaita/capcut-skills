@@ -11,7 +11,7 @@ Agent skills for editing CapCut projects with `capcutctl`. The hub is `capcut-ed
 | `capcut-editing-talking-head` | cutting the face, layouts |
 | `capcut-editing-screen-recording` | B-roll, OCR matching, `capcutctl find` |
 
-Install by symlink into the agent's skills dir, e.g. `~/.grok/skills/`, `~/.claude/skills/`, `~/.codex/skills/`.
+Install by symlink into the agent's skills directory; see [the install steps](CONTRIBUTING.md#install).
 
 See [capcut-editor-cli SETUP.md](https://github.com/RoXsaita/capcut-editor-cli/blob/main/SETUP.md).
 
@@ -25,8 +25,9 @@ the CLI README → *Presets and machine-local resources*, and `capcut-editing/SK
 documents are written against, and `.capcut/cli-contract.json` is a verbatim copy of that
 CLI's published command surface (`capcutctl contract`).
 
-`scripts/validate.py` checks every `capcutctl` command and flag written in a code block
-here against that contract, so a skill cannot document a flag the CLI does not have. It
+`scripts/validate.py` checks documented `capcutctl` command names and flags in code
+blocks and inline code against that contract, including shell continuation lines. It catches unknown commands
+and flags; it does not validate argument values, execute examples or prove behavioral claims. It
 also checks skill frontmatter, the files each `Files` table
 lists, and every relative link. CI runs it, plus `scripts/test_validate.py`, which
 reintroduces each defect the checker exists to catch and asserts it is still caught.

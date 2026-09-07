@@ -1,7 +1,7 @@
 ---
 name: capcut-editing
 description: >
-  Edit real video projects by writing CapCut's project JSON directly, so the user finishes in the
+  Edit real video projects with capcutctl, preserving native CapCut properties so the user finishes in the
   CapCut UI he actually likes. THE HUB — start here for any CapCut editing request. Covers why
   this exists, the non-negotiable rules, the draft_info.json schema, the user's measured style,
   pitfalls, and current project state. The write path itself is `capcutctl` — read capcut-cli
@@ -44,7 +44,7 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 | **capcut-cli** | **`capcutctl` — what is already automated: create a project, the locked layouts, scene listing, snapshots. Check here BEFORE hand-writing JSON.** |
 | **capcut-editing** (this one) | The format, the safe write path, his style, pitfalls, project state |
 | **capcut-editing-talking-head** | Cutting the face: deterministic mechanics, semantic keep/order review, escalation diagnostics, and the 3 layout presets |
-| **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **The editing half is still unsolved — read its status table first.** |
+| **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **Semantic matching requires inspected source evidence.** |
 
 **Colour lives in `capcut-cli` (`grade`).** Preserve source colour by default.
 Scopes help diagnose exposure; whole-frame RGB averages do not establish correct
@@ -115,7 +115,7 @@ capcutctl snapshot|history|restore --project NAME
 
 `--track` is a name or an index. Read `capcut-cli` before reaching for `apply --spec`.
 
-Every write is snapshotted, applied to the root draft and the active timeline as separate
+Transactional project edits are snapshotted, applied to the root draft and the active timeline as separate
 documents, staged, re-parsed, atomically renamed, doctored, and rolled back on failure. It
 refuses to run while CapCut is open.
 
@@ -123,12 +123,12 @@ refuses to run while CapCut is open.
 cannot express the edit, extend it — the layouts got built exactly that way, by capturing a
 verified structure out of a real project instead of inventing one.
 
-### Legacy scripts
+### Retired scripts
 
-`scripts/` still holds the one-off tools this grew out of (`capcut.py`, `build.py`, `render.py`,
-`to_overlays.py`, the `vo_*` pair, …). They predate `capcutctl` and are kept for reference and
-for the few things it does not do yet. `scripts/audio_index.py` is still live — `capcut.py`
-imports it. Prefer `capcutctl` for anything it covers.
+The legacy Python helpers were removed: their writers bypassed transactions and their
+indexes/previews had diverged from the CLI. Use `capcutctl cut`, `find`, `qa` and `preview`.
+For implementation details, inspect the maintained `tools/` and `src/` in the CLI repository.
+See [the migration map](scripts/README.md).
 
 ## Workflow
 
@@ -180,6 +180,6 @@ Work **one section at a time** and check end-to-end. He asked for this explicitl
 | `references/finish.md` | Last pass: motivated seams, ASCII timeline, generated beat-aligned bed |
 | `references/preview-loop.md` | Bounded frame/proxy checks and final native playback |
 | `references/pitfalls.md` | Concrete traps already hit. Read before starting. |
-| `references/project-state.md` | Sources, the signed-off VO EDL, what is done and what is not |
+| `references/project-state.md` | How to inspect current sources, timeline state and local caches |
 
-`scripts/` — legacy one-offs, see `scripts/README.md`. The live tooling is `capcutctl`.
+`scripts/README.md` maps retired helpers to the maintained CLI commands.

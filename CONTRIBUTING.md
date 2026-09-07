@@ -5,13 +5,13 @@ not exist yet is a bug — land the CLI change in
 [capcut-editor-cli](https://github.com/RoXsaita/capcut-editor-cli) first, or
 as a pair.
 
-That is now enforced rather than remembered. `scripts/validate.py` checks every
-`capcutctl` command and flag in these documents against
+`scripts/validate.py` checks documented `capcutctl` command names and flags against
 `.capcut/cli-contract.json`, the CLI's own published surface, and CI runs it on
 every pull request:
 
 ```bash
 python3 scripts/validate.py
+python3 scripts/test_validate.py
 ```
 
 If your change documents a new CLI capability, the CLI change must be pushed
@@ -26,21 +26,26 @@ to each other.
 - Do not add personal media paths, draft titles, transcripts, or QA frames.
 - `style.md` is the default house style. Keep measured rules; do not turn it
   into a live production diary.
-- `capcut-editing/scripts/` is legacy. Prefer extending `capcutctl` over adding
-  Python there. Top-level `scripts/` is this repository's own checkers and is not
-  legacy — that is where a new validation rule goes.
+- The retired helpers in `capcut-editing/scripts/README.md` are replaced by the CLI.
+  Extend `capcutctl` for runtime behavior; top-level `scripts/` contains this
+  repository's validation checks.
 
 ## Install
 
-Symlink the four skill directories into the agent you use:
+From the root of this clone, symlink the four skill directories into the agent you use.
+This example selects Codex; set `agent_skills` to another agent's skills directory as needed.
+Existing installations are skipped so the command cannot nest links inside an installed skill
+or overwrite unrelated customizations. Review an existing entry before replacing it.
 
 ```bash
-for AGENT in ~/.claude ~/.codex ~/.grok ~/.hermes; do
-  [ -d "$AGENT" ] || continue
-  mkdir -p "$AGENT/skills"
-  for S in capcut-cli capcut-editing capcut-editing-talking-head capcut-editing-screen-recording; do
-    ln -sfn "$PWD/$S" "$AGENT/skills/$S"
-  done
+agent_skills="${CODEX_HOME:-$HOME/.codex}/skills"
+mkdir -p "$agent_skills"
+for skill in capcut-cli capcut-editing capcut-editing-talking-head capcut-editing-screen-recording; do
+  if [ -e "$agent_skills/$skill" ] || [ -L "$agent_skills/$skill" ]; then
+    printf 'Skipped existing skill: %s\n' "$agent_skills/$skill"
+    continue
+  fi
+  ln -s "$PWD/$skill" "$agent_skills/$skill"
 done
 ```
 

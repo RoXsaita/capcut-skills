@@ -2,7 +2,7 @@
 
 > **Do not apply these by hand.** `capcutctl layout circle|split-screen|background` writes them.
 > The machine-readable source of truth is `presets/layouts.json` in the capcutctl repo, measured
-> verbatim from `grok-build-claude`. This file is the *record of what the numbers mean* — read it
+> verbatim from a verified reference timeline. This file is the *record of what the numbers mean* — read it
 > to understand or to verify, not to copy-paste.
 >
 > ```bash
@@ -82,7 +82,7 @@ transform + mask arithmetic produced a confidently wrong answer.
 ## Applying a preset
 
 `capcutctl layout circle|split-screen|background|auto`. Do not copy the Python dicts above
-into `draft_info.json`, and do not run `scripts/presets.py`. The dicts are the *record of
+into `draft_info.json`. The dicts are the *record of
 what the numbers mean*. The write path is the CLI.
 ## The CIRCLE preset's full composition
 
@@ -90,7 +90,7 @@ A small circle is almost never alone. Its standard completion — the user: *"us
 a small circle, it's followed by an 80% screen recording"* — is four layers, and the Preset 3
 endcard (around 1:00 in the timeline) is the canonical instance of it. Copy from there.
 
-Bottom to top by `render_index`:
+Bottom to top by track order:
 
 | # | Layer | scale | transform | uniform | notes |
 |---|---|---|---|---|---|
@@ -110,17 +110,15 @@ window captures are **720×1050** — same displayed width at 0.80 (864px), 61px
 frame's Y was remeasured against a composited frame so the indigo stroke sits on the
 window's top and bottom edges. Numbers live in `presets/layouts.json` → `screenRecording`.
 
-### Why the screen recording is always 0.80
+### The measured screen scale is 0.80
 
-He records with **rl2** (was Recording Layout), which pins the capture to fixed bounds every
-time, so every MacBook window recording arrives at the same dimensions (720×1050). That is
-what makes a single hard-coded scale safe across videos — there is no per-clip fitting to
-do. If a recording ever arrives at different dimensions, it did not come from rl2's window
-preset and the 0.80 does not transfer.
+The bundled geometry was measured on a 720×1050 window capture. Other captures, including
+other modes of the same recorder, can have different dimensions. Inspect the actual source
+and use `capcutctl layout screen`, which fits its linked frame to the recording. Verify
+the result with `qa`; do not assume the historical scale/geometry fits every source.
 ## Rendering a preview of these layouts
 
-`scripts/layout_preview.py` composites a preset in ffmpeg so you can look before writing CapCut.
-It approximates masks with `geq` alpha circles — good enough for position and size, not for
-feather. **Always sanity-check a preview against a real frame** before trusting its geometry; the
+`capcutctl qa --project NAME --times 12,30` composites the current project geometry.
+**Always sanity-check a preview against a real frame** before trusting its geometry; the
 sign-convention error above survived one preview precisely because nothing was compared to ground
 truth.

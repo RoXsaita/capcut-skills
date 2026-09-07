@@ -2,16 +2,16 @@
 
 Measured from the author's finished projects, not inferred.
 This is the default grammar `capcutctl polish` / `pace` / `wrap` encode.
-Treat it as a profile: match it unless the user asks for a different look.
-**Do not invent a vocabulary that is not in this file.**
+Apply this profile only when the user selected the bundled house style. Their creative
+brief takes precedence; these measurements describe past edits rather than impose quotas.
 
 **Provenance matters — read this before trusting a number.** The tables below were originally
-measured from `IKEA Refund` ALONE, and that one project is an outlier: it is the only recent
+measured from `reference A` ALONE, and that one project is an outlier: it is the only recent
 video with zero transitions. Everything marked *(library)* was re-measured on 2026-08-26 across
 all **88 drafts** in `~/Movies/CapCut/User Data/Projects/com.lveditor.draft/`. Where the two
 disagree, the library number wins.
 
-**Do not use `GrokBuild-20260825` as a style reference.** It is `capcutctl` output from an agent
+**Do not use `generated test edit` as a style reference.** It is `capcutctl` output from an agent
 test run, not a hand edit. It is useful as a readout of what the CLI produces unaided — which is
 exactly the gap this file exists to close.
 ## Format
@@ -26,7 +26,7 @@ exactly the gap this file exists to close.
 | Speed ramps | **0.4× / 0.5× / 0.7×** for emphasis, **20× / 50× / 100×** to kill dead time |
 | SFX | **24 cues across 3 audio lanes**, hand-synced |
 | Camera moves | **14 segments** with Position + Scale + Rotation keyframes (punch-ins, drifting pans) |
-| Transitions | *(library)* **342 across 57 of 88 projects** — a core part of the style, NOT zero. `IKEA Refund` having none is the exception. See "The seam formula". |
+| Transitions | *(library)* **342 across 57 of 88 projects** — a core part of the style, NOT zero. `reference A` having none is the exception. See "The seam formula". |
 | Video effects | *(library)* 402, but **370 of them are `Blur`** — the background plate `capcutctl layout background` already writes. Treat as "no effects except the blur plate". |
 | Text | essentially none (one element) |
 
@@ -35,13 +35,14 @@ is a style change — confirm first. Adding a **transition + its paired sound** 
 normal seam, and omitting it is what makes CLI output read as mechanical.
 ## The seam formula — the single most copyable thing in this file
 
-A cut is not a cut. It is **a transition plus its paired sound, fired together**, the sound
-leading the picture by about **4 frames (0.13–0.14s at 30fps)**.
+When a transition is useful, its paired sound leads the picture by about
+**4 frames (0.13–0.14s at 30fps)**. A clean cut is also valid; use the selected-seam
+workflow in [finish.md](finish.md) rather than decorating every splice.
 
 **Provenance, carefully.** The pairings and the lead were measured from his HAND-CUT projects
-(Hermes-agent, Higgsfield Refund, Content System, IKEA Refund — median lead 0.14s across 20
+(reference B, reference C, reference E, reference A — median lead 0.14s across 20
 paired cuts) and live in `presets/sfx.json`. `capcutctl polish` writes them. A re-check on
-`GrokBuild-20260825` found 22 of 22 seams at −0.133s with zero deviation — but that project is
+`generated test edit` found 22 of 22 seams at −0.133s with zero deviation — but that project is
 `polish` output, so it confirms the TOOL is consistent, not that the human is. Do not cite it as
 evidence about his style. The lead is roughly constant across transition durations; it is not
 `duration / 2` (Flash at 0.20s also leads by 0.133s).
@@ -52,7 +53,8 @@ evidence about his style. The lead is roughly constant across transition duratio
 | Flash · White Flash 2 · Glitch Flash II | 0.20–0.27s | `Decision / choice / stationery / click` | 0.50s |
 | Glitch (the machine doing something) | 0.27s | `Glitch sound that matches the sound logo` | 0.63s |
 
-Volume is `1.0` on every seam sound. No fades.
+The measured seam sounds used volume `1.0` without fades. This is provenance, not a
+mix target: audition each cue beneath the voice and lower or omit masking sounds.
 
 ### The transition palette *(library — uses / projects)*
 
@@ -72,8 +74,8 @@ exactly one project. Treat those seven as the vocabulary.
 **Durations are always an even number of frames at 30fps** — 0.13/0.20/0.27/0.33/0.40/0.47s are
 4/6/8/10/12/14 frames. Never write an unquantized duration.
 
-**Variety is part of the style.** `grok-build-final` used 6 distinct transitions across 16 seams.
-The unaided-CLI `GrokBuild-20260825` used **the same Horizontal Triptych 18 times out of 24** —
+**Variety is part of the style.** `reviewed test edit` used 6 distinct transitions across 16 seams.
+The unaided-CLI `generated test edit` used **the same Horizontal Triptych 18 times out of 24** —
 that monotony is the single loudest "a machine made this" tell in the file. Cap any one
 transition at roughly 40% of seams.
 
@@ -115,8 +117,8 @@ Placement conventions observed:
 
 ### SFX are NOT frame-snapped to cuts
 
-*(library, 6 hand-cut projects — IKEA Refund, Hermes-agent, Applies for Job, Content System,
-Skills, ElevenLabs Refund — ~189 cues)* Only **11–17%** of cues land within ±50ms of a cut.
+*(library, 6 hand-cut projects — reference A, reference B, reference F, reference E,
+reference H, reference D — ~189 cues)* Only **11–17%** of cues land within ±50ms of a cut.
 Median offset is **+0.00 to +0.17s (trailing)** for click/typing cues; seam sounds LEAD by about
 0.13s. A tool that snaps SFX to the nearest cut will sound *worse* than his hand edit. Encode the
 offset; do not quantize it away.
@@ -127,7 +129,9 @@ offset; do not quantize it away.
 (68.83→76.27s of a 76.27s project). Assets: `suheilai-rect-indigo-1080x1920 (2).png` (indigo
 frame), `suheilai-circle-white-1080x1920.png`, `circle-1080x1080.gif`, plus two clips.
 
-Standard workflow: duplicate it, build content in front, shift the endcard to the absolute end.
+Use `capcutctl new` to clone the template and park its clips after the content.
+`endcard` / `wrap` place the actual CTA over the talking head near `contentEnd`; parked
+template clips are a parts bin, not the finished ending.
 ## Structure that works
 
 Hook on the payoff (show the result first), then chronological build-up, then proof/receipts,
@@ -150,9 +154,9 @@ Build every timeline this way:
 
 ```
 [0] flag=0   MAIN — present but EMPTY (n=0). Never place a segment here.
-[1] flag=2   tri=1   A-roll (the cam / VO clips), all on one track
-[2] flag=2   tri=2   B-roll, endcard base, etc.
-[3..] flag=2         one track per additional layer
+[1] flag=2   tri=1   background / B-roll (behind the face)
+[2] flag=2   tri=2   A-roll (the cam / VO clips), all on one track
+[3..] flag=2         frames and foreground overlays as needed
 ```
 
 Verified against his own projects:
@@ -160,7 +164,7 @@ Verified against his own projects:
 | Project | main track | A-roll lives on |
 |---|---|---|
 | `Preset 3` | `flag=0, n=0` (empty) | — (endcard only, tri 1–6) |
-| `IKEA Refund` | 1 filler segment | overlay `tri=1`, 30 segments |
+| `reference A` | 1 filler segment | overlay `tri=1`, 30 segments |
 
 Why he works this way: main-track clips auto-ripple — deleting one closes the gap and drags
 everything left. Overlay clips move independently, so he can nudge, trim and restack without the
@@ -168,10 +172,10 @@ timeline fighting him. Respect it; it is the whole reason he wants a CapCut hand
 
 ### Layering
 
-`render_index` on the segment is the true z-order (lower = further back), independent of track
-order. `track_render_index` must equal the track's position in `tracks`. His endcard stack uses
-20 (indigo frame) < 36 (screen rec) < 43 (avatar) < 45 (endcard video) < 46 (white circle) <
-47 (gif) — preserve those exactly. A-roll can sit at a low index like 2.
+Higher track index renders in front. `track_render_index` must equal the track's position
+in `tracks`; keep `render_index` monotonic with that order for compatible readers.
+Put the screen frame above its recording but below the face inset, and the white ring
+above the face. Inherited render indices are not permission to reverse this stack.
 
 ## Pace — measured, not felt
 
@@ -179,26 +183,26 @@ Compression = source seconds consumed per screen second on the B-roll track.
 
 | project | compression | B-roll ramped | plays at 1× |
 |---|---|---|---|
-| IKEA Refund | 19.7× | 21/30 (70%) | 38% |
-| Hermes-agent | 1.5× | 9/18 (50%) | 62% |
+| reference A | 19.7× | 21/30 (70%) | 38% |
+| reference B | 1.5× | 9/18 (50%) | 62% |
 
-Speeds he actually uses: **20–100×** for an agent working (IKEA: 260s→2.6s, 463s→4.6s),
-**2–4×** for navigating and typing (Hermes: 2.0 / 2.2 / 3.1 / 4.0), **1.0×** for the thing
-he is naming right now, **0.4–0.7×** for the payoff. IKEA ends on 0.4×.
+Speeds he actually uses: **20–100×** for an agent working (reference A: 260s→2.6s, 463s→4.6s),
+**2–4×** for navigating and typing (reference B: 2.0 / 2.2 / 3.1 / 4.0), **1.0×** for the thing
+he is naming right now, **0.4–0.7×** for the payoff. Reference A ends on 0.4×.
 
-## Motion — two zoom idioms and nothing else
+## Motion — measured examples
 
-Every keyframed move in every project is **2 keyframes across 4 properties**
-(PositionX, PositionY, ScaleX, Rotation). Rotation is `0.0` everywhere — he never tilts.
+The reference moves commonly use PositionX, PositionY and ScaleX; Rotation stays
+at `0.0`. Key counts vary by intent, including a return after a hold:
 
 - **Snap punch** — ramp **0.10–0.33s** (median 0.20), scale 1.0 → 2.0–4.5.
 - **Punch → hold → release** — 4 keyframes: in over 0.2s, hold ~1.8s, back over 0.2s.
-  IKEA uses it on its money shot.
+  Reference A uses it on its money shot.
 - **Slow drift** — ramp **6.7–30s**, and it appears *only over a speed-ramped timelapse*.
-- **Pop-in** — anything that appears scales from `0.01` over **0.07–0.17s** (the IKEA
-  logo, the Hermes endcard, grok's circle GIF).
+- **Pop-in** — anything that appears scales from `0.01` over **0.07–0.17s** (the reference A
+  logo, the reference B endcard, grok's circle GIF).
 
-A single keyframe on a property is a static hold doing nothing. Two of grok-build-final's
+A single keyframe on a property is a static hold doing nothing. Two of reviewed test edit's
 nine keyframed segments were that — dead weight.
 
 ## What he does not do — verified across all 88 drafts, so stop wondering
@@ -220,7 +224,7 @@ The premium feel is entirely **pace, motion, and the seam formula**.
 ### Eased keyframes exist and are underused
 
 *(library)* 57 keyframe points across 10 projects use **`FreeCurveInOut`** (real bezier
-`left_control` / `right_control` handles) rather than `Line` — `Higgsfield Refund` alone has 16.
+`left_control` / `right_control` handles) rather than `Line` — `reference C` alone has 16.
 Both grok builds are 100% `Line`. A linear scale punch reads mechanical; an eased one reads like
 a camera. Harvest one `FreeCurveInOut` point from a real draft rather than inventing handles.
 
@@ -235,7 +239,7 @@ peak and return. A high keyframe count is not evidence of a good edit.
 
 ### B-roll audio level is an open decision, not a style
 
-IKEA holds screen-recording audio at **0.4** under the voice (19 clips), Hermes at **0.49**,
-`ElevenLabs Refund` runs B-roll at **1.51**, and both grok builds mute all of it to **0.0**.
+Reference A holds screen-recording audio at **0.4** under the voice (19 clips), reference B at **0.49**,
+`reference D` runs B-roll at **1.51**, and both grok builds mute all of it to **0.0**.
 That spread is an unmade decision, not a preference. UI ticking at ~0.4 is real texture; silence
 is flat. Phone-sourced B-roll may genuinely need muting for room noise — test one clip.

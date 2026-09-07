@@ -10,7 +10,7 @@ see `capcut-editing-screen-recording`.
 | Index | Question it answers | Built with | Cache |
 |---|---|---|---|
 | **Whisper** | what is said, and roughly when | `mlx_whisper`, `large-v3-turbo` | `<name>.whisper-<model>.json` |
-| **OCR** | what is on the screen, second by second | tesseract at 1 fps | `<name>.ocr.json` |
+| **OCR** | what is on the screen, second by second | Vision via `find --shows --refresh` | `<name>.ocr-<source-cache-key>.json` |
 | **Energy** | where sound actually is, to 10 ms | `audio_index.py` (inside `capcutctl cut`) | `<name>.energy10.json` |
 
 Whisper is **semantic** and its timings lie (contiguous fill). Energy is **acoustic** and
@@ -85,30 +85,25 @@ r = mlx_whisper.transcribe(
     language="ar", word_timestamps=True, verbose=False)
 ```
 
-Setup (Python 3.14 has no wheels for this — pin 3.12, and uv is far faster than pip):
-
-```bash
-uv venv --python 3.12 wenv
-UV_HTTP_TIMEOUT=300 VIRTUAL_ENV=./wenv uv pip install mlx-whisper
-```
-
-Extract audio first: `ffmpeg -i in.mp4 -vn -ac 1 -ar 16000 -c:a pcm_s16le cam.wav`
+For runtime setup, follow the CLI repository's SETUP.md and `pyproject.toml`; use
+`capcutctl preflight` to check the selected interpreter. Do not install a separate
+Whisper environment just for these reference examples.
 
 ### What you get and how to use it
 
-- `segments[].words[]` gives `{start, end, word}`. **Snap every cut to a word edge.** When this
-  was checked against hand-picked beat boundaries, all 19 landed on word edges with `+0.00` drift.
+- `segments[].words[]` gives `{start, end, word}`. Use these words to identify the intended
+  phrase; derive actual boundaries from the acoustic index. A reported word edge is only a candidate.
 - **Detect repeated takes.** The user often records the same script twice. Look for the opening
   line recurring far into the timeline — that is take 2 starting. Also look for the same sentence
   repeated 3–4× in a row: those are retries, and you pick the best one.
-- **Find pause points**: gaps > 0.25s between words are natural cut boundaries. A continuously
-  delivered take may have very few (only 6 in one 110s take) — then every boundary *must* be a
-  word edge because there is no silence to hide in.
+- **Find pause candidates**: transcript gaps can suggest a boundary, but confirm them acoustically.
+  For continuous speech, preserve the passage unless a safe boundary can be established.
 
 ### Known artifact
 
 Arabic transcripts often end with a hallucinated subtitle credit like `ترجمة نانسي قنقر`
-("translation by ..."). It is not in the audio. Always drop the trailing credit line.
+("translation by ..."). Compare it with the source audio; drop it only when it is an
+unspoken hallucination. Do not automatically remove a real spoken credit.
 ## Whisper word timings are contiguous-filled — do not trust them as cut points
 
 Whisper emits words back-to-back: each word's `start` equals the previous word's `end`. So a
@@ -126,10 +121,10 @@ ffmpeg -i cam.wav -af "silencedetect=noise=-32dB:d=0.25" -f null - 2>&1 | grep s
 
 Rules that follow from this:
 
-- Put the cut **inside a detected silence**, roughly 0.2–0.3 s before the real onset. Never on the
-  Whisper word start.
-- Where two spans butt against speech with no silence between (a run-on retry), cut tight on the
-  word edge and accept the hard cut — there is nothing to hide in.
+- Let `cut` resolve the boundary acoustically, normally leaving about two frames before an
+  onset. Never use a raw Whisper word start as the final cut point.
+- Where two spans meet continuous speech, preserve the source-contiguous passage. Diagnose
+  a reported seam before forcing a cut through sound.
 - A silence *inside* a Whisper word is the tell for a hesitation or a stumble. That is where the
   dead space is, and where the aborted-take boundary actually sits.
 ## Picking between takes and retries
@@ -155,21 +150,24 @@ Then hunt the three things that survive inside a good take:
 | Stutter | the same word twice in a row in the word list | `كبست كبستة publish` |
 
 Trim the hesitation to ~0.25 s; cut the filler and stutter out entirely.
-## Verify by re-transcribing the cut — always
+## Targeted re-transcription when a seam needs diagnosis
 
-Run Whisper on the rendered cut, not just on the source. It is the only cheap check that catches a
-clipped first syllable, a duplicate you missed, or a cut that fused two words into nonsense. A
-clean pass looks like: one segment per beat, no repeated sentence, no hallucinated tail.
+Before A-roll approval, use the current `scenes --transcript` feed, compare it with the raw
+word-level transcript, and run `doctor`. Re-transcribe a bounded rendered diagnostic only
+when playback, lint or the user identifies a specific speech defect that source evidence
+cannot resolve, or when the user explicitly requests a proxy. See [the procedure](procedure.md).
 
-(Whisper hallucinates on trailing silence — `ترجمة نانسي قنقر` appeared on 1.1 s of room tone at
-the end of the source. Always trim to the last real word.)
+A render transcript can expose a missing or repeated phrase but cannot prove syllable
+continuity; listen to the reported seam. A clean Whisper result is not a playback check.
+
 ## silencedetect is a coarse filter — confirm every seam with an RMS scan
 
 `silencedetect` at `-32dB:d=0.25` is good enough to *find* candidate seams. It is **not** good
 enough to place them. It missed a 0.35 s dead space and a clipped word on the one seam the user
 later flagged by ear ("a word crop and dead space stitched around second ~13").
 
-Before committing a cut, dump RMS in 10 ms bins across ±0.3 s of the seam:
+When diagnosing a named seam, query the maintained `AudioIndex` in 10 ms bins across
+±0.3 s of it. The following illustrates the measurement on mono 16-bit PCM:
 
 ```python
 import wave, struct, math
@@ -188,7 +186,7 @@ Read it like this:
 |---|---|---|
 | level **rising** at your out-point | you cut into a voiced tail — this clicks | move out to the local trough |
 | a long run below about −55 dB after your in-point | dead air | move in to ~40 ms before the onset |
-| a −45 to −50 dB blip just before the onset | breath or lip noise | cut past it |
+| a −45 to −50 dB blip just before the onset | possible breath, soft speech or lip noise | listen before removing it |
 | level flat around −20 dB | mid-word, not a boundary | do not cut here |
 
 Worked example — the seam that was wrong:

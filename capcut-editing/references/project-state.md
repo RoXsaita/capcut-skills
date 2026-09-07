@@ -15,16 +15,16 @@ usually means recoverable.
 
 ## Sources
 
-Camera and screen-recording paths belong in the user's own notes, or as
-environment variables for the legacy scripts:
+Camera and screen-recording paths belong in the user's own local notes. Pass them
+to the maintained CLI commands, for example:
 
 ```bash
-export CAPCUT_CAM=/path/to/face.mp4
-export CAPCUT_BROLL=/path/to/screen.mp4
+capcutctl cut /path/to/face.mp4
+capcutctl find "Build" --media /path/to/screen.mp4 --shows --refresh
 ```
 
 Indexes cache under `~/Downloads/.video-index/` as
-`<name>.energy10.json`, `<name>.whisper-<model>.json`, `<name>.ocr.json`.
+`<name>.energy10.json`, `<name>.whisper-<model>.json`, `<name>.ocr-<source-cache-key>.json`.
 
 ## The geometry source of truth
 
@@ -44,7 +44,8 @@ numbers from a live project.
 
 ## Known open, project-wide
 
-- **B-roll matching is unsolved** — see `capcut-editing-screen-recording`.
+- **Automatic semantic B-roll matching is not implemented** — use inspected frames
+  with the workflow in `capcut-editing-screen-recording`.
   `capcutctl polish`, `pace`, `wrap` / `zoom` / `logo`, `finish` / `music` /
   `timeline` are built. Use `polish --motivated` and `finish --music` on the
   last pass. See `finish.md`.

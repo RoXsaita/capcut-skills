@@ -65,6 +65,38 @@ def _(repo: Path) -> str:
     return "is not a subcommand of layout"
 
 
+@case("an invalid flag on a continued command")
+def _(repo: Path) -> str:
+    path = repo / "README.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n```bash\ncapcutctl doctor --project NAME \\\n  --repair\n```\n")
+    return "has no --repair in the CLI contract"
+
+
+@case("an invalid command after a shell separator")
+def _(repo: Path) -> str:
+    path = repo / "README.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n```bash\ncapcutctl projects && capcutctl summarise\n```\n")
+    return "not a command in the CLI contract"
+
+
+@case("an invalid command in a blockquoted code fence")
+def _(repo: Path) -> str:
+    path = repo / "README.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n> ```bash\n> capcutctl summarise\n> ```\n")
+    return "not a command in the CLI contract"
+
+
+@case("an invalid flag after a quoted shell separator")
+def _(repo: Path) -> str:
+    path = repo / "README.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n```bash\ncapcutctl doctor --project 'A&B; C # D' --repair\n```\n")
+    return "has no --repair in the CLI contract"
+
+
 @case("the false dry-run guarantee, reintroduced")
 def _(repo: Path) -> str:
     edit(repo / "capcut-cli" / "SKILL.md",

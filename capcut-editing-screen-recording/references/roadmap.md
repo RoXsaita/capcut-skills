@@ -1,7 +1,9 @@
 # Phase 2 and 3 — design, not yet built
 
-Phase 1 (`rl2`) exists. This file is the agreed design for the two phases after it, so nothing has
-to be re-derived. **Gate: do not start Phase 3 until a real recording round-trips through Phase 2.**
+This is a historical proposal for a separate private recorder integration, not implemented
+commands or a prerequisite for ordinary editing. Do not build these phases unless explicitly
+requested. If developing this proposal, prove a real recording round-trips through Phase 2
+before beginning Phase 3. Current editing uses inspected `find` results with `add` / `layout`.
 
 ---
 
