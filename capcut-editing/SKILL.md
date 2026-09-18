@@ -166,26 +166,33 @@ See [the migration map](scripts/README.md).
    Compress waiting, keep actions legible, and hold results until they can be understood.
    Pick one focus per shot; a zoom or highlight must point to that focus. `finish` checks
    opening coverage; it cannot verify that the picture proves the words.
-4. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
+4. **Give the video its graphic beats** — every short gets them; see
+   [capcut-motion-graphics](../capcut-motion-graphics/SKILL.md). From `scenes --transcript`,
+   tag the beats, keep 3–6 (one in the first 3s, one on the biggest claim, one on any number),
+   choose an archetype per beat and the one accent, and show the shot list before building.
+   Render outside, place with `add --generated`, re-run `layout auto`, inspect with `qa` on the
+   spoken word. Recorded B-roll still beats a graphic of the same thing; graphics carry what a
+   recording cannot — the claim, the number, the list, the "all of it".
+5. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
    two real defects passed it clean.
-5. **Check colour** — measure if a source looks wrong, then make a small explicit
+6. **Check colour** — measure if a source looks wrong, then make a small explicit
    correction with `grade --set`. Default `grade` leaves sources unchanged. Compare
    before/after in CapCut; the proxy's slider model is approximate. Preserve screen
    recordings unless a specific capture defect needs correction.
-6. **Finish** — run `finish` and review the proposed seams before applying polish.
+7. **Finish** — run `finish` and review the proposed seams before applying polish.
    A picture change is eligible for a transition; a clean cut is still a valid choice.
    Choose music from the story: mood, energy arc, texture and pacing. Pass that brief with `music --prompt`
    or use a suitable local track with `music --file`. Avoid a generic tech-demo bed.
    Balance the voice first, then the bed and SFX underneath it. Picture stays locked;
    speech is never recut to a beat. See `references/finish.md` for mixing and selected seams.
-7. **Review efficiently** — prefer timestamped CLI grids. If export is explicitly
+8. **Review efficiently** — prefer timestamped CLI grids. If export is explicitly
    authorized, use `export --grid` and inspect actual rendered frames at changed shots
    and zoom rest/peak/return. Match the spoken words to the exact screen prompt/result.
    Check short exported sections with sound for ramps and SFX; a grid cannot prove those.
    Avoid repeated manual CapCut clicking/exporting. Without export permission, use bounded
    `qa`/`preview` and native playback only for unresolved native effects. Report checks
    that remain pending. See `references/preview-loop.md`.
-8. **`capcutctl doctor`** must be error-free before you hand it over.
+9. **`capcutctl doctor`** must be error-free before you hand it over.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.
 
