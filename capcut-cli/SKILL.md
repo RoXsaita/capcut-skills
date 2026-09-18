@@ -822,3 +822,7 @@ source take/range, inspected action/result evidence, layout, one viewer focus an
 rectangle if needed, waiting/action/result timing, motion intent and sound cue (or none).
 Repair the failed section after targeted QA rather
 than rebuilding the entire video.
+
+Telemetry halo: `capcutctl cursor --project NAME --segment ID --plan --dry-run`
+or `capcutctl cursor --project NAME --auto --dry-run`. Missing sidecars skip;
+apply without the preview flags. Reapplying replaces the owned halo.

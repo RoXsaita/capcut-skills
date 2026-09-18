@@ -182,3 +182,14 @@ generic chat scroll does not prove it. Use the house Enter / click / select cue 
 screen zoom landing and verify it is audible in the actual exported section. Prefer
 CLI export grids for authorized exports over manual timeline-click QA; see the hub's
 `references/preview-loop.md`.
+
+## Telemetry cursor halo
+
+Use `capcutctl cursor --project NAME --segment ID --plan`, then `--dry-run`
+and apply; `--auto` walks eligible recording clips. Requires the take's rl2
+pointer sidecar. Missing samples are reported as `skippedNoCursor`; never infer
+pointer positions from OCR. The native photo overlay sits above the recording
+and below the face. Click peaks retain source timing through trims and speed;
+existing camera moves suppress the pulse. Reapply after changing the recording's
+camera or timing. Rotated, flipped, and variable-speed recordings are skipped.
+Inspect `qa` at rest, movement and click, then verify in CapCut.
