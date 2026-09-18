@@ -193,3 +193,13 @@ and below the face. Click peaks retain source timing through trims and speed;
 existing camera moves suppress the pulse. Reapply after changing the recording's
 camera or timing. Rotated, flipped, and variable-speed recordings are skipped.
 Inspect `qa` at rest, movement and click, then verify in CapCut.
+
+## Optional blur on fast waiting
+
+After reviewing the pace, use `capcutctl blur-broll --project NAME --segment ID --plan`,
+then `--dry-run` and apply only when the fast motion needs it. Requires a muted
+recording already at constant 8×–100×; faces and variable speed refuse. FFmpeg
+interpolates and mixes full-frame samples into a durable derivative. The timeline
+slot remains the same length, playing the derivative at 1×. Original path and
+source offset are recorded; restore the transaction snapshot to undo the baked
+look. Inspect the result with `qa` and native playback. Never add this to `pace --auto`.

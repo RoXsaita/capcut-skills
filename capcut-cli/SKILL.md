@@ -830,3 +830,7 @@ apply without the preview flags. Reapplying replaces the owned halo.
 Face camera: `capcutctl reframe --project NAME --segment ID --plan --dry-run`
 or `capcutctl reframe --project NAME --auto --dry-run`. Build the local helper
 with `swiftc -O tools/vision/face.swift -o tools/vision/face` in the CLI checkout.
+
+Optional fast-recording blur: `capcutctl blur-broll --project NAME --segment ID --plan`
+and `--dry-run`, then apply. Muted recording B-roll at constant 8×–100× only;
+full-frame derivative, original/offset retained, unchanged slot at native 1×.
