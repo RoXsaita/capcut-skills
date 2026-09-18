@@ -10,8 +10,8 @@
   "requiredContractVersion": 1,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "ca8cb97",
-    "branch": "main",
+    "commit": "7f34771",
+    "branch": "q-wave",
     "cliVersion": "0.1.1"
   }
 }

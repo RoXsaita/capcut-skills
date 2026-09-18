@@ -79,10 +79,10 @@ capcutctl shift    --project NAME --at S --track NAME --by SECONDS
 capcutctl remove   --project NAME --at S --track NAME
 capcutctl volume   --project NAME --at S --track NAME --level 0
 capcutctl fade     --project NAME --at S --track NAME [--in 0.08] [--out 0.12]
-capcutctl keyframe --project NAME --at S --track NAME [--to SCALE|--focus X,Y,W,H] [--hold 1.6] [--plan]
+capcutctl keyframe --project NAME --at S --track NAME [--to SCALE|--focus X,Y,W,H] [--hold 1.6] [--no-ease] [--plan]
 capcutctl match    --project NAME --screen FILE [--apply]
 capcutctl verify-shots --project NAME [--shots FILE]
-capcutctl punch    --project NAME --on TEXT --segment ID|--at T
+capcutctl punch    --project NAME --on TEXT --segment ID|--at T [--no-ease]
 capcutctl ramp     --project NAME --segment ID --speed N
 capcutctl preview  --project NAME --out preview.mp4 [--fps 6]
 capcutctl diff     --project NAME --snapshot NAME | --against NAME
@@ -216,7 +216,7 @@ capcutctl logo    --project NAME --logo ~/assets/marks/ --at 6      # a folder, 
 capcutctl logo    --project NAME --auto                             # brands he names, off the transcript
 capcutctl logo    --project NAME --brand chatgpt,hermes             # registered lookup, auto-timed
 capcutctl endcard --project NAME [--text Follow] [--at S]
-capcutctl zoom    --project NAME --auto | --at S[,S...] [--to 1.15] [--hold 1.6]
+capcutctl zoom    --project NAME --auto | --at S[,S...] [--to 1.15] [--hold 1.6] [--no-ease]
 ```
 
 `wrap` is the "final touches" pass: brand logos keyed to the moment he says the name, the
@@ -733,6 +733,7 @@ Nudge after the fact with `trim` / `shift` / `remove` / `volume` / `fade`. `shif
 ```bash
 capcutctl keyframe --project NAME --segments ID --at 43.2 --to 1.15 --hold 1.6
 capcutctl keyframe --project NAME --segments ID --at 43.2 --focus 400,80,500,250 --viewport 0,0,1080,960 --plan
+capcutctl keyframe --project NAME --segments ID --at 43.2 --to 1.15 --no-ease   # opt out of the house curve
 capcutctl keyframe --project NAME --segments ID --clear
 ```
 
@@ -752,10 +753,24 @@ only, including those on the linked frame. `--hold 0` explicitly leaves a push i
 an impossible requested hold/return fails instead of silently losing the return.
 Default shortened holds are reported. `--plan` validates without writing.
 
-These moves use native `Line` keys. Existing eased moves are preserved outside the
-new interval; starting inside an eased curve is refused because its current value
-is not reliably evaluated. Inspect rest, peak and return with `qa`, then check the
-motion in CapCut. Do not claim a still-frame or linear proxy proves native easing.
+**Camera moves ease by default.** Every push writes the harvested `FreeCurveInOut`
+shape on ScaleX/ScaleY, and the same curve on PositionX/Y wherever position keys are
+written at all — `--focus`, a split mask holding its seam, a linked screen frame
+tracking its recording. Those channels are pinned to each other, so they share one
+progress curve; easing one alone would slide the seam mid-ramp. A plain scale-only
+push writes no position keys, so nothing changes there.
+
+Acceleration, not amplitude, is what reads as a tween: the same 1.08–1.6× push now
+settles instead of sliding. `--no-ease` restores `Line` on both channels. `--ease` and
+`--ease-position` still parse and now name the default. This applies to `keyframe`,
+`punch`, `zoom --stress`, `zoom --auto` and `wrap`'s face push-ins.
+
+Existing eased moves are preserved outside the new interval; starting inside an eased
+curve is refused because its current value is not reliably evaluated. The curve
+round-tripped in CapCut 9.4.0 — check `curveType`, not the presence of control objects
+(CapCut writes those on `Line` points too). Inspect rest, peak and return with `qa`,
+then check the motion in CapCut. `qa` samples between keys linearly, so do not claim a
+still-frame or linear proxy proves native easing.
 
 ## Watchable proxy — `preview` / `diff`
 
