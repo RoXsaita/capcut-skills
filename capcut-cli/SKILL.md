@@ -770,8 +770,8 @@ Existing eased moves are preserved outside the new interval; starting inside an 
 curve is refused because its current value is not reliably evaluated. The curve
 round-tripped in CapCut 9.4.0 — check `curveType`, not the presence of control objects
 (CapCut writes those on `Line` points too). Inspect rest, peak and return with `qa`,
-then check the motion in CapCut. `qa` samples between keys linearly, so do not claim a
-still-frame or linear proxy proves native easing.
+then check the motion in CapCut. `qa` evaluates the harvested cubic control offsets,
+including overshoot; it remains a proxy and does not replace native playback.
 
 ## Watchable proxy — `preview` / `diff`
 
