@@ -60,9 +60,16 @@ The CLI reuses linked CapCut beat caches when present and falls back to local on
    ```
 
    `0.08` is a starting gain, not a loudness target. Lower the bed until quiet/dense speech
-   stays clear. The CLI writes constant gain plus in/out fades; any rises between phrases
-   or ducking envelopes need native CapCut volume automation. Do not claim a flat bed is
-   automatically ducked. Voice stays locked; beat alignment moves music only.
+   stays clear. After reviewing speech loudness (step 4), duck the existing bed with
+   `music --duck --plan`, then `music --duck`. Defaults: 12 dB under the bed,
+   `--attack-ms 120`, `--release-ms 380`, `--min-gap-ms 450`, and a 125 ms hold.
+   `--under-db` changes the depth. Short pauses recover only as far as the release permits.
+   Energy10 from `cut` is preferred; cached transcripts or `--words FILE` are the fallback.
+   Use `--track N` if the principal speech track needs an explicit selection.
+   Existing music volume automation is refused rather than replaced. Speech, SFX and
+   in/out fades stay unchanged. Voice stays locked; beat alignment moves music only.
+   Proxy playback and `loudness --measure` do not model native volume automation;
+   measure before ducking and use native playback/export for the final automated mix.
 3. Audition SFX against the actual words. Lower or omit a cue that masks a syllable or
    creates a second focus. Mute screen-recording audio unless it is intentionally useful.
    Check the hook, a dense explanation, a quiet line and the CTA with everything playing.

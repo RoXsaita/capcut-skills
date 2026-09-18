@@ -93,6 +93,7 @@ capcutctl loudness --project NAME [--measure] [--target -14] [--peak -1]
 capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
 capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
 capcutctl music    --project NAME [--plan] [--regen] [--volume 0.08]
+capcutctl music    --project NAME --duck [--plan] [--under-db 12] [--attack-ms 120] [--release-ms 380] [--min-gap-ms 450] [--words FILE] [--track N]
 capcutctl polish   --project NAME [--motivated]         # --motivated = picture changes only
 
 capcutctl status   [--json] [--wait-for-close] [--timeout MS] # is CapCut running; optionally ask it to quit
