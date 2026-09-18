@@ -117,3 +117,18 @@ When relinking a stock template to a local file, clear the stock-library identit
 use the existing local audio material pattern. An unchanged `effect_id` can make CapCut
 substitute a library sound. Confirm the intended cue in the actual render, not only in
 the timeline.
+
+### Optional measured voice cleanup
+
+Use `capcutctl denoise --project NAME --plan` only when room noise needs attention.
+It reads cut's energy10 and transcript caches, measures non-word pauses, and skips
+at ≤−55 dB (`already-quiet`). Review the plan, run `--dry-run`, then apply without
+those flags. Missing indexes or usable pauses refuse; don't guess a noise floor.
+The local FFmpeg `afftdn` spectral denoiser is the documented alternative to an
+external RNN model. It uses 12 dB reduction with noise tracking, copies the video
+stream unchanged, and replaces only audible 1× principal-track face clips with
+durable derivatives. Source windows, gains and native fades stay fixed. Original
+paths are recorded for recovery; restore the transaction snapshot to undo.
+The result compares edited voice before/after through the same engine as
+`loudness --measure`. This is opt-in cleanup, not a second creative grade; do not
+apply normalization again merely because a derivative was created.

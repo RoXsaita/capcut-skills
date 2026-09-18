@@ -834,3 +834,8 @@ with `swiftc -O tools/vision/face.swift -o tools/vision/face` in the CLI checkou
 Optional fast-recording blur: `capcutctl blur-broll --project NAME --segment ID --plan`
 and `--dry-run`, then apply. Muted recording B-roll at constant 8×–100× only;
 full-frame derivative, original/offset retained, unchanged slot at native 1×.
+
+Measured voice cleanup: `capcutctl denoise --project NAME --plan`, then `--dry-run`
+and apply only after reviewing the floor. Requires cut's energy10 and source-time
+transcript caches. Pauses of at least 200 ms, with 100 ms speech margins, measure
+the floor; ≤−55 dB skips as `already-quiet`. Missing pause evidence refuses.
