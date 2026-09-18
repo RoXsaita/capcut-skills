@@ -139,3 +139,15 @@ After approval, or for a specific observed defect, use the smallest targeted dia
 `--force` is not an editorial shortcut. Use it only after inspecting the named finding and
 recording why it is safe, such as two adjacent selected beats whose source ranges are exactly
 contiguous. Flag any bad seam by timecode; each one is useful calibration evidence.
+
+## Opt-in face reframe
+
+`capcutctl reframe --project NAME --auto --plan` samples Apple Vision locally at
+10 fps. Review the plan, run `--dry-run`, then apply without those flags. Only
+unmasked 1× principal-track footage is eligible; existing camera moves and
+ambiguous/missing faces skip. Small motion (12 px deadband) stays still. A
+400 ms smoother and error-bounded eased keys follow larger drift. Scale is
+constant per clip (routine ≤1.25, refusal above 1.35); speed and cuts stay intact.
+Headroom includes an estimated half-face-height margin above Vision's facial
+box. It is a conservative geometric estimate, so inspect hair/headroom with
+`qa` and in CapCut; switch layout when the framing cannot fit.

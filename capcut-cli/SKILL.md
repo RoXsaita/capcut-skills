@@ -826,3 +826,7 @@ than rebuilding the entire video.
 Telemetry halo: `capcutctl cursor --project NAME --segment ID --plan --dry-run`
 or `capcutctl cursor --project NAME --auto --dry-run`. Missing sidecars skip;
 apply without the preview flags. Reapplying replaces the owned halo.
+
+Face camera: `capcutctl reframe --project NAME --segment ID --plan --dry-run`
+or `capcutctl reframe --project NAME --auto --dry-run`. Build the local helper
+with `swiftc -O tools/vision/face.swift -o tools/vision/face` in the CLI checkout.
