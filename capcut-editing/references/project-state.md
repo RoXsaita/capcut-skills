@@ -44,8 +44,9 @@ numbers from a live project.
 
 ## Known open, project-wide
 
-- **Automatic semantic B-roll matching is not implemented** — use inspected frames
-  with the workflow in `capcut-editing-screen-recording`.
+- **`capcutctl match` is a first pass, not proof** — it scores sentences against change-moments
+  and leaves weak/ambiguous beats on the face. Inspect frames and `verify-shots` before treating
+  a placement as true. Use the workflow in `capcut-editing-screen-recording`.
   `capcutctl polish`, `pace`, `wrap` / `zoom` / `logo`, `finish` / `music` /
   `timeline` are built. Use `polish --motivated` and `finish --music` on the
   last pass. See `finish.md`.

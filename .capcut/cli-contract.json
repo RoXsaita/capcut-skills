@@ -14,10 +14,14 @@
       "layout",
       "localize",
       "logo",
+      "loudness",
+      "match",
       "music",
       "new",
       "pace",
       "polish",
+      "punch",
+      "ramp",
       "remove",
       "replace-media",
       "restore",
@@ -132,6 +136,24 @@
       ],
       "transactional": true
     },
+    "export": {
+      "options": [
+        "--grid",
+        "--out",
+        "--overwrite",
+        "--project",
+        "--times"
+      ],
+      "transactional": false
+    },
+    "export-grid": {
+      "options": [
+        "--media",
+        "--out",
+        "--times"
+      ],
+      "transactional": false
+    },
     "fade": {
       "options": [
         "--at",
@@ -147,9 +169,15 @@
     },
     "find": {
       "options": [
+        "--boxes",
         "--context",
+        "--focus",
+        "--kind",
         "--media",
+        "--min-score",
+        "--moments",
         "--refresh",
+        "--region",
         "--says",
         "--settle",
         "--shows",
@@ -161,8 +189,10 @@
       "options": [
         "--dry-run",
         "--file",
+        "--hits",
         "--json",
         "--music",
+        "--offset",
         "--plan",
         "--polish",
         "--project",
@@ -177,7 +207,11 @@
     "grade": {
       "options": [
         "--apply",
+        "--clarity",
         "--dry-run",
+        "--face-detail",
+        "--from",
+        "--layer",
         "--measure",
         "--plan",
         "--project",
@@ -186,9 +220,12 @@
         "--reset",
         "--samples",
         "--set",
+        "--sharpen",
         "--source",
         "--strength",
-        "--target"
+        "--target",
+        "--to",
+        "--vignette"
       ],
       "transactional": true
     },
@@ -226,6 +263,8 @@
         "--at",
         "--clear",
         "--dry-run",
+        "--ease",
+        "--ease-position",
         "--focus",
         "--from",
         "--hold",
@@ -301,11 +340,40 @@
       ],
       "transactional": true
     },
+    "loudness": {
+      "options": [
+        "--allow-boost",
+        "--dry-run",
+        "--measure",
+        "--peak",
+        "--plan",
+        "--project",
+        "--segments",
+        "--target"
+      ],
+      "transactional": true
+    },
+    "match": {
+      "options": [
+        "--apply",
+        "--dry-run",
+        "--face",
+        "--json",
+        "--min-margin",
+        "--out",
+        "--project",
+        "--screen",
+        "--shots"
+      ],
+      "transactional": true
+    },
     "music": {
       "options": [
         "--dry-run",
         "--file",
+        "--hits",
         "--json",
+        "--offset",
         "--plan",
         "--project",
         "--prompt",
@@ -393,6 +461,25 @@
       ],
       "transactional": false
     },
+    "punch": {
+      "options": [
+        "--at",
+        "--dry-run",
+        "--ease",
+        "--ease-position",
+        "--hold",
+        "--kind",
+        "--on",
+        "--plan",
+        "--project",
+        "--ramp",
+        "--segment",
+        "--track",
+        "--word",
+        "--zoom"
+      ],
+      "transactional": true
+    },
     "qa": {
       "options": [
         "--allow-missing",
@@ -423,6 +510,19 @@
         "--z"
       ],
       "transactional": false
+    },
+    "ramp": {
+      "options": [
+        "--at",
+        "--dry-run",
+        "--project",
+        "--result-at",
+        "--segment",
+        "--settle",
+        "--speed",
+        "--track"
+      ],
+      "transactional": true
     },
     "remove": {
       "options": [
@@ -548,6 +648,15 @@
       ],
       "transactional": true
     },
+    "verify-shots": {
+      "options": [
+        "--json",
+        "--out",
+        "--project",
+        "--shots"
+      ],
+      "transactional": false
+    },
     "version": {
       "options": [],
       "transactional": false
@@ -584,12 +693,15 @@
         "--at",
         "--auto",
         "--dry-run",
+        "--ease",
         "--hold",
         "--min-length",
         "--plan",
         "--project",
+        "--stress",
         "--to",
-        "--track"
+        "--track",
+        "--words"
       ],
       "transactional": true
     },

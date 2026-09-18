@@ -3,9 +3,10 @@ name: capcut-editing-screen-recording
 description: >
   Select, time and place screen-recording B-roll in a CapCut video. Use when matching spoken
   sentences to on-screen events, building or querying an index of a long screen recording, or
-  choosing crops and zooms. Use `capcutctl find` for OCR/transcript search, then inspect
-  source frames to verify actions and results; automatic semantic alignment is not implemented. Read the
-  capcut-editing hub first; for what `capcutctl` already automates, read capcut-cli.
+  choosing crops and zooms. Use `capcutctl find` to search, `capcutctl match` for a
+  sentence→moment shot list (weak matches stay on the face), then inspect frames /
+  `verify-shots`. Read the capcut-editing hub first; for what `capcutctl` already automates,
+  read capcut-cli.
 ---
 
 # Screen recording — B-roll
@@ -18,6 +19,22 @@ toolkit; do not tell the user to clone or install it. For ordinary screen
 recordings, index with `find` and place B-roll with `capcutctl add` / `layout`.
 `add` persists the take's `trace.ndjson` beside the draft; `polish` maps
 `click` / `typing_burst` onto the chopped B-roll as mouse-click and typing SFX.
+
+**When a take carries rl2 sidecars, start with `find --moments`, not `--shows`.**
+It reads the recorder's own per-frame change signal instead of OCRing a blind
+1 fps grid, so listing what happened costs nothing and searching costs one frame
+per moment. On a measured 22-minute take: 86 moments over 4% of runtime, 36s to
+index against 7m41s for the 1 fps grid, and it reports the frame a screen
+actually changed on rather than the whole second the grid sampled. `--focus APP`
+narrows a multi-window take to one app. Everything degrades to `--shows` on a
+recording that has no sidecars, which is most of them. See `references/indexing.md`.
+
+**Do not promise click SFX.** `polish` reads `click` / `typing_burst` from the
+trace and the machinery works, but across 51 real takes 44 carried exactly one
+click event and it was the Stop button, logged `in_capture: false`, which polish
+correctly skips. No shipped project contains a single trace-driven click SFX.
+The content is agent-watching, not clicking, so there is usually nothing to key
+off. The change signal and the focus trace are the parts of a sidecar that pay.
 
 ## The premise
 
@@ -37,18 +54,20 @@ fill the gaps, and spend model calls only on discriminating between a handful of
 | Phase | What it is | State |
 |---|---|---|
 | 1 | `rl2` — instrumented capture: one clock, event packets, change signal, guided markers | **built** (v2.1). Timing/pixels solid. Two core modes: **whole screen** (usual) and **one window at full visible**. Acceptance take (10 named clicks + scroll + type + guided) still unrun |
-| 2 | Event compiler — trace + video into a queryable session DB, four levels L0–L3 | not built |
-| 3 | The editing skill — obligation contracts, global alignment, zoom synthesis, verification | not built |
+| 2 | Event compiler — trace + video into a queryable session DB, four levels L0–L3 | **L0 built**: `find --moments` / `--focus` query the change signal and the focus trace directly (`tools/change_index.py`). No session DB, no semantic levels above it |
+| 3 | The editing skill — obligation contracts, global alignment, zoom synthesis, verification | **partial**: `capcutctl match` assigns sentences to change-moments globally; weak matches stay on the face. Inspect/`verify-shots` still required. Obligation contracts and zoom synthesis are not automatic |
 
 This table describes the recorder roadmap, not a gate on ordinary video editing.
-Use the current `find`, `layout` and `keyframe` commands with inspected frames.
-Semantic sentence-to-event alignment still requires judgement; do not claim OCR
-hits prove that an action happened.
+Use `find`, `match`, `layout` and `keyframe` with inspected frames.
+`match` is a first pass: do not claim a score or OCR hit proves that an action happened.
 
 ## Build each shot from evidence
 
-Use the existing compact shot list in `capcut-cli`; keep the exact narration phrase,
-source file/range, timeline range and inspected evidence together.
+Start from a reviewed `capcutctl match --project NAME --screen FILE` shot list when one
+exists. Weak matches (`flag` / `none`) stay on the face — that is a valid answer. Then
+keep the exact narration phrase, source file/range, timeline range and inspected evidence
+together. `match --apply` writes only through `layout.screen` / `add` / `pace` / `punch` /
+`ramp`. `verify-shots` is the blind before/action/after check; CONTRADICTED blocks the build.
 
 - **Verify the verb.** For a click or change, inspect before/action/after frames or a short
   source playback. A labelled button alone proves neither a click nor a successful result.
@@ -58,6 +77,13 @@ source file/range, timeline range and inspected evidence together.
   judge its length. `pace --auto` only infers source gaps. If a source span includes both
   waiting and useful action, place them as separate shots first; apply per-clip
   `pace --at … --speed …` to the waiting shot and recheck the action/result timing.
+- **Show the requested evidence, not only its summary.** When the user records expanded
+  tool calls, preserve the opening action and emphasize the actual tool name and result.
+  When narration quotes a prompt, land a native position/scale move on that exact prompt
+  during the quoted words; move to the answer only when narration moves there.
+- **Return to the speaker.** Use full-face for context, reactions and connective narration
+  that has no useful screen evidence. A product photo belongs at a reveal/payoff, not
+  throughout every mention of the product.
 - **Choose one focus.** Write what the viewer should notice. Crop/zoom to an inspected
   rectangle and leave caption space; use a highlight only if it makes that target clearer.
   Avoid simultaneous competing callouts, zooms and transitions. A stable shot is valid.
@@ -131,3 +157,13 @@ Inspect recordings for personal content (notification shades, DMs) and exclude o
 before placement. Whole-screen capture can include notifications even with a privacy-aware
 trace logger. The historical recorder notes describe trace restrictions, not a guarantee
 that arbitrary video pixels are private.
+
+## Browsing, proof, and zoom sound
+
+When narration says Claude opens sites, searches and clicks, establish the wider browser
+and show actual activity with a speed ramp. Save tight framing for the prompt, price or
+result being discussed. Match each follow-up question to that exact visible prompt; a
+generic chat scroll does not prove it. Use the house Enter / click / select cue at each
+screen zoom landing and verify it is audible in the actual exported section. Prefer
+CLI export grids for authorized exports over manual timeline-click QA; see the hub's
+`references/preview-loop.md`.

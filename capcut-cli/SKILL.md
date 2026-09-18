@@ -80,16 +80,20 @@ capcutctl remove   --project NAME --at S --track NAME
 capcutctl volume   --project NAME --at S --track NAME --level 0
 capcutctl fade     --project NAME --at S --track NAME [--in 0.08] [--out 0.12]
 capcutctl keyframe --project NAME --at S --track NAME [--to SCALE|--focus X,Y,W,H] [--hold 1.6] [--plan]
+capcutctl match    --project NAME --screen FILE [--apply]
+capcutctl verify-shots --project NAME [--shots FILE]
+capcutctl punch    --project NAME --on TEXT --segment ID|--at T
+capcutctl ramp     --project NAME --segment ID --speed N
 capcutctl preview  --project NAME --out preview.mp4 [--fps 6]
 capcutctl diff     --project NAME --snapshot NAME | --against NAME
 capcutctl harvest  [--projects A,B] [--out FILE] [--plan]
 
-capcutctl grade    --project NAME [--measure|--plan] [--apply] [--strength 1]
+capcutctl grade    --project NAME [--measure|--plan|--apply|--layer NAME] [--dry-run]
+capcutctl loudness --project NAME [--measure] [--target -14] [--peak -1]
 capcutctl timeline --project NAME [--width 64]          # ASCII stacked timeline
 capcutctl finish   --project NAME [--plan] [--music] [--polish] [--regen]
 capcutctl music    --project NAME [--plan] [--regen] [--volume 0.08]
 capcutctl polish   --project NAME [--motivated]         # --motivated = picture changes only
-capcutctl grade    --project NAME [--measure|--plan|--apply] [--dry-run]
 
 capcutctl status   [--json] [--wait-for-close] [--timeout MS] # is CapCut running; optionally ask it to quit
 capcutctl review   --project NAME                    # outputs/<id>/proxy.mp4 + edl.json + contact sheet
@@ -319,6 +323,44 @@ first; needs real alpha. `tools/rasterize.py` gates it — under 0.5% ink is whi
 Whisper actually produced, then `qa --times <pop>` to see it composited. Ask first if the mark is
 contested (a person, a small creator). **A versus video pops both brands or neither** — popping
 only the side you have reads as taking a side.
+
+## Agent-directed music, audio levels and shared color
+
+Use existing commands; the agent chooses emphasis and appearance, the CLI computes and applies.
+
+```bash
+capcutctl music --project NAME --file /absolute/music/selected.mp3 --hits 2.4,8.1 --plan --json
+capcutctl music --project NAME --file /absolute/music/selected.mp3 --hits 2.4,8.1 --offset 0.12
+capcutctl loudness --project NAME --measure
+capcutctl loudness --project NAME --target -14 --peak -1 --plan
+capcutctl loudness --project NAME --target -14 --peak -1
+capcutctl grade --project NAME --layer Finish --from 0 --to 20 --strength 0.5 --set 'contrast=0.1,saturation=0.05' --plan
+capcutctl grade --project NAME --layer Finish --from 0 --to 20 --strength 0.5 --set 'contrast=0.1,saturation=0.05' --apply
+capcutctl grade --project NAME --reset --layer Finish
+```
+
+`music --hits` takes timeline seconds of agent-selected reveals/visual emphasis. Plans analyze local
+audio without project writes; output includes source beat times and the alignment pairs' `timelineBeat`
+and signed `remaining` error. Linked CapCut beat caches are reused where available; otherwise onset
+detection supplies candidate hits, not guaranteed downbeats. `--offset` overrides the music shift
+within ±0.4s. Positive delays the bed; negative trims its beginning. Repeat the chosen flags when
+applying. Neither speech nor picture clips move. Generated music that does not yet exist cannot be
+analyzed in a plan; generate it with a specific brief, then inspect it.
+
+`loudness --measure` reports the current mix and edited segments at unity gain for normalization.
+Measurement reuses preview's speed/gain/fade audio path and includes audible video, music and SFX.
+Writes preserve muted clips and music gain, limit each selected speech/SFX gain to `--peak`, and
+refuse if the proposed combined mix still exceeds it. Peak limiting may leave the LUFS target unmet;
+inspect `peakLimited` and `afterMix`. Boosting above unity still requires `--allow-boost` and remains
+unverified. This is not a compressor, limiter, denoiser or native-DSP emulator; listen in CapCut.
+
+`grade --layer NAME` updates one native adjustment lane above existing picture tracks. It is a shared
+look affecting everything beneath it, including screen captures and graphics. Use source-level `grade`
+for individual exposure/white-balance corrections; choose a layer only when that shared scope is intended.
+Layer values use the same native slider units as existing `grade`; strength scales them from 0 to 1.
+Ranges default to the content duration. Named removal preserves other lanes and refuses manual effects
+or animation. The native layer's range and nonzero controls survived opening/saving in CapCut on
+2026-09-18. CLI frame/proxy grading remains approximate; compare the actual look in CapCut.
 
 ## Colour — `grade`
 
@@ -729,9 +771,27 @@ the compositor mix preserves stereo. Native audio processing/volume keyframes an
 rendering still need a normal-speed CapCut watch. It is not CapCut's export.
 `harvest` is catalogue-only — there is no `--apply`.
 
+**Explicitly requested native export and fast export grid:**
+
+```bash
+capcutctl export --project NAME --out final.mp4 --overwrite --grid final-grid.png --times 0,8,15,24
+capcutctl export-grid --media final.mp4 --out final-grid.png --times 0,8,15,24
+```
+
+`export` uses a bounded macOS native UI bridge to CapCut's renderer (not headless).
+CapCut must be open on Home or the requested project. It briefly needs focus and refuses
+unknown controls, the wrong project, or unapproved overwrite. A staged render must match
+the timeline duration and decode before it replaces the destination. `export-grid` reads
+an existing video directly with ffmpeg; it never opens CapCut. Inspect changed frames and
+zoom landings, then only the short audio/motion sections relevant to the change.
+
+Final exports are user-controlled: never initiate one unless explicitly requested.
+"Finish/finalise" means finish the editable project. Diagnostic previews and native
+project playback do not require a final export.
+
 ## What it does NOT do
 
-No captions (those stay outside CapCut), OTIO, HTTP CapCut APIs, or driving CapCut's UI to export. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `capcutctl find`. Music beds are `finish --music`, not CapCut's stock library.
+No captions (those stay outside CapCut), OTIO, HTTP CapCut APIs, or a headless CapCut renderer. No inventing effect/filter/sticker/Position-keyframe structures — harvest a real one first (`capcutctl harvest`). Moment-finding for screen recordings is `capcutctl find`. Music beds are `finish --music`, not CapCut's stock library.
 
 ## Compact screen layouts
 

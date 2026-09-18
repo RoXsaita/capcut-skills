@@ -24,15 +24,34 @@ that conceals clipping in the actual project.
 
 ## Before final delivery
 
-Play the current CapCut project at normal speed, with sound, at phone size. Check:
+Prefer a CLI-produced grid over repeatedly opening CapCut and manually clicking through
+its timeline. When the user explicitly authorizes export, use the native export bridge:
 
-- the pictured action/result matches the narration and stays readable;
-- speech sounds continuous, with no clipped syllables or distracting level jumps;
-- music and SFX leave every word clear, including the hook and CTA;
-- one clear focus, legible text, usable caption space and clean crop/motion boundaries;
-- native transitions, masks, grading and fades look and sound right.
+```bash
+capcutctl export --project NAME --out final.mp4 --overwrite --grid final-grid.png --times 0,8,15,24
+capcutctl export-grid --media final.mp4 --out final-grid.png --times 0,8,15,24
+```
 
-A mute watch can expose visual clutter; it does not approve the mix. Inspect the actual
-export, including the opening and ending, then deliver it with the editable project and
-localized source media. If playback/export verification has not happened, say so.
-Repair identified timestamps and recheck the changed section before final playback.
+The export command invokes CapCut's real rendering engine through a bounded macOS native
+UI bridge; it is not a headless renderer. It needs CapCut open on Home or the requested
+project and briefly needs app focus. It checks project identity, stages a unique output,
+checks duration and decoding, and preserves the prior output if rendering fails. Unknown
+controls or lost focus are named failures; do not blindly retry clicks or claim success.
+
+Inspect the actual export grid at changed shots and camera rest/peak/return, including the
+opening and ending. Check that the pictured prompt, action, price and result match the
+spoken words; the text remains readable; split-screen seams and crops are clean; and each
+shot has one clear focus. For a browsing montage, show the wider browser and real activity,
+then ramp through the search. Hold proof shots long enough to read.
+
+A grid does not prove sound or motion. Check short normal-speed sections of the exported
+video when reviewing a ramp, transition, speech seam or SFX hit. Use the house
+“Enter / click / select” cue on the actual screen-zoom landing; confirm it is audible under
+the voice. Do not substitute a generic whoosh or an intended timeline placement for an
+actual audible cue. Recheck only the repaired sections unless a change affects the whole mix.
+
+Deliver the editable project and localized media. Export only when explicitly requested;
+“finish/finalise” and edit approval alone are not export requests. Without export permission,
+use bounded CLI QA/proxies and reserve native playback for unresolved native-only effects.
+Do not open the export dialog speculatively. Report unperformed checks honestly. A clean
+`doctor` validates structure, not visual or audio quality.

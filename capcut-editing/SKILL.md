@@ -51,6 +51,15 @@ Scopes help diagnose exposure; whole-frame RGB averages do not establish correct
 skin colour or justify changing UI whites. Use explicit correction and compare in
 CapCut. The native Adjust material structure must not be hand-written.
 
+## Export permission
+
+Never export the final video on your own. Requests to finish, finalise, polish, or approve
+an edit authorize the editable project only. Export only when the user explicitly requests
+an export. Do not open the export dialog as a routine QA step. Use CLI frame/proxy QA; when export is explicitly authorized, use `capcutctl export`
+and `export-grid` instead of manual export and timeline-click loops. Inspect a supplied
+export with `export-grid`. See `references/preview-loop.md` for the bounded native bridge
+and targeted audio/motion checks.
+
 ## The four rules
 
 **0. Overlays only.** His main track is **always empty**. He calls the main track "the cover" and
@@ -105,6 +114,8 @@ capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --dry-run
 capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --project NAME
 capcutctl add --project NAME --media FILE --at S --dur S --track broll
 capcutctl layout auto|split-screen|circle|background --project NAME
+capcutctl match --project NAME --screen FILE [--apply]
+capcutctl verify-shots --project NAME
 capcutctl polish|pace|wrap --project NAME
 capcutctl grade    --project NAME [--measure] [--apply]   # colour: preserve unless explicitly corrected
 capcutctl timeline|finish|music --project NAME   # last pass: ASCII, scorecard, generated bed
@@ -145,8 +156,9 @@ See [the migration map](scripts/README.md).
    the keep list. Do not start B-roll, layouts, or finish until then. The face is the timeline's
    clock; everything else hangs off it.
 3. **Give the scenes their looks** — `capcutctl layout …`. The first picture is proof
-   (split-screen or circle + 80% recording). Bind each narration phrase to an inspected
-   action/result using the [screen-recording skill](../capcut-editing-screen-recording/SKILL.md).
+   (split-screen or circle + 80% recording). Start from `capcutctl match --screen FILE`
+   for a sentence→moment shot list; weak matches stay on the face. Bind each narration
+   phrase to an inspected action/result using the [screen-recording skill](../capcut-editing-screen-recording/SKILL.md).
    Compress waiting, keep actions legible, and hold results until they can be understood.
    Pick one focus per shot; a zoom or highlight must point to that focus. `finish` checks
    opening coverage; it cannot verify that the picture proves the words.
@@ -162,11 +174,13 @@ See [the migration map](scripts/README.md).
    or use a suitable local track with `music --file`. Avoid a generic tech-demo bed.
    Balance the voice first, then the bed and SFX underneath it. Picture stays locked;
    speech is never recut to a beat. See `references/finish.md` for mixing and selected seams.
-7. **Watch the finished edit** — check changed frames with `qa`, then play the current
-   project in CapCut at normal speed, with sound, at phone size. Check proof readability,
-   cut syllables, music/SFX balance and native effects. Inspect the actual export too.
-   A proxy or a clean `doctor` result cannot replace this playback check. If native playback
-   is unavailable, report it as pending instead of claiming the edit passed.
+7. **Review efficiently** — prefer timestamped CLI grids. If export is explicitly
+   authorized, use `export --grid` and inspect actual rendered frames at changed shots
+   and zoom rest/peak/return. Match the spoken words to the exact screen prompt/result.
+   Check short exported sections with sound for ramps and SFX; a grid cannot prove those.
+   Avoid repeated manual CapCut clicking/exporting. Without export permission, use bounded
+   `qa`/`preview` and native playback only for unresolved native effects. Report checks
+   that remain pending. See `references/preview-loop.md`.
 8. **`capcutctl doctor`** must be error-free before you hand it over.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.

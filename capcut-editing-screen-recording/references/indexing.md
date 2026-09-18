@@ -1,3 +1,39 @@
+## Screen — the change signal first (rl2 takes only)
+
+```bash
+capcutctl find --media /absolute/take/screen.mp4 --moments                 # what happened, when
+capcutctl find --media /absolute/take/screen.mp4 --moments --focus Hermes  # …while one app was up
+capcutctl find "signal bay" --media /absolute/take/screen.mp4 --moments --context
+```
+
+An rl2 take writes `change.ndjson` (per-frame mean absolute luma delta, 0..255, plus an
+8×8 block mask) and `trace.ndjson` (every frontmost-app switch). `--moments` reads them
+instead of OCRing a 1 fps grid, and it is not a small difference:
+
+| | 1 fps grid (`--shows`) | change signal (`--moments`) |
+|---|---|---|
+| samples on a 22-min take | 1329 | 86 |
+| time to build | 7m 41s | 36s |
+| resolution of an answer | the whole second it sampled | the frame the screen changed on |
+
+With no query it lists every moment — start, end, peak score, changed block count, and the
+frontmost app. With a query it OCRs one frame per moment and reports only the hits. The
+cache is bound to the source fingerprint *and* `--min-score`, so changing the threshold
+rebuilds rather than silently mixing two different moment sets.
+
+`--moments` also sharpens `--shows`: when a sidecar is present, a run reported at second
+`587` is annotated `(changed at 586.52s)`. Verified against frames — 586.40 was the old
+screen, 586.60 the new one. Cut on the annotated time, not the rounded second.
+
+**Where it does not apply.** A recording with no sidecar, or a trimmed/derived copy whose
+frame clock disagrees with the media duration, is refused by name and you fall back to
+`--shows`. That is most recordings. `--focus` needs the trace and names the apps that were
+actually frontmost when it finds none — match the trace's process name, not the Dock label.
+
+**What `--moments` does not tell you.** That an action *succeeded*, or what the change was.
+A moment is "these pixels moved". The verb still has to be verified on frames, exactly as
+below.
+
 ## Screen — OCR (B-roll)
 
 ```bash
