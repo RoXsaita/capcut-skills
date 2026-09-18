@@ -63,11 +63,26 @@ Use `find`, `match`, `layout` and `keyframe` with inspected frames.
 
 ## Build each shot from evidence
 
-Start from a reviewed `capcutctl match --project NAME --screen FILE` shot list when one
-exists. Weak matches (`flag` / `none`) stay on the face — that is a valid answer. Then
-keep the exact narration phrase, source file/range, timeline range and inspected evidence
-together. `match --apply` writes only through `layout.screen` / `add` / `pace` / `punch` /
-`ramp`. `verify-shots` is the blind before/action/after check; CONTRADICTED blocks the build.
+Semantic alignment is **implemented**: `capcutctl match` scores every spoken sentence
+against the recording's change-moments and returns a shot list. It is the B-roll path.
+Reach for hand-rolled `find` + `add` only when `match` has no candidate for a beat.
+
+```bash
+capcutctl match --project NAME --screen FILE --out shots.json
+# read every row; weak matches (flag / none) stay on the face — edit shots.json if needed
+capcutctl match --project NAME --apply --shots shots.json --dry-run
+capcutctl match --project NAME --apply --shots shots.json
+capcutctl verify-shots --project NAME --shots shots.json
+capcutctl punch --project NAME --on TEXT --segment ID --dry-run
+capcutctl ramp --project NAME --segment ID --speed 20 --dry-run
+capcutctl qa --project NAME --expect 'T=phrase'
+```
+
+`match` is a shot list, not proof. `verify-shots` and `qa --expect` stay mandatory after
+`--apply`; CONTRADICTED blocks the build. Weak matches staying on the face is a valid
+answer, not a failure to route around. Keep the exact narration phrase, source
+file/range, timeline range and inspected evidence together. `match --apply` writes only
+through `layout screen` / `add` / `pace` / `punch` / `ramp`.
 
 - **Verify the verb.** For a click or change, inspect before/action/after frames or a short
   source playback. A labelled button alone proves neither a click nor a successful result.
