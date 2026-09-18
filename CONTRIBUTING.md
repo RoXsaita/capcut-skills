@@ -32,7 +32,7 @@ to each other.
 
 ## Install
 
-From the root of this clone, symlink the four skill directories into the agent you use.
+From the root of this clone, symlink the five skill directories into the agent you use.
 This example selects Codex; set `agent_skills` to another agent's skills directory as needed.
 Existing installations are skipped so the command cannot nest links inside an installed skill
 or overwrite unrelated customizations. Review an existing entry before replacing it.
@@ -40,7 +40,7 @@ or overwrite unrelated customizations. Review an existing entry before replacing
 ```bash
 agent_skills="${CODEX_HOME:-$HOME/.codex}/skills"
 mkdir -p "$agent_skills"
-for skill in capcut-cli capcut-editing capcut-editing-talking-head capcut-editing-screen-recording; do
+for skill in capcut-cli capcut-editing capcut-editing-talking-head capcut-editing-screen-recording capcut-motion-graphics; do
   if [ -e "$agent_skills/$skill" ] || [ -L "$agent_skills/$skill" ]; then
     printf 'Skipped existing skill: %s\n' "$agent_skills/$skill"
     continue

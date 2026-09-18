@@ -6,7 +6,8 @@ description: >
   this exists, the non-negotiable rules, the draft_info.json schema, the user's measured style,
   pitfalls, and current project state. The write path itself is `capcutctl` — read capcut-cli
   before touching JSON. For cutting the talking head use capcut-editing-talking-head; for
-  screen-recording B-roll use capcut-editing-screen-recording.
+  screen-recording B-roll use capcut-editing-screen-recording; for drawn B-roll (titles,
+  typed commands, collages, marks) use capcut-motion-graphics.
 ---
 
 # CapCut Editing — hub
@@ -35,7 +36,9 @@ Do not silently apply option 1 to a stranger.
 
 The deliverable is a *CapCut project*, not a rendered file. Code-render tools
 (HyperFrames, Remotion) cannot hand the edit back to CapCut's UI. CapCut stores
-projects as plain JSON on disk, which is what `capcutctl` writes.
+projects as plain JSON on disk, which is what `capcutctl` writes. Rendered graphics
+still have a place — as *generated B-roll* placed with `capcutctl add --generated`
+(see `capcut-motion-graphics`) — but the cut, the layouts and the camera moves stay native.
 
 ## The family
 
@@ -45,6 +48,7 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 | **capcut-editing** (this one) | The format, the safe write path, his style, pitfalls, project state |
 | **capcut-editing-talking-head** | Cutting the face: deterministic mechanics, semantic keep/order review, escalation diagnostics, and the 3 layout presets |
 | **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **Semantic matching requires inspected source evidence.** |
+| **capcut-motion-graphics** | Drawn B-roll — titles, typed commands, collages, marks — that does not read as generated: the rulebook, named easing curves, a Remotion kit, still-render QA, and the alpha render placed with `capcutctl add --generated`. |
 
 **Colour lives in `capcut-cli` (`grade`).** Preserve source colour by default.
 Scopes help diagnose exposure; whole-frame RGB averages do not establish correct

@@ -10,6 +10,7 @@ Agent skills for editing CapCut projects with `capcutctl`. The hub is `capcut-ed
 | `capcut-editing` | format, style, pitfalls, project state |
 | `capcut-editing-talking-head` | cutting the face, layouts |
 | `capcut-editing-screen-recording` | B-roll, OCR matching, `capcutctl find` |
+| `capcut-motion-graphics` | drawn B-roll that does not look generated: rulebook, named easings, Remotion kit, alpha render → `capcutctl add --generated` |
 
 Install by symlink into the agent's skills directory; see [the install steps](CONTRIBUTING.md#install).
 

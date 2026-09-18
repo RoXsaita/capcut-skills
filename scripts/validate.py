@@ -33,7 +33,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS = ["capcut-cli", "capcut-editing", "capcut-editing-talking-head",
-          "capcut-editing-screen-recording"]
+          "capcut-editing-screen-recording", "capcut-motion-graphics"]
 CONTRACT = ROOT / ".capcut" / "cli-contract.json"
 COMPAT = ROOT / ".capcut" / "cli-compatibility.json"
 
