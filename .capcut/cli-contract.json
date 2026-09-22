@@ -5,6 +5,7 @@
     "guarantee": "Every transactional edit command takes --dry-run.",
     "commands": [
       "add",
+      "animate",
       "apply",
       "blur-broll",
       "cursor",
@@ -19,6 +20,7 @@
       "logo",
       "loudness",
       "match",
+      "motion",
       "music",
       "new",
       "pace",
@@ -60,6 +62,22 @@
         "--track",
         "--volume",
         "--width"
+      ],
+      "transactional": true
+    },
+    "animate": {
+      "options": [
+        "--at",
+        "--dry-run",
+        "--intro",
+        "--intro-dur",
+        "--outro",
+        "--outro-dur",
+        "--plan",
+        "--project",
+        "--replace-existing",
+        "--segments",
+        "--track"
       ],
       "transactional": true
     },
@@ -358,8 +376,10 @@
         "--auto",
         "--brand",
         "--dry-run",
+        "--glow",
         "--hold",
         "--logo",
+        "--motion",
         "--name",
         "--no-sfx",
         "--plain",
@@ -396,6 +416,24 @@
         "--project",
         "--screen",
         "--shots"
+      ],
+      "transactional": true
+    },
+    "motion": {
+      "options": [
+        "--accent",
+        "--asset",
+        "--at",
+        "--color",
+        "--dry-run",
+        "--duration",
+        "--logo",
+        "--name",
+        "--project",
+        "--scale",
+        "--text",
+        "--x",
+        "--y"
       ],
       "transactional": true
     },

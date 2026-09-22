@@ -289,8 +289,9 @@ frame.
 
 ### The glow reveal — `logo` is the "with everything" verb
 
-`logo` writes the **glow reveal** by default; `--plain` gives the measured two-key pop, which is
-what `wrap` still uses. The reveal is four layers, every structure harvested, none invented:
+`logo` and a text overlay default to **`motion orbit-glow`**: the harvested Blur underlay plus the moving mask. `--motion shimmer|spotlight|gradient|orbit-glow` picks another of those entrances. `--glow` is the older halo pop; `--plain` is the two-key pop. `wrap` still uses the pop unless `--glow` is asked for. Do not put this entrance on a sentence that did not earn a logo or a line of type.
+
+The glow reveal (`--glow`) is four layers, every structure harvested, none invented:
 
 | layer | what it is | where it came from |
 |---|---|---|

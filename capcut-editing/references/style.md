@@ -30,7 +30,7 @@ exactly the gap this file exists to close.
 | Video effects | *(library)* 402, but **370 of them are `Blur`** — the background plate `capcutctl layout background` already writes. Treat as "no effects except the blur plate". |
 | Text | essentially none (one element) |
 
-He cuts hard and lets **sound + speed** carry the edit. Adding a *video effect* or a colour grade
+He cuts hard and lets **sound + speed** carry the edit. Breath where a result or a line must be read; punch where the cut is the point. A move that adds neither clarity, emotion, nor momentum stays off the timeline. Adding a *video effect* or a colour grade
 is a style change — confirm first. Adding a **transition + its paired sound** is not; that is his
 normal seam, and omitting it is what makes CLI output read as mechanical.
 ## The seam formula — the single most copyable thing in this file

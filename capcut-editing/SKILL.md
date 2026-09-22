@@ -145,6 +145,17 @@ indexes/previews had diverged from the CLI. Use `capcutctl cut`, `find`, `qa` an
 For implementation details, inspect the maintained `tools/` and `src/` in the CLI repository.
 See [the migration map](scripts/README.md).
 
+## Pace before anything else
+
+Read the cut once as a viewer and mark each beat **breath** or **punch** before a layout, a zoom, a graphic, or a sound.
+
+- **Breath** is where something has to be understood: a result, a face, a number, a line of type. Hold it. Slow the screen. One picture. No second move on top of it.
+- **Punch** is the cut into proof, the word that lands, the wait you kill. Short. One accent. A zoom only if it points at that one thing.
+- If it does not add clarity, emotion, or momentum, it does not go on the timeline. A treatment on a word that is not the point is the failure mode: right effect, wrong place, zero value.
+- The details that read as taste are small and motivated: the 4-frame sound lead, a seam only when the picture changes, type in empty wall and off the mouth, a push that returns, a mix with headroom. Check the frame on the word, at the peak, and on the return.
+
+A logo or a text line that earned its place arrives with `capcutctl logo` or `capcutctl motion` (default **orbit-glow**: Blur underlay plus the moving mask). `--motion` picks shimmer, spotlight, gradient, or orbit-glow. That entrance is not a sticker, and it is not for zooms or B-roll.
+
 ## Workflow
 
 1. **Cut the A-roll** — `capcutctl cut VIDEO`, read the full script, then dry-run and build with

@@ -141,7 +141,7 @@ capcutctl qa --project NAME --times 16.3,19,22
 | A talking-head video with drawn B-roll inserts (the normal case) | Remotion + this kit → `add --generated` → finish in CapCut |
 | A graphics-heavy promo with a few seconds of face | Diffusion Studio (`dapi mount` a TSX composition; MPL-2.0, `brew install --cask diffusionstudio/tap/editor`), render, then `add --generated` if it must end in CapCut |
 | A camera move on real footage | `capcutctl keyframe` / `punch` / `zoom` — native, eased, editable in CapCut; not a render |
-| A brand mark popping on its name | `capcutctl logo` — the harvested glow reveal; not a render |
+| A brand mark or a text line that earned the beat | `capcutctl logo` or `capcutctl motion` — default orbit-glow (Blur underlay plus the recipe). Not a render, and not a word dropped on a face that did not ask for it |
 
 The last two rows matter: anything CapCut can express natively should stay native so the user
 can still touch it. Render only what CapCut cannot draw.
