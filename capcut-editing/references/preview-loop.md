@@ -30,7 +30,14 @@ its timeline. When the user explicitly authorizes export, use the native export 
 ```bash
 capcutctl export --project NAME --out final.mp4 --overwrite --grid final-grid.png --times 0,8,15,24
 capcutctl export-grid --media final.mp4 --out final-grid.png --times 0,8,15,24
+capcutctl check-export --media final.mp4 --project NAME
 ```
+
+`check-export` measures the rendered file, which the grid cannot do in one look. It checks
+for black inside the edit and at either end, stray 1-2 frame flashes and shots, picture
+frozen past `density.maxStatic`, late first sound, dead air, integrated loudness, true peak,
+and canvas, fps and length against the project. It exits 1 on a FAIL and lists every flagged
+time. Pass those times to `export-grid --times` and look before you fix anything.
 
 The export command invokes CapCut's real rendering engine through a bounded macOS native
 UI bridge; it is not a headless renderer. It needs CapCut open on Home or the requested

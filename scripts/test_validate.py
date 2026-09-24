@@ -133,8 +133,8 @@ def _(repo: Path) -> str:
 @case("a vendored contract of the wrong shape")
 def _(repo: Path) -> str:
     edit(repo / ".capcut" / "cli-compatibility.json",
-         '"requiredContractVersion": 1', '"requiredContractVersion": 2')
-    return "requiredContractVersion 2"
+         '"requiredContractVersion": 2', '"requiredContractVersion": 3')
+    return "requiredContractVersion 3"
 
 
 def main() -> int:

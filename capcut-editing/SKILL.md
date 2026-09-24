@@ -31,6 +31,20 @@ Then **ask the user, once, before writing a project**:
 
 Do not silently apply option 1 to a stranger.
 
+If they hand over a **reference reel** ("edit it like this"), measure it before you plan:
+`capcutctl reference --media reel.mp4 --sheet shots.png --profile-out ref-profile.json`.
+Read the pacing numbers and the shot sheet, say in plain words what you would copy, and
+hold the edit to it with `gate --profile ref-profile.json`. See `capcut-cli`.
+
+## Every session: read the creative log first
+
+`capcutctl notes --project NAME --brief` prints what was already tried and rejected, the
+accepted look, the decisions, and what is still owed. Read it before proposing anything,
+and summarise the last state in one sentence. When the user rejects something, record it
+with the reason (`notes --reject … --why …`). When something lands, record that too
+(`notes --accept … --why …`). The log is kept outside snapshots, so it survives `restore`,
+a compaction and a new session. Without it, the next round proposes the rejected look again.
+
 ## Why this exists
 
 The deliverable is a *CapCut project*, not a rendered file. Code-render tools
@@ -181,7 +195,22 @@ See [the migration map](scripts/README.md).
    Avoid repeated manual CapCut clicking/exporting. Without export permission, use bounded
    `qa`/`preview` and native playback only for unresolved native effects. Report checks
    that remain pending. See `references/preview-loop.md`.
+   **Any rendered file** (an authorized export, or one the user supplies) gets
+   `capcutctl check-export --media FILE --project NAME` first. It reads the render, not the
+   draft: black inside the edit, stray 1-2 frame shots, dead air, loudness, true peak,
+   canvas and length. Then `export-grid --times` on the moments it lists.
+   **For anything that will be published, get a fresh-eyes critique before hand-off.** Give
+   a sub-agent with no context the grid or contact sheet, the `check-export` report, the
+   creative log and any reference sheet. Brief it to find problems, not to praise:
+   a verdict, then ranked problems with timecodes and evidence, then the five fixes to do
+   first. You stop seeing your own edit; a reader with no context still sees a payoff line
+   cut short or text too small to read at phone size.
 8. **`capcutctl doctor`** must be error-free before you hand it over.
+
+**Revisions.** For a note like "change only X", snapshot, make the change, then prove its
+scope before saying it is done:
+`capcutctl diff --project NAME --snapshot LABEL --allow SEGMENT-ID,track:NAME`. It exits 1
+and names every change outside that scope. Record rejections in `notes` as they come.
 
 Work **one section at a time** and check end-to-end. He asked for this explicitly.
 
