@@ -8,6 +8,27 @@ matches what the gate will check.
 rhythm: something new every few seconds, rests between, one focus at a time, and every picture
 event paired with a sound. Constant motion reads as machine-made just as surely as none.
 
+## Breath and punch — decide pace first
+
+Read the cut once as a viewer and mark each beat **breath** or **punch** before you choose a
+layout, a zoom, a graphic, or a sound. The table below is what a beat *gets*; this is how you
+decide which beat it is.
+
+- **Breath** is where something has to be understood: a result, a face, a number, a line of
+  type. Hold it. Slow the screen. One picture. No second move on top of it.
+- **Punch** is the cut into proof, the word that lands, the wait you kill. Short. One accent.
+  A zoom only if it points at that one thing.
+- If it adds neither clarity, emotion, nor momentum, it does not go on the timeline. A treatment
+  on a word that is not the point is the failure mode: right effect, wrong place, zero value.
+- The details that read as taste are small and motivated: the profile's sound lead, a seam only
+  where the picture changes, type in empty wall and off the mouth, a push that returns, a mix
+  with headroom. Check the frame on the word, at the peak, and on the return.
+
+Drawn B-roll — titles, typed commands, collages, marks — has its own rulebook, named easing
+curves and scene vocabulary in [capcut-motion-graphics](../../capcut-motion-graphics/SKILL.md).
+Recorded B-roll still beats a graphic of the same thing; graphics carry what a recording cannot:
+the claim, the number, the list, the "all of it".
+
 ## What each beat gets
 
 | Beat | Camera | Graphic | Sound |

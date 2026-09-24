@@ -172,3 +172,21 @@ Known-weak, in the order worth fixing:
 - **End-to-end editorial review remains with the user.** `doctor` validates the project
   structure; the user can review the actual editorial result in CapCut. Render-based checks are
   available when a specific discrepancy is reported.
+
+## Face reframe — opt-in
+
+`capcutctl reframe --project NAME --auto --plan` samples Apple Vision locally at 10 fps. Review
+the plan, run `--dry-run`, then apply without those flags. Only unmasked 1× principal-track
+footage is eligible; existing camera moves and ambiguous or missing faces skip. Small motion
+(12 px deadband) stays still. A 400 ms smoother and error-bounded eased keys follow larger
+drift. Scale is constant per clip (routine ≤1.25, refusal above 1.35); speed and cuts stay
+intact. Headroom includes an estimated half-face-height margin above Vision's facial box — a
+conservative geometric estimate, so inspect hair and headroom with `qa` and in CapCut, and
+switch layout when the framing cannot fit.
+
+## Measured voice cleanup — opt-in
+
+`capcutctl denoise --project NAME --plan`, then `--dry-run`, and apply only after reviewing the
+floor. Requires `cut`'s energy10 and source-time transcript caches. Pauses of at least 200 ms,
+with 100 ms speech margins, measure the floor; ≤−55 dB skips as `already-quiet`. Missing pause
+evidence refuses.
