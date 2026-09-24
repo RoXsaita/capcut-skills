@@ -15,24 +15,27 @@ python3 scripts/test_validate.py
 ```
 
 If your change documents a new CLI capability, the CLI change must be pushed
-first; then refresh `.capcut/cli-contract.json` (`capcutctl contract >
-.capcut/cli-contract.json`) and the `contractSyncedFrom` block in
-`.capcut/cli-compatibility.json` in the same pull request, and link the two PRs
-to each other.
+first; then run `scripts/sync-cli.sh PATH_TO_CLI_CLONE`, which refreshes
+`.capcut/cli-contract.json`, the generated `capcut-cli/reference.md` and the
+`contractSyncedFrom` block together, and link the two PRs to each other.
+
+If you previously installed the four-skill layout, remove the retired
+`capcut-editing-talking-head` and `capcut-editing-screen-recording` links.
 
 ## Ground rules
 
 - One job per pull request. Never force-push `main`.
 - Do not add personal media paths, draft titles, transcripts, or QA frames.
-- `style.md` is the default house style. Keep measured rules; do not turn it
-  into a live production diary.
-- The retired helpers in `capcut-editing/scripts/README.md` are replaced by the CLI.
+- The style targets live in the CLI's `presets/profile.json`. `style.md` is
+  provenance; keep measured facts there, and never restate a rule the profile
+  owns (the validator rejects the retired ones).
+- The retired helpers in `docs/retired-scripts.md` are replaced by the CLI.
   Extend `capcutctl` for runtime behavior; top-level `scripts/` contains this
   repository's validation checks.
 
 ## Install
 
-From the root of this clone, symlink the four skill directories into the agent you use.
+From the root of this clone, symlink the two skill directories into the agent you use.
 This example selects Codex; set `agent_skills` to another agent's skills directory as needed.
 Existing installations are skipped so the command cannot nest links inside an installed skill
 or overwrite unrelated customizations. Review an existing entry before replacing it.
@@ -40,7 +43,7 @@ or overwrite unrelated customizations. Review an existing entry before replacing
 ```bash
 agent_skills="${CODEX_HOME:-$HOME/.codex}/skills"
 mkdir -p "$agent_skills"
-for skill in capcut-cli capcut-editing capcut-editing-talking-head capcut-editing-screen-recording; do
+for skill in capcut-cli capcut-editing; do
   if [ -e "$agent_skills/$skill" ] || [ -L "$agent_skills/$skill" ]; then
     printf 'Skipped existing skill: %s\n' "$agent_skills/$skill"
     continue

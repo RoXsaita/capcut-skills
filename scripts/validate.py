@@ -11,7 +11,7 @@ A skill that names a flag the CLI does not have sends an agent into a parse erro
 that misses a command means the agent hand-writes draft_info.json instead — the single
 thing every one of these documents exists to prevent.
 
-So this checks four things:
+So this checks:
 
   frontmatter   every SKILL.md has a usable name/description, and the name matches its
                 directory, because that is how an agent loads it
@@ -20,6 +20,10 @@ So this checks four things:
   cli parity    every `capcutctl` command and flag written in a code block or code span
                 exists in the CLI's published contract, and the contract we hold is the
                 version we say we are compatible with
+  reference     capcut-cli/reference.md was generated from the vendored contract: same CLI
+                and contract version, and every command's summary and example present
+  budget        the happy path stays under HAPPY_PATH_BUDGET lines
+  profile       no skill restates a rule the style profile has since replaced
 
 Run:  python3 scripts/validate.py         (exit 1 on any finding)
 """
@@ -32,8 +36,21 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILLS = ["capcut-cli", "capcut-editing", "capcut-editing-talking-head",
-          "capcut-editing-screen-recording"]
+SKILLS = ["capcut-cli", "capcut-editing"]
+REFERENCE = ROOT / "capcut-cli" / "reference.md"
+# What an agent reads on the happy path. Every line here is context spent before the first
+# edit; the old four-skill set was ~4,600 lines and 37 commits stale.
+HAPPY_PATH = ["capcut-editing/SKILL.md", "capcut-cli/SKILL.md",
+              "capcut-editing/references/edit-plan.md", "capcut-editing/references/grammar.md"]
+HAPPY_PATH_BUDGET = 1200
+# Rules that used to live in prose and now contradict the style profile the CLI enforces.
+CONTRADICTIONS = [
+    (r"hard cuts only", "the profile decides seams (seams.hardCutsByDefault); `build` applies motivated seams"),
+    (r"no transition effects,? ever", "the profile decides seams; motivated seams are the house default"),
+    (r"captions happen outside capcut", "the profile decides captions (captions.mode: keywords)"),
+    (r"no captions(/subtitles)? anywhere", "keyword supers are part of the profile's grammar"),
+    (r"preferred: remotion", "footage stays CapCut-native; rendered media is mograph graphics only"),
+]
 CONTRACT = ROOT / ".capcut" / "cli-contract.json"
 COMPAT = ROOT / ".capcut" / "cli-compatibility.json"
 
@@ -244,7 +261,53 @@ def check_dry_run_claim() -> None:
                      f"--dry-run. The CLI's actual claim is: {guarantee!r}")
 
 
+def check_reference() -> None:
+    """The command reference is generated; prove it came from the contract we vendor."""
+    if not REFERENCE.exists():
+        fail("capcut-cli/reference.md", "missing — `capcutctl contract --markdown > capcut-cli/reference.md`")
+        return
+    if not CONTRACT.exists():
+        return
+    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+    text = REFERENCE.read_text(encoding="utf-8")
+    header = re.search(r"from CLI (\S+), contract v(\d+)", text)
+    if not header or header.group(1) != contract.get("cliVersion") \
+            or int(header.group(2)) != contract.get("contractVersion"):
+        fail("capcut-cli/reference.md", "was not generated from the vendored contract — regenerate "
+                                        "both together with scripts/sync-cli.sh")
+    for name, entry in contract.get("commands", {}).items():
+        summary, example = entry.get("summary"), entry.get("example")
+        if summary and summary not in text:
+            fail("capcut-cli/reference.md", f"stale: the summary of `{name}` differs from the contract")
+        if example and example.replace("|", "\\|") not in text:
+            fail("capcut-cli/reference.md", f"stale: the example for `{name}` differs from the contract")
+
+
+def check_budget() -> None:
+    total = 0
+    for relative in HAPPY_PATH:
+        path = ROOT / relative
+        if path.exists():
+            total += len(path.read_text(encoding="utf-8").split("\n"))
+    if total > HAPPY_PATH_BUDGET:
+        fail("happy path", f"{total} lines across {', '.join(HAPPY_PATH)}; the budget is "
+                           f"{HAPPY_PATH_BUDGET}. Move detail into a reference an agent opens on demand.")
+
+
+def check_profile_contradictions() -> None:
+    for path in markdown_files():
+        if "docs" in path.relative_to(ROOT).parts:
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").split("\n"), 1):
+            for pattern, why in CONTRADICTIONS:
+                if re.search(pattern, line, re.I):
+                    fail(f"{path.relative_to(ROOT)}:{number}", f"contradicts the style profile: {why}")
+
+
 def main() -> int:
+    check_reference()
+    check_budget()
+    check_profile_contradictions()
     check_frontmatter()
     check_referenced_files()
     check_links()
@@ -255,7 +318,7 @@ def main() -> int:
         for finding in sorted(set(findings)):
             print(f"  {finding}", file=sys.stderr)
         return 1
-    print("skills validate: frontmatter, referenced files, links and CLI parity all pass")
+    print("skills validate: frontmatter, files, links, CLI parity, generated reference, budget and profile all pass")
     return 0
 
 

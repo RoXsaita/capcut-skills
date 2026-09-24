@@ -47,21 +47,21 @@ def edit(path: Path, old: str, new: str) -> None:
 @case("a command the CLI does not have")
 def _(repo: Path) -> str:
     edit(repo / "capcut-cli" / "SKILL.md",
-         "capcutctl projects  ", "capcutctl summarise  ")
+         "capcutctl profile       #", "capcutctl summarise     #")
     return "not a command in the CLI contract"
 
 
 @case("a flag the CLI does not have")
 def _(repo: Path) -> str:
-    edit(repo / "capcut-cli" / "SKILL.md",
-         "capcutctl doctor   --project NAME", "capcutctl doctor   --project NAME --repair")
+    edit(repo / "capcut-editing" / "SKILL.md",
+         "capcutctl doctor --project NAME\n", "capcutctl doctor --project NAME --repair\n")
     return "has no --repair in the CLI contract"
 
 
 @case("a layout subcommand that does not exist")
 def _(repo: Path) -> str:
-    edit(repo / "capcut-cli" / "SKILL.md",
-         "capcutctl layout list", "capcutctl layout mosaic")
+    edit(repo / "capcut-editing" / "references" / "edit-plan.md",
+         "`capcutctl mograph list`", "`capcutctl layout mosaic`")
     return "is not a subcommand of layout"
 
 
@@ -100,7 +100,7 @@ def _(repo: Path) -> str:
 @case("the false dry-run guarantee, reintroduced")
 def _(repo: Path) -> str:
     edit(repo / "capcut-cli" / "SKILL.md",
-         "**`--dry-run` is a guarantee about transactional edit commands**",
+         "**`--dry-run` is a guarantee about transactional commands only:**",
          "Everything that writes takes `--dry-run`.\n\n**Also**")
     return "repeats the false guarantee"
 
@@ -133,8 +133,35 @@ def _(repo: Path) -> str:
 @case("a vendored contract of the wrong shape")
 def _(repo: Path) -> str:
     edit(repo / ".capcut" / "cli-compatibility.json",
-         '"requiredContractVersion": 1', '"requiredContractVersion": 2')
-    return "requiredContractVersion 2"
+         '"requiredContractVersion": 2', '"requiredContractVersion": 1')
+    return "requiredContractVersion 1"
+
+
+@case("a hand-edited or stale generated reference")
+def _(repo: Path) -> str:
+    edit(repo / "capcut-cli" / "reference.md", "Blocking ready-to-post check", "Optional check")
+    return "stale: the summary of `gate`"
+
+
+@case("a reference generated from another CLI version")
+def _(repo: Path) -> str:
+    edit(repo / "capcut-cli" / "reference.md", "from CLI 0.1.1", "from CLI 0.0.9")
+    return "was not generated from the vendored contract"
+
+
+@case("the happy path growing past its budget")
+def _(repo: Path) -> str:
+    path = repo / "capcut-editing" / "references" / "grammar.md"
+    path.write_text(path.read_text(encoding="utf-8") + "\nfiller\n" * 900, encoding="utf-8")
+    return "the budget is"
+
+
+@case("a retired rule that contradicts the style profile")
+def _(repo: Path) -> str:
+    path = repo / "capcut-editing" / "references" / "pitfalls.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n- Hard cuts only. No captions anywhere.\n")
+    return "contradicts the style profile"
 
 
 def main() -> int:

@@ -209,11 +209,11 @@ visible layers solely from inherited `render_index` values.
 
 `reference B` is the reference: it contains every layout (split screen, circle inset,
 full face) and the user calls it the masterpiece of the set. Its stack, verified against
-the JSON and against the CapCut timeline he screenshotted:
+the JSON and against the CapCut timeline the author screenshotted:
 
 | track | content | note |
 |---|---|---|
-| 0 | main — **always empty** | he calls it "the cover" and never uses it |
+| 0 | main — **always empty** | the author calls it "the cover" and never uses it |
 | 1 | blurred backdrop (the face again, under an effect) | furthest back |
 | 2 | screen-recording B-roll | `attribute: 1` (muted) |
 | 3 | indigo rect **when it frames the screen recording** | circle-inset scenes only |
@@ -228,7 +228,7 @@ The indigo rect appears at two different heights because it does two different j
 - framing the **screen recording** (circle-inset scenes) → *below* the face, `s=(1.05, 0.783582) t=(0, 0)`
 - framing the **talking head** (split-screen scenes) → *above* the face, `s=(1.827225, 0.752104) t=(0, -0.603627)`
 
-His words: *"the purple cover usually sits at the absolute top … however, in case the scene
+The author's words: *"the purple cover usually sits at the absolute top … however, in case the scene
 is the [circle] talking head, then the purple cover sits in the middle on top of the screen
 recording, but under the talking head."* Both halves check out against the JSON.
 

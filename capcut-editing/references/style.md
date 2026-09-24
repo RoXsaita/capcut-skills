@@ -1,9 +1,15 @@
-# Default house style
+# House style — provenance
 
-Measured from the author's finished projects, not inferred.
-This is the default grammar `capcutctl polish` / `pace` / `wrap` encode.
-Apply this profile only when the user selected the bundled house style. Their creative
-brief takes precedence; these measurements describe past edits rather than impose quotas.
+**The targets live in the profile, not here.** `capcutctl profile` prints them and `capcutctl gate`
+enforces them; `presets/profile.json` in the CLI is the one source of taste. This file records
+where the house style came from: what the author's hand edits measured across 88 drafts. Use it
+to understand a number, not to override the profile.
+
+One deliberate change of direction: the hand edits were hard-cut, almost text-free and had no
+animation (see "What the hand edits did not do"). The goal is now a **highly animated,
+ready-to-post** short, so the profile adds keyword supers, counters, callouts, a CTA card and a
+hook title — rendered with `mograph` — while keeping what measured well here: the seam formula,
+the sound lead, the speed ramps, overlays-only, no rotation, even-frame durations.
 
 **Provenance matters — read this before trusting a number.** The tables below were originally
 measured from `reference A` ALONE, and that one project is an outlier: it is the only recent
@@ -30,21 +36,21 @@ exactly the gap this file exists to close.
 | Video effects | *(library)* 402, but **370 of them are `Blur`** — the background plate `capcutctl layout background` already writes. Treat as "no effects except the blur plate". |
 | Text | essentially none (one element) |
 
-He cuts hard and lets **sound + speed** carry the edit. Adding a *video effect* or a colour grade
+The author cuts hard and lets **sound + speed** carry the edit. Adding a *video effect* or a colour grade
 is a style change — confirm first. Adding a **transition + its paired sound** is not; that is his
 normal seam, and omitting it is what makes CLI output read as mechanical.
 ## The seam formula — the single most copyable thing in this file
 
 When a transition is useful, its paired sound leads the picture by about
 **4 frames (0.13–0.14s at 30fps)**. A clean cut is also valid; use the selected-seam
-workflow in [finish.md](finish.md) rather than decorating every splice.
+workflow `build` applies (`sound.seams: "motivated"`) rather than decorating every splice.
 
-**Provenance, carefully.** The pairings and the lead were measured from his HAND-CUT projects
+**Provenance, carefully.** The pairings and the lead were measured from the author's HAND-CUT projects
 (reference B, reference C, reference E, reference A — median lead 0.14s across 20
 paired cuts) and live in `presets/sfx.json`. `capcutctl polish` writes them. A re-check on
 `generated test edit` found 22 of 22 seams at −0.133s with zero deviation — but that project is
 `polish` output, so it confirms the TOOL is consistent, not that the human is. Do not cite it as
-evidence about his style. The lead is roughly constant across transition durations; it is not
+evidence about the author's style. The lead is roughly constant across transition durations; it is not
 `duration / 2` (Flash at 0.20s also leads by 0.133s).
 
 | Transition | Typical dur | Paired SFX | SFX dur |
@@ -82,7 +88,7 @@ transition at roughly 40% of seams.
 ## The SFX palette *(library — 88 drafts)*
 
 All cached locally under `~/Library/Containers/com.lemon.lvoverseas/Data/Movies/CapCut/User Data/Cache/music/<md5>.mp3`
-and reusable. Keep to these — they are his established sound.
+and reusable. Keep to these — they are the established house sound.
 
 | Name | Dur | Uses | Projects | Cache md5 |
 |---|---|---|---|---|
@@ -120,7 +126,7 @@ Placement conventions observed:
 *(library, 6 hand-cut projects — reference A, reference B, reference F, reference E,
 reference H, reference D — ~189 cues)* Only **11–17%** of cues land within ±50ms of a cut.
 Median offset is **+0.00 to +0.17s (trailing)** for click/typing cues; seam sounds LEAD by about
-0.13s. A tool that snaps SFX to the nearest cut will sound *worse* than his hand edit. Encode the
+0.13s. A tool that snaps SFX to the nearest cut will sound *worse* than the hand edit. Encode the
 offset; do not quantize it away.
 
 ## Presets
@@ -135,19 +141,19 @@ template clips are a parts bin, not the finished ending.
 ## Structure that works
 
 Hook on the payoff (show the result first), then chronological build-up, then proof/receipts,
-then CTA. His CTA is consistently *"write [keyword] in the comments"*.
+then CTA. The CTA is consistently *"write [keyword] in the comments"*.
 
 **The first picture is proof.** A 5–7s full-face talking-head with nothing else on screen is a
-miss — he recut that open to split-screen with the result already happening. `finish` reports
+miss — the author recut that open to split-screen with the result already happening. `finish` reports
 it as `cold-open`. Put the result on screen from t=0 (split-screen, or circle + 80% recording)
-and only then cut to him alone.
-## He edits on OVERLAYS ONLY — the main track stays empty
+and only then cut to the speaker alone.
+## Overlays only — the main track stays empty
 
-His words: *"i never use the 'Main' which is cover, i use overlays, fully, so just use overlays,
+The author's words: *"i never use the 'Main' which is cover, i use overlays, fully, so just use overlays,
 never a Main timeline."*
 
-**"Cover" = CapCut's main track**, not "B-roll covering the face". When he says take something
-off the cover, he means move it off `flag=0` and onto an overlay track. Getting this backwards
+**"Cover" = CapCut's main track**, not "B-roll covering the face". When the author says take something
+off the cover, it means move it off `flag=0` and onto an overlay track. Getting this backwards
 wasted two rounds.
 
 Build every timeline this way:
@@ -159,16 +165,16 @@ Build every timeline this way:
 [3..] flag=2         frames and foreground overlays as needed
 ```
 
-Verified against his own projects:
+Verified against the author's own projects:
 
 | Project | main track | A-roll lives on |
 |---|---|---|
 | `Preset 3` | `flag=0, n=0` (empty) | — (endcard only, tri 1–6) |
 | `reference A` | 1 filler segment | overlay `tri=1`, 30 segments |
 
-Why he works this way: main-track clips auto-ripple — deleting one closes the gap and drags
-everything left. Overlay clips move independently, so he can nudge, trim and restack without the
-timeline fighting him. Respect it; it is the whole reason he wants a CapCut handoff at all.
+Why the author works this way: main-track clips auto-ripple — deleting one closes the gap and drags
+everything left. Overlay clips move independently, so an editor can nudge, trim and restack without the
+timeline fighting them. Respect it; it is the whole reason the author wants a CapCut handoff at all.
 
 ### Layering
 
@@ -186,7 +192,7 @@ Compression = source seconds consumed per screen second on the B-roll track.
 | reference A | 19.7× | 21/30 (70%) | 38% |
 | reference B | 1.5× | 9/18 (50%) | 62% |
 
-Speeds he actually uses: **20–100×** for an agent working (reference A: 260s→2.6s, 463s→4.6s),
+Speeds actually used: **20–100×** for an agent working (reference A: 260s→2.6s, 463s→4.6s),
 **2–4×** for navigating and typing (reference B: 2.0 / 2.2 / 3.1 / 4.0), **1.0×** for the thing
 he is naming right now, **0.4–0.7×** for the payoff. Reference A ends on 0.4×.
 
@@ -205,21 +211,23 @@ at `0.0`. Key counts vary by intent, including a return after a hold:
 A single keyframe on a property is a static hold doing nothing. Two of reviewed test edit's
 nine keyframed segments were that — dead weight.
 
-## What he does not do — verified across all 88 drafts, so stop wondering
+## What the hand edits did not do (88 drafts) — and what changed
 
 These are not "probably nots". Each was counted across the whole library:
 
 | Thing | Evidence | Verdict |
 |---|---|---|
 | Colour grading | 312 `hsl` objects, **every one at default**; 1 project has `color_curves`, unused | never |
-| Loudness normalisation | all 592 `loudnesses` have `enable: false` | never — CapCut's own LUFS tool is one he has never switched on |
+| Loudness normalisation | all 592 `loudnesses` have `enable: false` | never — CapCut's own LUFS tool is one never switched on |
 | Beat sync | all 1225 `beats` are `mode: 404`, `enable_ai_beats: false` (auto-generated per audio, ignored) | never |
 | Animations | 1493 `material_animations`, of which **3** are a real "Fade In" | effectively never |
-| Music bed | 4 stray tracks across 88 projects | historically never *in CapCut* — he added it after export. `capcutctl finish --music` now writes a quiet generated bed; see `finish.md`. Do not turn on CapCut's `enable_ai_beats`. |
+| Music bed | 4 stray tracks across 88 projects | historically never *in CapCut* — it was added after export. `capcutctl build` / `music` now write a ducked bed; see [edit-plan.md](edit-plan.md). Do not turn on CapCut's `enable_ai_beats`. |
 | Captions | 106 `texts` across 31 projects, 0–1 per video | essentially never |
 | Rotation | `KFTypeRotation` present 435× but the value is `0.0` everywhere | never tilts |
 
-The premium feel is entirely **pace, motion, and the seam formula**.
+In the hand edits the premium feel came from **pace, motion and the seam formula**. The profile keeps
+all three and adds rendered typography on top (keyword supers, not captions; no colour grade, no
+CapCut loudness normalisation, no AI beat sync — those verdicts still stand).
 
 ### Eased keyframes exist and are underused
 
