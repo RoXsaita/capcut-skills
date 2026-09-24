@@ -1,6 +1,22 @@
 # Pitfalls
 
 Concrete traps already hit on this project. Read before starting.
+
+## Motion graphics
+
+- **Animating everything.** Constant motion reads as machine-made as surely as none does. The
+  gate fails crowding (more than two things animating at once), template repeats inside 10s and
+  entrances inside 6 frames; it warns when there is no rest from overlays. Leave sentences bare.
+- **Subtitling instead of emphasising.** A `keyword-super` is 1–3 words that matter, not the
+  sentence. Full captions are not the house style.
+- **A spinning glow on a logo.** The native `orbit-glow` recipe rotated a blurred halo 720° on
+  linear keys and dropped the pop sound; it is no longer the logo default. Recipes are opt-in
+  and experimental.
+- **A callout on a moving shot.** A box drawn over a clip that is punching or panning drifts off
+  its target. Callouts go on static shots; otherwise `punch`.
+- **Trusting a graphic you have not looked at.** Run `mograph preview` with the real text and
+  `qa` at its hold frame. Arabic that fell back to another face refuses to render; check the
+  line fits the band.
 ## Process
 
 - **Building blind.** The #1 failure. 83s of timeline written from arithmetic, never previewed,
@@ -9,25 +25,26 @@ Concrete traps already hit on this project. Read before starting.
 - **Showing a silent preview.** SFX existed in the CapCut build but not in the ffmpeg preview, so
   the user asked "where are the sounds". Include audio in anything you hand over.
 - **Doing the whole video at once.** The user explicitly asked for one section at a time, checked
-  end-to-end. Cut the talking head, get it signed off, *then* B-roll. Recutting the face after
-  B-roll is on the timeline desyncs every shot.
+  end-to-end. Cut the talking head, get it signed off, *then* the shot list and `build`. `build`
+  re-anchors graphics to their words after a recut, but reviewed B-roll shots are timed to the
+  cut they were matched against: recheck `shots.json` after any recut.
 - **Speeding the talking head.** `clip.trim` that lengthens the source window and leaves the
   target the same is a speed ramp. Used on `a previous speech-recovery edit` to "save" first words
   the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
   re-run `cut --keep` so the clip gets *longer*, not faster. `pace` already refuses the
   principal track; trim does not, so do not reach for it on `content`.
-- **Cold open.** Handing over 5s+ of full-face with no screen. He recut it to split-screen
+- **Cold open.** Handing over 5s+ of full-face with no screen. The author recut it to split-screen
   proof from t=0. `finish` flags `cold-open`. The first picture is the result, sharing the
   frame. Full-face comes after.
 - **Editing outside CapCut, then importing the result.** The AI Video Editor B-roll was cropped
   1920×1080 → 1080×960 with ffmpeg in a session scratchpad, imported, and placed with an identity
   transform. Every check passed: `doctor` clean, the frames looked right, the timing was right.
-  What he got was a project where **no shot could be reframed** — the rows outside the crop no
+  What the author got was a project where **no shot could be reframed** — the rows outside the crop no
   longer existed — and where `media-map.json` pointed the original at a temp directory that had
   since been deleted, so there was no way back to the recording either. *"I cannot edit it after.
   I have to re-figure out where the fuck is the video."* The tell is a B-roll segment sitting at
   `scale 1.0, transform y 0.5` with no mask: the geometry is trivial because ffmpeg already did
-  it. `add` refuses this now; see the hub, rule 3.
+  it. `add` refuses this now; see [broll.md](broll.md) for the native verb for each ffmpeg pass.
 ## Indexing
 
 - **Loose OCR keywords silently over-match.** `wave` returned 1006 seconds because the *prompt
@@ -88,8 +105,8 @@ while root and active-timeline documents may differ. Use `sync` for drift. Reope
 verify current playback before final delivery.
 ## "Cover" means the main track
 
-Do not read "cover" as "B-roll covering his face". In his vocabulary the **main track is the
-cover**, and he never puts anything there. "Move it off the cover" = move it onto an overlay.
+Do not read "cover" as "B-roll covering the face". In the author's vocabulary the **main track is the
+cover**, and nothing ever goes there. "Move it off the cover" = move it onto an overlay.
 
 Tell for getting this right without asking: open `Preset 3` and look at track 0. It has zero
 segments. That is the convention.

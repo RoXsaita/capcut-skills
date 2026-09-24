@@ -36,7 +36,7 @@ numbers from a live project.
 ## Decisions that must not be silently undone
 
 - **Transitions are part of the house style**, not a deviation. See `style.md`
-  → "The seam formula". `capcutctl polish` owns them. **Video effects** other
+  → "The seam formula". `polish` (and `build`'s seam stage) owns them. **Video effects** other
   than the `Blur` background plate (`layout background`) stay off unless the
   user asks.
 - **Overlays only.** Main track always empty. See `style.md` rule zero.
@@ -46,7 +46,14 @@ numbers from a live project.
 
 - **`capcutctl match` is a first pass, not proof** — it scores sentences against change-moments
   and leaves weak/ambiguous beats on the face. Inspect frames and `verify-shots` before treating
-  a placement as true. Use the workflow in `capcut-editing-screen-recording`.
-  `capcutctl polish`, `pace`, `wrap` / `zoom` / `logo`, `finish` / `music` /
-  `timeline` are built. Use `polish --motivated` and `finish --music` on the
-  last pass. See `finish.md`.
+  a placement as true. See [broll.md](broll.md).
+- **Rendered graphics are `importVerified: false`** until the Mac checklist in the CLI's
+  `docs/mograph.md` passes on the CapCut build in use; `gate` reports it as a WARN.
+- **The rectangle spotlight (Q04)** is still behind its harvest gate; use `punch` or `callout-box`.
+
+## Build state
+
+`build` keeps `.capcutctl/build.json` (plan hash, shots applied, last verdict) and
+`.capcutctl/gate.json` (the last gate report) beside the draft, and each rendered graphic's
+sidecar in `mograph/<id>.json`. Read those before re-running anything on a project someone else
+started.

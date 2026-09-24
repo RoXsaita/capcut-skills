@@ -48,7 +48,7 @@ error you are trying to catch.
 
 ### What the thresholds are calibrated on
 
-One cut the user reviewed and called flawless, with the single seam he caught by ear as the
+One cut the user reviewed and called flawless, with the single seam the user caught by ear as the
 negative control:
 
 | | tail silence (outgoing) | head silence (incoming) | total |
@@ -69,7 +69,7 @@ ear hears speech stop dead, then a hole. Where the speaker genuinely paused, sil
 
 ```
 A/B  13.50s    ##########|.o########      good: speech -> cut -> speech
-C1/C2 32.87s   ####ooo...|...####oo#      good: he paused; silence both sides
+C1/C2 32.87s   ####ooo...|...####oo#      good: a pause; silence both sides
 old A/B        ##########|.......###      BAD: mid-flow out, then a hole
 ```
 
@@ -129,8 +129,8 @@ Rules that follow from this:
   dead space is, and where the aborted-take boundary actually sits.
 ## Picking between takes and retries
 
-The user's rule, verbatim: **"generally the last cut of a specific thing is better."** He warms up
-across a take and re-says lines until they land, so later almost always wins.
+The user's rule, verbatim: **"generally the last cut of a specific thing is better."** Speakers warm up
+across a take and re-say lines until they land, so later almost always wins.
 
 Procedure:
 
@@ -155,7 +155,7 @@ Trim the hesitation to ~0.25 s; cut the filler and stutter out entirely.
 Before A-roll approval, use the current `scenes --transcript` feed, compare it with the raw
 word-level transcript, and run `doctor`. Re-transcribe a bounded rendered diagnostic only
 when playback, lint or the user identifies a specific speech defect that source evidence
-cannot resolve, or when the user explicitly requests a proxy. See [the procedure](procedure.md).
+cannot resolve, or when the user explicitly requests a proxy. See [the procedure](aroll.md).
 
 A render transcript can expose a missing or repeated phrase but cannot prove syllable
 continuity; listen to the reported seam. A clean Whisper result is not a playback check.

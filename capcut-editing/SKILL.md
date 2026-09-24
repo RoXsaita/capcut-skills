@@ -1,221 +1,171 @@
 ---
 name: capcut-editing
 description: >
-  Edit real video projects with capcutctl, preserving native CapCut properties so the user finishes in the
-  CapCut UI he actually likes. THE HUB — start here for any CapCut editing request. Covers why
-  this exists, the non-negotiable rules, the draft_info.json schema, the user's measured style,
-  pitfalls, and current project state. The write path itself is `capcutctl` — read capcut-cli
-  before touching JSON. For cutting the talking head use capcut-editing-talking-head; for
-  screen-recording B-roll use capcut-editing-screen-recording; for drawn B-roll (titles,
-  typed commands, collages, marks) use capcut-motion-graphics.
+  Edit a talking-head + screen-recording short into a production-grade, highly animated CapCut
+  project that is ready to post, with capcutctl. THE skill for any CapCut editing request: the
+  first-run style question, the A-roll cut and sign-off, the shot list, writing edit.json (the
+  judgement: hook, graphics on words, brands, CTA, music brief), `capcutctl build`, the blocking
+  `capcutctl gate`, review and hand-off. The command reference is capcut-cli.
 ---
 
-# CapCut Editing — hub
+# CapCut editing
 
-Programmatic video editing that hands off cleanly to a human.
+The deliverable is a **CapCut project** the user can still drag, not a rendered file. The
+CLI does the mechanics; you make the calls a transcript cannot: which take, which order, which
+shot proves which sentence, which words deserve a graphic, and what the music should feel like.
 
-## First: install, then ask which style
+**The loop:** cut the face → user signs it off → shot list → `edit.json` → `build` → fix
+until `gate` passes → review frames → hand off. Everything after sign-off is one command.
 
-If `capcutctl` is not on PATH, clone and `npm link` [capcut-editor-cli](https://github.com/RoXsaita/capcut-editor-cli) (see its `SETUP.md`). It needs Node 20+ and **ffmpeg**.
+## 0. Setup and the one style question
 
-Then run `capcutctl preflight` once. It reports the dependencies, the bundled overlay artwork,
-the SFX palette and the drafts folder, and names the fix for anything missing. The layouts work
-on any machine; the SFX palette is CapCut's per-machine cache, so `polish` may report
-`unavailableSfx` and place no sound — that is a degraded edit, not a broken one, and it belongs
-in the hand-off. See `capcut-cli`.
+`capcutctl` must be on PATH (see the CLI's SETUP.md; ffmpeg required; Playwright + Chromium for
+graphics). Run `capcutctl preflight` once and read its non-blocking rows.
 
-Then **ask the user, once, before writing a project**:
+Ask **once, before the first write**:
 
-1. **Keep the bundled house style** (Suheil / suheilai) — `style.md`, `presets/layouts.json`, `polish` / `pace` / `wrap` as documented. Default if they already edit this way.
-2. **Harvest their own CapCut edits** — `capcutctl harvest`, then treat *their* drafts as the style source. Do not apply the bundled seam formula or branded endcard unasked.
-3. **Build their own style** — `capcutctl new --blank` (or `--from` a draft they name). Skip `polish` / `wrap` until they say what they want.
+1. **The bundled house profile** — `presets/profile.json` as shipped (Arabic tech shorts, indigo card,
+   white ring, keyword supers, motivated seams). `capcutctl profile` prints it.
+2. **Their own edits** — `capcutctl harvest --profile ~/capcut-profile.json`, then pass
+   `"profile": "~/capcut-profile.json"` in `edit.json` (or put it in `CAPCUTCTL_PRESET_DIR/profile.json`).
+   It overrides only what their drafts measured.
+3. **Blank** — `capcutctl new --blank`, and ask what they want before adding graphics or seams.
 
-Do not silently apply option 1 to a stranger.
+Never apply the house brand (indigo card, ring, endcard text) to a stranger silently.
 
-## Why this exists
+## Non-negotiables
 
-The deliverable is a *CapCut project*, not a rendered file. Code-render tools
-(HyperFrames, Remotion) cannot hand the edit back to CapCut's UI. CapCut stores
-projects as plain JSON on disk, which is what `capcutctl` writes. Rendered graphics
-still have a place — as *generated B-roll* placed with `capcutctl add --generated`
-(see `capcut-motion-graphics`) — but the cut, the layouts and the camera moves stay native.
+- **Overlays only.** The main track (CapCut's "cover") stays empty; every clip is on an overlay.
+- **Every decision stays a CapCut property.** Import full-frame originals from durable paths;
+  crops, zooms, speed and cuts are native (`add` refuses `PREFRAMED_MEDIA` / `EPHEMERAL_MEDIA`).
+  The only rendered media are `mograph` graphics, imported `--generated` with a re-render sidecar.
+- **The face is always 1×.** Recut length with `cut`; never speed or trim-stretch the talking head.
+- **Never hand-write `draft_info.json`.** If the CLI cannot express an edit, extend the CLI.
+- **CapCut closed for writes** (`capcutctl close`). `doctor` error-free before any hand-off.
+- **Export only when the user explicitly asks.** "Finish/polish/finalise" means the editable project.
 
-## The family
-
-| Skill | Use it for |
-|---|---|
-| **capcut-cli** | **`capcutctl` — what is already automated: create a project, the locked layouts, scene listing, snapshots. Check here BEFORE hand-writing JSON.** |
-| **capcut-editing** (this one) | The format, the safe write path, his style, pitfalls, project state |
-| **capcut-editing-talking-head** | Cutting the face: deterministic mechanics, semantic keep/order review, escalation diagnostics, and the 3 layout presets |
-| **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **Semantic matching requires inspected source evidence.** |
-| **capcut-motion-graphics** | Drawn B-roll — titles, typed commands, collages, marks — that does not read as generated: the rulebook, named easing curves, a Remotion kit, still-render QA, and the alpha render placed with `capcutctl add --generated`. |
-
-**Colour lives in `capcut-cli` (`grade`).** Preserve source colour by default.
-Scopes help diagnose exposure; whole-frame RGB averages do not establish correct
-skin colour or justify changing UI whites. Use explicit correction and compare in
-CapCut. The native Adjust material structure must not be hand-written.
-
-## Export permission
-
-Never export the final video on your own. Requests to finish, finalise, polish, or approve
-an edit authorize the editable project only. Export only when the user explicitly requests
-an export. Do not open the export dialog as a routine QA step. Use CLI frame/proxy QA; when export is explicitly authorized, use `capcutctl export`
-and `export-grid` instead of manual export and timeline-click loops. Inspect a supplied
-export with `export-grid`. See `references/preview-loop.md` for the bounded native bridge
-and targeted audio/motion checks.
-
-## The four rules
-
-**0. Overlays only.** His main track is **always empty**. He calls the main track "the cover" and
-never uses it — every clip goes on an overlay track (`flag=2`). Confirm against `Preset 3`
-(main track `n=0`). See `references/style.md`.
-
-**1. Doctor-gated handoff.** Build the editable project, run `capcutctl doctor`, and when it is
-error-free, tell the user the project is available in CapCut. For B-roll, layouts, crops, and
-finish work, render/composite representative frames with `qa` because `doctor` cannot see the
-picture. Full preview renders, contact sheets, and render re-transcription are targeted
-diagnostics when playback or lint identifies a risk; they are not mandatory before every
-ordinary A-roll build. See `references/preview-loop.md`.
-
-**2. Edit quality == index quality.** Every cut you cannot verify is a guess, and guesses are
-where the errors were. Never derive geometry either — render it and compare against a frame you
-know is right.
-
-**3. Every edit happens INSIDE CapCut.** His words, after the AI Video Editor video:
-
-> *"the videos were cropped outside of CapCut… I cannot edit it after. I have to re-figure out
-> where the fuck is the video."*
-
-The deliverable is a project he finishes by hand. That only holds if every decision is still a
-CapCut property he can drag. Anything you flatten into the pixels before import is a decision
-he can no longer take back, and `doctor` cannot see it, because the picture is *correct* — it
-is just frozen. **ffmpeg renders previews. It never produces media that goes into the project.**
-
-| Tempting ffmpeg pass | What it costs him | The CapCut-native verb |
-|---|---|---|
-| `crop=` to the split-screen half | Cannot reframe, re-zoom, or move the scene to another layout — those rows are gone | `capcutctl layout broll --row PIXEL_ROW` (writes `clip.scale` + `clip.transform` + the seam mask) |
-| `crop=` a landscape/window capture | Same, plus the measured window treatment is lost | `capcutctl layout screen --media FULL.mp4` |
-| `-ss`/`-t` to cut a subclip | He can only extend inside the window you chose | `add --src S --dur S` — the segment's `source_timerange` on the whole file |
-| `setpts=`/`atempo=` for speed | Speed stops being a slider | `add --cover IN-OUT`, or `capcutctl pace` |
-| `zoompan` for a punch-in | A camera move he cannot retime | `capcutctl keyframe --to 2.4 --hold 1.6` |
-| `concat` a montage | One clip where there were eight | one `add` per shot |
-
-Import the **full-frame original**, from a path that still exists next week. `add` and
-`replace-media` now enforce this: media exactly half the canvas is refused as `PREFRAMED_MEDIA`,
-and a source in `/tmp` or a session scratchpad is refused as `EPHEMERAL_MEDIA` — that is how the
-last project lost the trail back to its screen recordings for good. `--generated` is the honest
-escape for a Remotion/AE render with no editable original; `--derived-from ORIGINAL` records the
-source when pre-processing really was unavoidable. `capcutctl doctor` reports both faults on
-projects built before the contract existed.
-
-## The CLI — the only sanctioned way to write
-
-**`capcutctl`.** Read `capcut-cli` for the full surface. The short version:
+## 1. The talking head — then stop
 
 ```bash
-capcutctl cut VIDEO --lang ar                    # A-roll: index, review table
-capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --dry-run
-capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --project NAME
-capcutctl add --project NAME --media FILE --at S --dur S --track broll
-capcutctl layout auto|split-screen|circle|background --project NAME
-capcutctl match --project NAME --screen FILE [--apply]
-capcutctl verify-shots --project NAME
-capcutctl polish|pace|wrap --project NAME
-capcutctl grade    --project NAME [--measure] [--apply]   # colour: preserve unless explicitly corrected
-capcutctl timeline|finish|music --project NAME   # last pass: ASCII, scorecard, generated bed
-capcutctl scenes|inspect|doctor --project NAME
-capcutctl qa --project NAME --times 3,9,15       # composite real frames
-capcutctl snapshot|history|restore --project NAME
+capcutctl cut FACE.mp4 --lang ar                                   # table + FACE.aroll.json
+capcutctl cut FACE.mp4 --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --dry-run
+capcutctl cut FACE.mp4 --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --project NAME
+capcutctl scenes --project NAME --transcript                       # read the final script
+capcutctl doctor --project NAME
 ```
 
-`--track` is a name or an index. Read `capcut-cli` before reaching for `apply --spec`.
+Read the whole transcript in story order and decide: which complete take, which instance of a
+repeated line (usually the last, if it is also the most complete), false starts, near-duplicates,
+and the running order (hook → explanation → proof → payoff → CTA). Boundaries, dead air and seam
+repair are arithmetic — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
 
-Transactional project edits are snapshotted, applied to the root draft and the active timeline as separate
-documents, staged, re-parsed, atomically renamed, doctored, and rolled back on failure. It
-refuses to run while CapCut is open.
+**Stop and get the cut signed off.** Everything else anchors to it. After sign-off a recut is
+cheap — `build` re-anchors every graphic to its words — but a wrong keep-list poisons all of it.
 
-**Never hand-roll a project writer, and never hand-write `draft_info.json`.** If `capcutctl`
-cannot express the edit, extend it — the layouts got built exactly that way, by capturing a
-verified structure out of a real project instead of inventing one.
+## 2. The shot list
 
-### Retired scripts
+```bash
+capcutctl match --project NAME --screen SCREEN.mp4 --out shots.json   # sentence → moment
+capcutctl verify-shots --project NAME --shots shots.json               # CONTRADICTED blocks
+```
 
-The legacy Python helpers were removed: their writers bypassed transactions and their
-indexes/previews had diverged from the CLI. Use `capcutctl cut`, `find`, `qa` and `preview`.
-For implementation details, inspect the maintained `tools/` and `src/` in the CLI repository.
-See [the migration map](scripts/README.md).
+Edit `shots.json`: weak matches stay on the face (a valid answer). The picture must **prove the
+words**: verify the verb on before/action/after frames, separate waiting (ramp it) from the action
+(readable) and the result (hold it), one focus per shot, and the first 1.5s must show proof.
+Details and OCR discipline: [references/broll.md](references/broll.md).
 
-## Pace before anything else
+## 3. Write `edit.json` — the judgement
 
-Read the cut once as a viewer and mark each beat **breath** or **punch** before a layout, a zoom, a graphic, or a sound.
+```json
+{
+  "version": 1,
+  "shots": "shots.json",
+  "graphics": [
+    { "template": "hook-title",    "say": "بنيت موقع كامل", "params": { "text": "موقع كامل بدقيقة" } },
+    { "template": "keyword-super", "say": "مجاني",          "params": { "text": "مجاني بالكامل" } },
+    { "template": "number-pop",    "say": "تسعين",          "params": { "value": 90, "suffix": "%", "label": "أسرع" } },
+    { "template": "callout-box",   "at": 21.4,               "params": { "box": [210, 640, 520, 120], "label": "Publish" } },
+    { "template": "cta-card",      "say": "اكتب",            "params": { "keyword": "AI" } }
+  ],
+  "logos": "auto",
+  "endcard": { "text": "Follow" },
+  "sound": { "music": { "prompt": "minimal tense synth pulse, opens up warm at the reveal, no drums under speech" } }
+}
+```
 
-- **Breath** is where something has to be understood: a result, a face, a number, a line of type. Hold it. Slow the screen. One picture. No second move on top of it.
-- **Punch** is the cut into proof, the word that lands, the wait you kill. Short. One accent. A zoom only if it points at that one thing.
-- If it does not add clarity, emotion, or momentum, it does not go on the timeline. A treatment on a word that is not the point is the failure mode: right effect, wrong place, zero value.
-- The details that read as taste are small and motivated: the 4-frame sound lead, a seam only when the picture changes, type in empty wall and off the mouth, a push that returns, a mix with headroom. Check the frame on the word, at the peak, and on the return.
+- **`say`** anchors a graphic to the words as spoken in the cut (Whisper's spelling; hamza/dots fold).
+  It lands the profile's lead frames before the word. Use `occurrence` for the Nth time it is heard.
+  `at` is only for things with no word (a callout on a screen moment).
+- **Hook:** a `hook-title` inside the first second, over proof. **Claims:** one `keyword-super` of
+  1–3 words, never the whole sentence, at most one per ~6s. **Numbers:** `number-pop`.
+  **Instructions:** `punch` onto the element, or a `callout-box` on a *static* shot (never both on
+  one target). **CTA:** `cta-card` + endcard. Leave rests: not every sentence gets a graphic.
+- **Brands:** `"logos": "auto"` pops each brand once, on its first surviving mention; a brand with no
+  artwork becomes a text `brand-chip`. A versus video pops both or neither.
+- **Music:** a story-specific brief or a local `file`; the bed aligns to the graphics and picture
+  changes, ducks under speech, and never moves the picture.
 
-A logo or a text line that earned its place arrives with `capcutctl logo` or `capcutctl motion` (default **orbit-glow**: Blur underlay plus the moving mask). `--motion` picks shimmer, spotlight, gradient, or orbit-glow. That entrance is not a sticker, and it is not for zooms or B-roll.
+Full schema, every template's params, and defaults: [references/edit-plan.md](references/edit-plan.md).
+The grammar behind these choices: [references/grammar.md](references/grammar.md).
 
-## Workflow
+## 4. Build, then pass the gate
 
-1. **Cut the A-roll** — `capcutctl cut VIDEO`, read the full script, then dry-run and build with
-   `--keep` plus `--order` when the story differs from source order. Use safe inward
-   `--trim-beat` only for a justified edge. Face stays **1×**. Before handoff, read back the
-   current script with the existing `capcutctl scenes --project NAME --track CONTENT_TRACK
-   --transcript`; compare its timeline-order `says` rows with the raw word-level transcript and
-   remove accidental repeats, false starts, and filler by recutting the A-roll. This is an audit
-   feed, not proof: overlapping transcript segments can repeat words at clip boundaries. Re-run
-   it after any user tweak, then run `capcutctl doctor`; when it is error-free, tell the user the
-   project is available in CapCut. See `capcut-editing-talking-head`.
-2. **Stop and get the cut signed off.** Hand off the project and wait for the user to confirm
-   the keep list. Do not start B-roll, layouts, or finish until then. The face is the timeline's
-   clock; everything else hangs off it.
-3. **Give the scenes their looks** — `capcutctl layout …`. The first picture is proof
-   (split-screen or circle + 80% recording). Start from `capcutctl match --screen FILE`
-   for a sentence→moment shot list; weak matches stay on the face. Bind each narration
-   phrase to an inspected action/result using the [screen-recording skill](../capcut-editing-screen-recording/SKILL.md).
-   Compress waiting, keep actions legible, and hold results until they can be understood.
-   Pick one focus per shot; a zoom or highlight must point to that focus. `finish` checks
-   opening coverage; it cannot verify that the picture proves the words.
-4. **Give the video its graphic beats** — every short gets them; see
-   [capcut-motion-graphics](../capcut-motion-graphics/SKILL.md). From `scenes --transcript`,
-   tag the beats, keep 3–6 (one in the first 3s, one on the biggest claim, one on any number),
-   choose an archetype per beat and the one accent, and show the shot list before building.
-   Render outside, place with `add --generated`, re-run `layout auto`, inspect with `qa` on the
-   spoken word. Recorded B-roll still beats a graphic of the same thing; graphics carry what a
-   recording cannot — the claim, the number, the list, the "all of it".
-5. **Look at frames** — `capcutctl qa`. `doctor` validates structure and cannot see the picture;
-   two real defects passed it clean.
-6. **Check colour** — measure if a source looks wrong, then make a small explicit
-   correction with `grade --set`. Default `grade` leaves sources unchanged. Compare
-   before/after in CapCut; the proxy's slider model is approximate. Preserve screen
-   recordings unless a specific capture defect needs correction.
-7. **Finish** — run `finish` and review the proposed seams before applying polish.
-   A picture change is eligible for a transition; a clean cut is still a valid choice.
-   Choose music from the story: mood, energy arc, texture and pacing. Pass that brief with `music --prompt`
-   or use a suitable local track with `music --file`. Avoid a generic tech-demo bed.
-   Balance the voice first, then the bed and SFX underneath it. Picture stays locked;
-   speech is never recut to a beat. See `references/finish.md` for mixing and selected seams.
-8. **Review efficiently** — prefer timestamped CLI grids. If export is explicitly
-   authorized, use `export --grid` and inspect actual rendered frames at changed shots
-   and zoom rest/peak/return. Match the spoken words to the exact screen prompt/result.
-   Check short exported sections with sound for ramps and SFX; a grid cannot prove those.
-   Avoid repeated manual CapCut clicking/exporting. Without export permission, use bounded
-   `qa`/`preview` and native playback only for unresolved native effects. Report checks
-   that remain pending. See `references/preview-loop.md`.
-9. **`capcutctl doctor`** must be error-free before you hand it over.
+```bash
+capcutctl mograph preview --template number-pop --params '{"value":90,"suffix":"%"}' --out /tmp/n.png   # look first
+capcutctl build --project NAME --edit edit.json --dry-run
+capcutctl close
+capcutctl build --project NAME --edit edit.json          # exit 1 while the gate fails
+capcutctl gate --project NAME                            # re-check on its own at any time
+```
 
-Work **one section at a time** and check end-to-end. He asked for this explicitly.
+`build` applies, in order: reviewed shots (once) → `layout auto` → stress pushes → graphics on their
+words with their sounds → logo pops → endcard → motivated seams → music → duck → loudness → gate.
+Every stage replaces its own output; an unchanged plan on an unchanged cut is a no-op.
+
+Fix every **FAIL**, then rebuild:
+
+| Gate check | Usual fix |
+|---|---|
+| `hook` / `proof` / `first-picture` | Put a shot at 0s in `shots.json`; add a `hook-title` said in the first second |
+| `max-static` | A graphic, a `punch`, or a shorter shot in that window — or cut the dead air |
+| `simultaneity` / `entrance-spacing` | Move one graphic to a different word; drop it if the camera already moves |
+| `template-repeat` | A different template, or drop the second one |
+| `safe-zones` | `params.layout` or `params.center` into the text band |
+| `graphic-sfx` | The cue is missing on this machine (`preflight`), or `"sfx": null` was set by mistake |
+| `chip-and-logo` | Remove the brand-chip; the logo pop already names the brand |
+| `same-screen-transitions` / `seam-variety` | Rebuild (motivated seams) — never decorate an A-roll splice |
+
+**WARN** rows are not blockers, but each one goes in the hand-off by name.
+
+## 5. Review and hand off
+
+```bash
+capcutctl qa --project NAME --times 0.4,3.2,9.8 --sheet        # hook, each graphic's hold, each punch
+capcutctl preview --project NAME --from 0 --to 8 --out /tmp/open.mp4
+capcutctl doctor --project NAME
+```
+
+Look at the frames: the graphic reads at phone size, sits clear of the face and the UI element
+being discussed, and the picture proves the words. Check the opening and one dense section with
+sound. Then tell the user, in this order:
+
+1. The project name, and that it is ready in CapCut.
+2. The gate verdict and every WARN (e.g. `mograph-import` until the Mac checklist in the CLI's
+   `docs/mograph.md` has passed; `unseen` native layers; missing SFX).
+3. What you could not check (sound in native effects, motion easing at full speed).
+4. Ask how many minutes of manual fixing it took, and record it — the target is under ten.
 
 ## Reference files
 
 | File | Use it for |
 |---|---|
-| `references/capcut-format.md` | draft_info.json schema, segments, masks, keyframes, the multi-copy write, registration |
-| `references/style.md` | Rule zero, his measured signature, SFX palette |
-| `references/finish.md` | Last pass: motivated seams, ASCII timeline, generated beat-aligned bed |
-| `references/preview-loop.md` | Bounded frame/proxy checks and final native playback |
-| `references/pitfalls.md` | Concrete traps already hit. Read before starting. |
-| `references/project-state.md` | How to inspect current sources, timeline state and local caches |
-
-`scripts/README.md` maps retired helpers to the maintained CLI commands.
+| `references/edit-plan.md` | The `edit.json` schema, template catalogue and parameters, defaults |
+| `references/grammar.md` | Motion grammar: what each beat gets, density, rest, the never-list |
+| `references/aroll.md` | Talking-head judgement, the acoustic boundary rules, escalation |
+| `references/aroll-indexing.md` | The three indexes and the linter's calibration — when diagnosing a seam |
+| `references/broll.md` | Shot evidence, `find`/`match`/`verify-shots`, OCR discipline, framing and bbox rules |
+| `references/preview-loop.md` | Frame/proxy review, export permission, the native export bridge |
+| `references/capcut-format.md` | The draft format, mirrors, geometry and layer stack |
+| `references/pitfalls.md` | Traps already hit. Read before a first edit |
+| `references/style.md` | Where the house style came from (provenance); the targets live in the profile |
+| `references/project-state.md` | Reading current drafts, caches and decisions that must not be undone |

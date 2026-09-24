@@ -1,0 +1,46 @@
+name: CLI drift
+
+# The vendored contract and generated reference describe one CLI commit. This job compares them
+# with the CLI's current main, so a new command, flag or summary upstream shows up here as a
+# red check instead of as an agent hand-writing JSON because the skills never mentioned it.
+# Refresh with scripts/sync-cli.sh against a clone of the CLI. Not a pull-request check: a PR
+# that documents an unmerged CLI branch is legitimately ahead of main until both merge.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    name: Contract matches CLI main
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out skills
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Check out the CLI
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: RoXsaita/capcut-editor-cli
+          path: cli
+          persist-credentials: false
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+
+      - name: Compare vendored contract and reference with CLI main
+        run: |
+          set -euo pipefail
+          node cli/bin/capcutctl.mjs contract > /tmp/contract.json
+          node cli/bin/capcutctl.mjs contract --markdown > /tmp/reference.md
+          diff -u .capcut/cli-contract.json /tmp/contract.json
+          diff -u capcut-cli/reference.md /tmp/reference.md

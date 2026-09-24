@@ -26,9 +26,10 @@ jobs:
       - name: Require SKILL.md in each skill
         run: |
           set -euo pipefail
-          for s in capcut-cli capcut-editing capcut-editing-talking-head capcut-editing-screen-recording capcut-motion-graphics; do
+          for s in capcut-cli capcut-editing; do
             test -f "$s/SKILL.md"
           done
+          test -f capcut-cli/reference.md
           test -f LICENSE
           test -f NOTICE
 
