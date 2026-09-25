@@ -34,7 +34,9 @@ Do not silently apply option 1 to a stranger.
 ## Why this exists
 
 The deliverable is a *CapCut project*, not a rendered file. Code-render tools
-(HyperFrames, Remotion) cannot hand the edit back to CapCut's UI. CapCut stores
+(HyperFrames, Remotion) cannot hand the edit back to CapCut's UI. Motion design is the one
+thing that *is* rendered: `capcutctl mograph` scenes and templates become `--generated` clips
+inside the project, and the edit around them stays native (see capcut-motion-design). CapCut stores
 projects as plain JSON on disk, which is what `capcutctl` writes.
 
 ## The family
@@ -45,6 +47,7 @@ projects as plain JSON on disk, which is what `capcutctl` writes.
 | **capcut-editing** (this one) | The format, the safe write path, his style, pitfalls, project state |
 | **capcut-editing-talking-head** | Cutting the face: deterministic mechanics, semantic keep/order review, escalation diagnostics, and the 3 layout presets |
 | **capcut-editing-screen-recording** | B-roll: OCR index, ROI, content matching, `capcutctl find`. **Semantic matching requires inspected source evidence.** |
+| **capcut-motion-design** | Motion design: full-frame scenes (openers, hook slams, transitions, reveals, name cards) and overlay graphics. Catalog first, then the motion grammar and the promotion bar that keep it from reading as generated. |
 
 **Colour lives in `capcut-cli` (`grade`).** Preserve source colour by default.
 Scopes help diagnose exposure; whole-frame RGB averages do not establish correct

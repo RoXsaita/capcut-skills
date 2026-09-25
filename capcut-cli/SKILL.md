@@ -103,6 +103,14 @@ capcutctl version                                    # installed CLI version
 capcutctl layout screen --project NAME --at S --media FILE [--dur S] [--src S] [--track NAME]
 capcutctl layout auto   --project NAME [--plan]      # split-screen where B-roll covers
 capcutctl layout audit  --project NAME               # what each clip is vs what it should be
+
+# Motion design: read capcut-motion-design first
+capcutctl mograph list                               # overlay templates (keyword, counter, callout, CTA)
+capcutctl mograph scenes                             # full-frame scenes (opener, slam, reveal, stinger, name card)
+capcutctl mograph scene-preview --scene ID --params JSON --out sheet.png
+capcutctl mograph scene-render  --scene ID --params JSON --out clip.mp4 --format mp4
+capcutctl mograph add --project NAME --scene ID --params JSON --say WORDS [--dry-run]
+capcutctl build --project NAME --edit edit.json [--dry-run]   # graphics + scenes + sound from one plan
 ```
 
 **`--dry-run` is a guarantee about transactional edit commands** — the ones that go through

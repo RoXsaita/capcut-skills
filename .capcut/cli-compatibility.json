@@ -7,11 +7,11 @@
     "then update contractSyncedFrom and run scripts/validate.py."
   ],
   "repository": "https://github.com/RoXsaita/capcut-editor-cli",
-  "requiredContractVersion": 1,
+  "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "ca8cb97",
-    "branch": "main",
+    "commit": "01fd291",
+    "branch": "claude/motion-graphics-showreel-n1kk2s",
     "cliVersion": "0.1.1"
   }
 }
