@@ -13,6 +13,7 @@
 !capcut-editing/
 !capcut-editing-screen-recording/
 !capcut-editing-talking-head/
+!capcut-motion-design/
 # The CLI contract these skills are validated against, and the validator itself.
 !.capcut/
 !scripts/
