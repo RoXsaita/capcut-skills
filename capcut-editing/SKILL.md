@@ -33,6 +33,20 @@ Ask **once, before the first write**:
 
 Never apply the house brand (indigo card, ring, endcard text) to a stranger silently.
 
+If they hand over a **reference reel** ("edit it like this"), measure it before you plan:
+`capcutctl reference --media reel.mp4 --sheet shots.png --profile-out ref-profile.json`.
+Read the pacing numbers and the shot sheet, say in plain words what you would copy, and hold the
+edit to it with `gate --profile ref-profile.json`. Details: [references/render-qa.md](references/render-qa.md).
+
+## Every session: read the creative log first
+
+`capcutctl notes --project NAME --brief` prints what was already tried and rejected, the accepted
+look, the decisions, and what is still owed. Read it before proposing anything, and summarise the
+last state in one sentence. When the user rejects something, record it with the reason
+(`notes --reject … --why …`); when something lands, record that too (`notes --accept … --why …`).
+The log lives outside snapshots, so it survives `restore`, a compaction and a new session.
+Without it, the next round proposes the rejected look again.
+
 ## Non-negotiables
 
 - **Overlays only.** The main track (CapCut's "cover") stays empty; every clip is on an overlay.
@@ -155,6 +169,23 @@ sound. Then tell the user, in this order:
 3. What you could not check (sound in native effects, motion easing at full speed).
 4. Ask how many minutes of manual fixing it took, and record it — the target is under ten.
 
+**Any rendered file** — an authorized export, or one the user supplies — gets
+`capcutctl check-export --media FILE --project NAME` first. It reads the render, not the draft:
+black inside the edit, stray 1–2 frame shots, dead air, loudness, true peak, canvas and length.
+FAIL exits 1. Then `export-grid --times` on the moments it lists, and look at them before calling
+any of them a defect. Thresholds and what FAIL vs WARN means:
+[references/render-qa.md](references/render-qa.md).
+
+**For anything that will be published, get a fresh-eyes critique before hand-off.** Give a
+sub-agent with no context the grid or contact sheet, the `check-export` report, the creative log
+and any reference sheet. Brief it to find problems, not to praise: a verdict, then ranked problems
+with timecodes and evidence, then the five fixes to do first. You stop seeing your own edit; a
+reader with no context still sees a payoff line cut short or text too small to read at phone size.
+
+**Revisions.** For a note like "change only X", snapshot, make the change, then prove its scope
+before saying it is done: `capcutctl diff --project NAME --snapshot LABEL --allow SEGMENT-ID,track:NAME`.
+It exits 1 and names every change outside that scope. Record rejections in `notes` as they come.
+
 ## Reference files
 
 | File | Use it for |
@@ -164,6 +195,7 @@ sound. Then tell the user, in this order:
 | `references/aroll.md` | Talking-head judgement, the acoustic boundary rules, escalation |
 | `references/aroll-indexing.md` | The three indexes and the linter's calibration — when diagnosing a seam |
 | `references/broll.md` | Shot evidence, `find`/`match`/`verify-shots`, OCR discipline, framing and bbox rules |
+| `references/render-qa.md` | `check-export` thresholds, reference reels, scoped revisions with `diff --allow`, the creative log |
 | `references/preview-loop.md` | Frame/proxy review, export permission, the native export bridge |
 | `references/capcut-format.md` | The draft format, mirrors, geometry and layer stack |
 | `references/pitfalls.md` | Traps already hit. Read before a first edit |

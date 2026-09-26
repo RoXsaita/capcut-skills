@@ -96,11 +96,13 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 
 | Command | What it is for | Example |
 |---|---|---|
-| `diff` | What changed since a snapshot or another project. | `capcutctl diff --project NAME --snapshot NAME` |
+| `check-export` | QA the rendered file: black, flash frames, freezes, dead air, loudness, true peak, canvas and length. | `capcutctl check-export --media final.mp4 --project NAME` |
+| `diff` | What changed since a snapshot or another project; --allow proves a scoped edit stayed in scope. | `capcutctl diff --project NAME --snapshot NAME --allow SEGMENT-ID,track:broll` |
 | `doctor` | Structural integrity; must be error-free before hand-off. | `capcutctl doctor --project NAME` |
 | `gate` | Blocking ready-to-post check from the profile's motion grammar. | `capcutctl gate --project NAME` |
 | `preview` | Lightweight proxy with audio. | `capcutctl preview --project NAME --out preview.mp4` |
 | `qa` | Composite real frames (incl. keyframes, grades, mograph clips); --expect gates text. | `capcutctl qa --project NAME --times 3,9,15 --sheet` |
+| `reference` | Measure a reference reel's pacing in the gate's terms; --profile-out writes the density override. | `capcutctl reference --media reel.mp4 --project NAME --sheet shots.png` |
 | `review` | Proxy + EDL + contact sheet into outputs/. | `capcutctl review --project NAME` |
 
 ## Snapshots and repair
@@ -110,6 +112,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `apply` **T** | Apply a v1 spec of operations transactionally. | `capcutctl apply --project NAME --spec spec.json --dry-run` |
 | `history` | List snapshots. | `capcutctl history --project NAME` |
 | `init-spec` | A blank v1 spec to fill in. | `capcutctl init-spec --output spec.json` |
+| `notes` | Creative log: rejected looks and why, accepted look, decisions, outstanding; survives restore. | `capcutctl notes --project NAME --reject "orange captions" --why "fights the indigo frame"` |
 | `restore` **T** | Restore a snapshot. | `capcutctl restore --project NAME --snapshot NAME --dry-run` |
 | `rm` **T** | Move a project to the recycle bin (recoverable). | `capcutctl rm --project NAME --dry-run` |
 | `snapshot` | Snapshot the project. | `capcutctl snapshot --project NAME --label before-build` |
@@ -138,12 +141,13 @@ Every option each command accepts, from `capcutctl contract`.
 - `apply`: `--dry-run` `--force-running` `--no-backup` `--project` `--spec`
 - `blur-broll`: `--dry-run` `--plan` `--project` `--segment`
 - `build`: `--dry-run` `--edit` `--force` `--json` `--project`
+- `check-export`: `--json` `--media` `--peak` `--project` `--sheet` `--target` `--times`
 - `close`: `--json` `--timeout`
 - `contract`: `--json` `--markdown`
 - `cursor`: `--auto` `--dry-run` `--plan` `--project` `--segment`
 - `cut`: `--drop` `--dry-run` `--force` `--fps` `--in-place` `--into` `--keep` `--lang` `--model` `--no-repair` `--order` `--project` `--recover-beat` `--reindex` `--review` `--selftest` `--trim-beat`
 - `denoise`: `--dry-run` `--plan` `--project`
-- `diff`: `--against` `--project` `--snapshot`
+- `diff`: `--against` `--allow` `--project` `--snapshot`
 - `doctor`: `--json` `--project` `--root`
 - `endcard`: `--at` `--dry-run` `--hold` `--no-sfx` `--project` `--scale` `--text`
 - `export`: `--grid` `--out` `--overwrite` `--project` `--times`
@@ -167,6 +171,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `motion`: `--accent` `--asset` `--at` `--color` `--dry-run` `--duration` `--logo` `--name` `--project` `--scale` `--text` `--x` `--y`
 - `music`: `--attack-ms` `--dry-run` `--duck` `--file` `--hits` `--json` `--min-gap-ms` `--offset` `--plan` `--project` `--prompt` `--regen` `--release-ms` `--track` `--under-db` `--volume` `--width` `--words`
 - `new`: `--allow-ephemeral` `--blank` `--canvas` `--derived-from` `--derived-offset` `--dry-run` `--duration` `--force-running` `--fps` `--from` `--generated` `--height` `--media` `--new-timeline-id` `--no-localize` `--project` `--scenes` `--width`
+- `notes`: `--accept` `--brief` `--decide` `--done` `--json` `--project` `--reject` `--todo` `--why`
 - `oracle`: `--after` `--baseline` `--before` `--json` `--label` `--out` `--project` `--resource-noop` `--values`
 - `pace`: `--at` `--auto` `--cover` `--dry-run` `--max` `--min-gap` `--project` `--speed` `--track`
 - `polish`: `--dry-run` `--lead` `--motivated` `--no-interactions` `--no-sfx` `--no-transitions` `--project` `--track`
@@ -177,6 +182,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `punch`: `--at` `--dry-run` `--ease` `--ease-position` `--hold` `--kind` `--no-ease` `--on` `--plan` `--project` `--ramp` `--segment` `--track` `--word` `--zoom`
 - `qa`: `--allow-missing` `--at-broll` `--at-cuts` `--at-scenes` `--cut-window` `--expect` `--fps` `--from` `--guide` `--label` `--languages` `--native` `--no-cache` `--no-grade` `--ocr` `--out` `--preview` `--project` `--rects-only` `--resolution` `--selftest` `--sheet` `--times` `--to` `--width` `--z`
 - `ramp`: `--at` `--dry-run` `--project` `--result-at` `--segment` `--settle` `--speed` `--track`
+- `reference`: `--build-threshold` `--cut-threshold` `--json` `--media` `--overwrite` `--profile` `--profile-out` `--project` `--sheet`
 - `reframe`: `--auto` `--dry-run` `--plan` `--project` `--segment`
 - `remove`: `--at` `--dry-run` `--project` `--segments` `--track`
 - `replace-media`: `--allow-ephemeral` `--at` `--derived-from` `--derived-offset` `--dry-run` `--file` `--generated` `--height` `--media` `--media-duration` `--no-localize` `--project` `--retime` `--segments` `--track` `--width`

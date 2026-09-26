@@ -2,16 +2,16 @@
   "$comment": [
     "Which capcutctl these skills are written against.",
     "cli-contract.json is a verbatim copy of docs/cli-contract.json from the CLI repository",
-    "at the commit named below, and capcut-cli/reference.md is its rendered form.",
-    "Refresh all three together, never one alone: scripts/sync-cli.sh PATH_TO_CLI_CLONE",
-    "then run scripts/validate.py."
+    "at the commit named below. Refresh both together, never one alone:",
+    "  capcutctl contract > .capcut/cli-contract.json",
+    "then update contractSyncedFrom and run scripts/validate.py."
   ],
   "repository": "https://github.com/RoXsaita/capcut-editor-cli",
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "d7c2b5a",
-    "branch": "claude/cli-skills-video-optimization-hrmip9",
+    "commit": "28aeead",
+    "branch": "main",
     "cliVersion": "0.1.1"
   }
 }
