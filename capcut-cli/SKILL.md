@@ -108,7 +108,24 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 - **`export`** — CapCut's real renderer through a bounded macOS UI bridge. **Only on an explicit
   request.**
 
+## Motion design — read capcut-motion-design first
+
+`mograph` renders both overlay templates and full-frame scenes, and `build` places them from
+`edit.json`:
+
+```bash
+capcutctl mograph list                      # overlay templates (keyword, counter, callout, CTA)
+capcutctl mograph scenes                    # full-frame scenes (opener, slam, reveal, stinger, name card)
+capcutctl mograph scene-preview --scene ID --params JSON --out sheet.png
+capcutctl mograph scene-render  --scene ID --params JSON --out clip.mp4 --format mp4
+capcutctl mograph add --project NAME --scene ID --params JSON --say WORDS [--dry-run]
+```
+
+Pick the scene and its params from [capcut-motion-design](../capcut-motion-design/SKILL.md), not
+from this list. Every option is in [reference.md](reference.md).
+
 ## What it does not do
 
 No OTIO, no HTTP CapCut API, no headless CapCut renderer, no invented effect/sticker/keyframe
-structures (harvest a real one first), no full-frame rendered overlays, no animated mask geometry.
+structures (harvest a real one first), no animated mask geometry. Full-frame rendered pictures
+are the one exception, and only as `mograph` scenes imported `--generated`.

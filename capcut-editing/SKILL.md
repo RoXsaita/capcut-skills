@@ -52,7 +52,10 @@ Without it, the next round proposes the rejected look again.
 - **Overlays only.** The main track (CapCut's "cover") stays empty; every clip is on an overlay.
 - **Every decision stays a CapCut property.** Import full-frame originals from durable paths;
   crops, zooms, speed and cuts are native (`add` refuses `PREFRAMED_MEDIA` / `EPHEMERAL_MEDIA`).
-  The only rendered media are `mograph` graphics, imported `--generated` with a re-render sidecar.
+  The only rendered media are `mograph` graphics and scenes, imported `--generated` with a
+  re-render sidecar. Motion design is the one thing that *is* rendered: `capcutctl mograph`
+  scenes and templates become `--generated` clips and the edit around them stays native.
+  The catalog, the grammar and the promotion bar: [capcut-motion-design](../capcut-motion-design/SKILL.md).
 - **The face is always 1×.** Recut length with `cut`; never speed or trim-stretch the talking head.
 - **Never hand-write `draft_info.json`.** If the CLI cannot express an edit, extend the CLI.
 - **CapCut closed for writes** (`capcutctl close`). `doctor` error-free before any hand-off.
@@ -195,6 +198,7 @@ It exits 1 and names every change outside that scope. Record rejections in `note
 | `references/aroll.md` | Talking-head judgement, the acoustic boundary rules, escalation |
 | `references/aroll-indexing.md` | The three indexes and the linter's calibration — when diagnosing a seam |
 | `references/broll.md` | Shot evidence, `find`/`match`/`verify-shots`, OCR discipline, framing and bbox rules |
+| `../capcut-motion-design/SKILL.md` | Full-frame scenes (openers, hook slams, transitions, reveals, name cards) and overlay graphics |
 | `references/render-qa.md` | `check-export` thresholds, reference reels, scoped revisions with `diff --allow`, the creative log |
 | `references/preview-loop.md` | Frame/proxy review, export permission, the native export bridge |
 | `references/capcut-format.md` | The draft format, mirrors, geometry and layer stack |

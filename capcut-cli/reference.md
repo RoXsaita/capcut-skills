@@ -78,7 +78,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `brands` | Known brands, spoken aliases, and which have artwork. | `capcutctl brands` |
 | `endcard` **T** | The CTA card on the talking head near the end. | `capcutctl endcard --project NAME --text Follow --dry-run` |
 | `logo` **T** | Brand mark pop with its cue, timed off the transcript or --at. | `capcutctl logo --project NAME --auto --plan` |
-| `mograph` add\|list\|preview\|render\|rerender **T** | Rendered HTML/JS motion graphics: list, preview, render, add on a word, rerender. | `capcutctl mograph add --project NAME --template keyword-super --params '{"text":"أسرع"}' --say "أسرع" --dry-run` |
+| `mograph` add\|list\|preview\|render\|rerender\|scene-preview\|scene-render\|scenes **T** | Rendered HTML/JS motion graphics: list, preview, render, add on a word, rerender. | `capcutctl mograph add --project NAME --template keyword-super --params '{"text":"أسرع"}' --say "أسرع" --dry-run` |
 | `motion` **T** | EXPERIMENTAL native text/logo recipes; prefer mograph. | `capcutctl motion list` |
 | `wrap` **T** | Logos from what is said + the endcard in one pass. | `capcutctl wrap --project NAME --plan` |
 
@@ -167,7 +167,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `logo`: `--at` `--auto` `--brand` `--dry-run` `--glow` `--hold` `--logo` `--motion` `--name` `--no-sfx` `--plain` `--plan` `--pos` `--project` `--scale` `--track` `--words`
 - `loudness`: `--allow-boost` `--dry-run` `--measure` `--peak` `--plan` `--project` `--segments` `--target`
 - `match`: `--apply` `--dry-run` `--face` `--json` `--min-margin` `--out` `--project` `--screen` `--shots`
-- `mograph`: `--allow-unsafe` `--at` `--background` `--dry-run` `--format` `--id` `--no-sfx` `--occurrence` `--out` `--params` `--params-file` `--project` `--say` `--scale` `--template` `--times` `--words`
+- `mograph`: `--allow-unsafe` `--at` `--background` `--dry-run` `--format` `--id` `--no-sfx` `--occurrence` `--out` `--params` `--params-file` `--project` `--samples` `--say` `--scale` `--scene` `--template` `--times` `--words` `--workers`
 - `motion`: `--accent` `--asset` `--at` `--color` `--dry-run` `--duration` `--logo` `--name` `--project` `--scale` `--text` `--x` `--y`
 - `music`: `--attack-ms` `--dry-run` `--duck` `--file` `--hits` `--json` `--min-gap-ms` `--offset` `--plan` `--project` `--prompt` `--regen` `--release-ms` `--track` `--under-db` `--volume` `--width` `--words`
 - `new`: `--allow-ephemeral` `--blank` `--canvas` `--derived-from` `--derived-offset` `--dry-run` `--duration` `--force-running` `--fps` `--from` `--generated` `--height` `--media` `--new-timeline-id` `--no-localize` `--project` `--scenes` `--width`

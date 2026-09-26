@@ -10,7 +10,7 @@
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "28aeead",
+    "commit": "2ce6906",
     "branch": "main",
     "cliVersion": "0.1.1"
   }

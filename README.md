@@ -8,6 +8,7 @@ Agent skills for producing production-grade, highly animated CapCut shorts with 
 |---|---|
 | `capcut-editing` | **Start here.** The whole procedure: style question, A-roll cut and sign-off, shot list, `edit.json`, `build`, `gate`, review, hand-off |
 | `capcut-cli` | The rules `capcutctl` enforces, and `reference.md` — the generated command reference |
+| `capcut-motion-design` | Motion design: full-frame scenes (openers, hook slams, transitions, reveals, name cards) and overlay graphics — the catalog, the grammar, the promotion bar |
 | `capcut-motion-graphics` | Drawn B-roll that does not look generated: the rulebook, named easings, the Remotion kit, alpha render → `capcutctl add --generated` |
 
 Install by symlink into the agent's skills directory; see [the install steps](CONTRIBUTING.md#install).
