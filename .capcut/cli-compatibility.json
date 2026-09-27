@@ -11,7 +11,7 @@
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
     "commit": "5104756",
-    "branch": "feat/user-profile",
+    "branch": "main",
     "cliVersion": "0.1.1"
   }
 }
