@@ -22,16 +22,20 @@ until `gate` passes → review frames → hand off. Everything after sign-off is
 `capcutctl` must be on PATH (see the CLI's SETUP.md; ffmpeg required; Playwright + Chromium for
 graphics). Run `capcutctl preflight` once and read its non-blocking rows.
 
-Ask **once, before the first write**:
+The creator's brand, styles and preferences live in **their profile**, outside every repo:
+`~/.config/capcutctl/profile.json`, merged over the CLI's shipped, brand-neutral defaults.
+Run `capcutctl profile where` first.
 
-1. **The bundled house profile** — `presets/profile.json` as shipped (Arabic tech shorts, indigo card,
-   white ring, keyword supers, motivated seams). `capcutctl profile` prints it.
-2. **Their own edits** — `capcutctl harvest --profile ~/capcut-profile.json`, then pass
-   `"profile": "~/capcut-profile.json"` in `edit.json` (or put it in `CAPCUTCTL_PRESET_DIR/profile.json`).
-   It overrides only what their drafts measured.
-3. **Blank** — `capcutctl new --blank`, and ask what they want before adding graphics or seams.
+- **A user layer exists:** that is their style. Use it; don't ask again.
+- **None:** ask **once, before the first write**:
+  1. **Set up their profile** — `capcutctl profile init`, then fill `brand`, `tokens.color`,
+     `tokens.font` and `styles` with them. [capcut-motion](../capcut-motion/SKILL.md) says what each part is for.
+  2. **Measure their own edits** — `capcutctl harvest --profile FILE`, and copy what it measured
+     into their profile (or pass `"profile": FILE` in `edit.json` for this video only).
+  3. **The neutral defaults** — the shipped profile as it is. Placeholder colours; say so in the hand-off.
+  4. **Blank** — `capcutctl new --blank`, and ask what they want before adding graphics or seams.
 
-Never apply the house brand (indigo card, ring, endcard text) to a stranger silently.
+Never apply one creator's brand to another. Don't write a brand into a skill or a repo either.
 
 If they hand over a **reference reel** ("edit it like this"), measure it before you plan:
 `capcutctl reference --media reel.mp4 --sheet shots.png --profile-out ref-profile.json`.
@@ -55,7 +59,7 @@ Without it, the next round proposes the rejected look again.
   The only rendered media are `mograph` graphics and scenes, imported `--generated` with a
   re-render sidecar. Motion design is the one thing that *is* rendered: `capcutctl mograph`
   scenes and templates become `--generated` clips and the edit around them stays native.
-  The catalog, the grammar and the promotion bar: [capcut-motion-design](../capcut-motion-design/SKILL.md).
+  Brand, style and the video's own idea: [capcut-motion](../capcut-motion/SKILL.md).
 - **The face is always 1×.** Recut length with `cut`; never speed or trim-stretch the talking head.
 - **Never hand-write `draft_info.json`.** If the CLI cannot express an edit, extend the CLI.
 - **CapCut closed for writes** (`capcutctl close`). `doctor` error-free before any hand-off.
@@ -198,7 +202,7 @@ It exits 1 and names every change outside that scope. Record rejections in `note
 | `references/aroll.md` | Talking-head judgement, the acoustic boundary rules, escalation |
 | `references/aroll-indexing.md` | The three indexes and the linter's calibration — when diagnosing a seam |
 | `references/broll.md` | Shot evidence, `find`/`match`/`verify-shots`, OCR discipline, framing and bbox rules |
-| `../capcut-motion-design/SKILL.md` | Full-frame scenes (openers, hook slams, transitions, reveals, name cards) and overlay graphics |
+| `../capcut-motion/SKILL.md` | Motion design: brand from the profile, a style per video type, one idea per video; overlay graphics, full-frame scenes, drawn B-roll |
 | `references/render-qa.md` | `check-export` thresholds, reference reels, scoped revisions with `diff --allow`, the creative log |
 | `references/preview-loop.md` | Frame/proxy review, export permission, the native export bridge |
 | `references/capcut-format.md` | The draft format, mirrors, geometry and layer stack |

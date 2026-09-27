@@ -108,7 +108,7 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 - **`export`** — CapCut's real renderer through a bounded macOS UI bridge. **Only on an explicit
   request.**
 
-## Motion design — read capcut-motion-design first
+## Motion design — read capcut-motion first
 
 `mograph` renders both overlay templates and full-frame scenes, and `build` places them from
 `edit.json`:
@@ -121,8 +121,8 @@ capcutctl mograph scene-render  --scene ID --params JSON --out clip.mp4 --format
 capcutctl mograph add --project NAME --scene ID --params JSON --say WORDS [--dry-run]
 ```
 
-Pick the scene and its params from [capcut-motion-design](../capcut-motion-design/SKILL.md), not
-from this list. Every option is in [reference.md](reference.md).
+Decide what each beat becomes with [capcut-motion](../capcut-motion/SKILL.md), not from
+this list. The colours and font come from the profile (`capcutctl profile`). Every option is in [reference.md](reference.md).
 
 ## What it does not do
 

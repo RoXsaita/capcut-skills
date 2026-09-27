@@ -32,7 +32,7 @@ Never two of the same archetype running. Never more than one archetype in a shot
 **Beat.** One word carries the moment: *analyzing*, *published*, *done*, *broke*. The word is
 spoken (or is the obvious name for what is being shown) and everything else can go.
 
-**Picture.** One capital word in a condensed display face (Anton), cap height ~58% of the frame,
+**Picture.** One capital word in a condensed Latin display face (Anton; the one exception to the profile family, skip it if the brand forbids a second face), cap height ~58% of the frame,
 so the line is 1.5–3× wider than the frame. An I-beam stands where the writing begins.
 
 **Move.** Letters are struck when the writing reaches their place on the line (the rhythm is the
@@ -53,7 +53,7 @@ every screenshot, all the comments. The line under it names the act (*Watching f
 
 **Picture.** 8–12 stills of the real material, white-matted (a stroke that does not scale with
 the frame — a mat says "different sizes", a scaling stroke says "different distances"). A label
-in Inter 500 at the centre, with a band of light passing through the type every 900ms and a
+in the profile sans (body weight) at the centre, with a band of light passing through the type every 900ms and a
 dot count ticking every 280ms.
 
 **Move.** A pile at the near point of a tilted ellipse unwinds along it while the ring turns
@@ -90,7 +90,7 @@ answer's gutter leads by 3f, opacity in 300ms then an 8px settle; the block clim
 button pressed, a card turned over, a toggle flipped. The act is the sentence's verb.
 
 **Picture.** Flat props drawn as SVG at the frame's scale — a panel with a 24 radius on
-`#161616`, a folder, a button in the one accent. A pointer that is a *pointer*: white arrow with
+`SURFACE`, a folder, a button in the one accent. A pointer that is a *pointer*: white arrow with
 a dark edge, at cursor scale ×3–4 so it reads as a hand, not a UI cursor.
 
 **Move.** The pointer reaches on `AIM` (one throw, homing), the prop leans as it is carried
@@ -107,7 +107,7 @@ Springy overshoot on the drop. Two props moving at once. A cursor at 1× (it van
 
 **Beat.** A statistic or count is spoken: *450K*, *18 out of 18*, *ten times faster*, *0.13s*.
 
-**Picture.** The figure alone, Inter 600 at title size, unit or qualifier in `TEXT_2` at label
+**Picture.** The figure alone, profile sans at display weight and title size, unit or qualifier in `TEXT_2` at label
 size below or beside. The number may be the shot's accent. Nothing else in the frame.
 
 **Move.** Digits arrive on `EXPO_OUT` (a counter: the last 20% of the travel takes 60% of the
@@ -138,7 +138,7 @@ crops.
 
 **Beat.** A short list is spoken: three tools, four steps, the five things.
 
-**Picture.** Each item one line, Inter 500, left-aligned, anchored low, a hairline or nothing
+**Picture.** Each item one line, profile sans (body weight), left-aligned, anchored low, a hairline or nothing
 between them. Optional mark per item (a monochrome glyph, not a colour logo — brands are
 `capcutctl logo`'s job on the *face*).
 
@@ -161,7 +161,7 @@ in the accent at 2px, a one-word label in `TEXT`, or a dimming of everything but
 the dim comes up in 300ms. Then the native `capcutctl keyframe --focus` push-in does the
 camera, in CapCut, editable.
 
-**Slot.** Top half, on the recording placed by `capcut-editing-screen-recording`.
+**Slot.** Top half, on the recording placed by the edit (`capcut-editing`, references/broll.md).
 
 **Pitfalls.** Redrawing the UI. Arrows. A rectangle that pulses.
 
@@ -172,6 +172,6 @@ camera, in CapCut, editable.
 - One object, one move, one idea. If the brief needs two, it is two shots.
 - The camera is always doing something, and it hands over to the next shot rather than stopping.
 - Every value is on a named curve and every constant is in ms with a sentence.
-- Real material (his footage, his UI, his numbers) over illustration; illustration over stock.
+- Real material (the creator's footage, UI and numbers) over illustration; illustration over stock.
 - The still is the truth. If a frame from `stills.sh` does not look like a frame from a film you
   would stop scrolling for, the shot is not finished.

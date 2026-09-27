@@ -10,8 +10,8 @@
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "ac46154",
-    "branch": "main",
+    "commit": "5104756",
+    "branch": "feat/user-profile",
     "cliVersion": "0.1.1"
   }
 }

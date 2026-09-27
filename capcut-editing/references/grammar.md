@@ -25,7 +25,7 @@ decide which beat it is.
   with headroom. Check the frame on the word, at the peak, and on the return.
 
 Drawn B-roll — titles, typed commands, collages, marks — has its own rulebook, named easing
-curves and scene vocabulary in [capcut-motion-graphics](../../capcut-motion-graphics/SKILL.md).
+curves and scene vocabulary in [capcut-motion](../../capcut-motion/SKILL.md).
 Recorded B-roll still beats a graphic of the same thing; graphics carry what a recording cannot:
 the claim, the number, the list, the "all of it".
 

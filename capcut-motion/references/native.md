@@ -1,21 +1,13 @@
----
-name: capcut-motion-design
-description: >
-  Motion design for his videos: full-frame scenes (opener, hook slam, textless transition,
-  particle reveal, style-frame stinger, name card) and the overlay graphics that sit on the
-  face, all rendered by `capcutctl mograph` with real motion blur, grain and synced sound, and
-  placed in the CapCut project. Use for any request for motion graphics, B-roll motion design, transitions,
-  an intro/outro, kinetic typography, "make it look like a motion designer did it", a
-  showreel, or a standalone motion clip. Catalog first; a new design follows the promotion bar
-  so the library never turns into slop.
----
+# The native engine — `capcutctl mograph`
 
-# CapCut motion design
+The CLI renders two kinds of motion graphic itself, with real motion blur, grain and synced
+sound, in the profile's colours and font, and places them as `--generated` clips. Anything this
+engine can express stays here: it re-renders when the profile changes and `build` re-anchors it
+on a recut. Reach for the Remotion kit ([remotion.md](remotion.md)) only for what it cannot draw.
 
-Generated motion graphics usually read as slop for four reasons. The motion is borrowed from
-presets (fades, generic slides). Nothing shares a system: every piece has its own colours,
-fonts and timing. Transitions have no reason to happen. And nobody looks at frames before
-shipping. This skill covers all four with one engine, one catalog, one grammar and one QA loop.
+The catalog below is a **vocabulary, not a menu.** The video's idea and its style decide what a
+beat becomes (see the skill); the catalog is where you start building it. When the idea needs a
+move the catalog does not have, that is a new scene or a new param — see *A new design*.
 
 ## Two kinds of motion graphic
 
@@ -47,7 +39,7 @@ capcutctl mograph list            # the overlay templates
 | Energy, montage beat | `style-stinger` | `count` 4/8, `word`, `words`, `looks` | hard cuts either side |
 | Sign-off | `dot-signature` | `name`, `role`, `footer`, `hold` | the end |
 
-Text is Arabic-first: `word-slam`, `particle-word` and `dot-signature` lay Arabic out by word,
+Text follows the profile's languages. `word-slam`, `particle-word` and `dot-signature` lay Arabic out by word,
 right to left, with punctuation on the reading end. Keep copy to **1–3 words** per line and
 **five words at most** in a caption. The scene wraps and fits, but short is what reads at speed.
 
@@ -56,9 +48,9 @@ right to left, with punctuation on the reading end. Keep copy to **1–3 words**
 1. **Mark the moments** in the signed-off cut: the hook claim (inside the first 3 s), at most
    one break or reveal in the middle, and the sign-off. Never cover the proof. When the screen
    recording shows the result, the picture is the result, not a scene.
-2. **Pick from the catalog and write params only.** Check the chain column: a scene's
-   `handoff.out` should equal the next scene's `in`, or it should end on `"footage"` or a
-   hard cut.
+2. **Build the beat the idea asks for.** When a catalog scene does it, params are enough;
+   when it nearly does, add the param. Check the chain column: a scene's `handoff.out` should
+   equal the next scene's `in`, or it should end on `"footage"` or a hard cut.
 3. **Preview before placing**, and look at the sheet (see QA below):
 
    ```bash
@@ -72,7 +64,7 @@ right to left, with punctuation on the reading end. Keep copy to **1–3 words**
      "graphics": [ { "template": "number-pop", "say": "تسعين", "params": { "value": 90, "suffix": "%" } } ],
      "scenes": [
        { "scene": "word-slam", "say": "بالكود", "params": { "text": "صُنع بالكود", "then": "بأمر واحد", "to": "footage" } },
-       { "scene": "dot-signature", "at": 41.5, "params": { "name": "سهيل", "role": "صانع محتوى" } }
+       { "scene": "dot-signature", "at": 41.5, "params": { "name": "BRAND_NAME", "role": "BRAND_ROLE" } }
      ] }
    ```
 
@@ -90,12 +82,14 @@ right to left, with punctuation on the reading end. Keep copy to **1–3 words**
 
 Chain scenes whose hand-offs match, render each one as mp4, and join them:
 
+`BRAND_NAME` is the profile's `brand.name`; read it, never type a person's name from memory.
+
 ```bash
 capcutctl mograph scene-render --scene ignition      --params '{"to":"hot"}' --out 01.mp4 --format mp4
 capcutctl mograph scene-render --scene word-slam     --params '{"text":"صُنع بالكود","bg":"hot","to":"paper"}' --out 02.mp4 --format mp4
 capcutctl mograph scene-render --scene shape-grid    --params '{}' --out 03.mp4 --format mp4
 capcutctl mograph scene-render --scene particle-word --params '{"text":"Opus 5.5","from":"dots"}' --out 04.mp4 --format mp4
-capcutctl mograph scene-render --scene dot-signature --params '{"name":"سهيل"}' --out 05.mp4 --format mp4
+capcutctl mograph scene-render --scene dot-signature --params '{"name":"BRAND_NAME"}' --out 05.mp4 --format mp4
 ```
 
 ```bash
@@ -109,8 +103,8 @@ that mismatch is exactly what reads as slop.
 
 ## A new design
 
-Read [references/authoring.md](references/authoring.md) and hold
-[references/grammar.md](references/grammar.md). In short, in this order:
+Read [native-authoring.md](native-authoring.md) and hold
+[taste.md](taste.md). In short, in this order:
 
 1. An existing scene does the job: **params only.**
 2. A param would do it: **add the param** to that scene (a variant), with its header and test case.
@@ -139,10 +133,3 @@ Nobody on this machine can watch the clip in real time, so the frames are the re
 - Sound can't be heard here. Every scene declares `cues`, and its level is normalised to
   -6 dBFS peak, so it sits under the voice and the project's loudness pass finishes it. Say
   in the hand-off that the mix was checked by numbers, not by ear.
-
-## Files
-
-| File | Use it for |
-|---|---|
-| `references/grammar.md` | The motion grammar: what makes motion read as designed rather than generated, with numbers |
-| `references/authoring.md` | Writing, forking and promoting a scene: anatomy, the kit, the checklist |

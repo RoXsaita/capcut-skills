@@ -1,50 +1,44 @@
 # Rulebook — how a drawn frame is allowed to look and move
 
-Adapted from the Diffusion Studio brand and motion guides (MPL-2.0) and from measuring their
-open-source launch video (MIT), then cut down to what applies to a graphic that will sit in a
-CapCut edit. Pixel values assume a 1080 short edge; scale them for anything else. Frame counts
-assume 30fps; keep the millisecond values when the rate differs.
+The craft rules — layout, timing, motion, cuts — are adapted from the Diffusion Studio motion
+guide (MPL-2.0) and from measuring their open-source launch video (MIT). Their *brand* (palette,
+typeface) is deliberately not here: the brand is the creator's profile.
+Pixel values assume a 1080 short edge; scale them for anything else. Frame counts assume 30fps; keep the millisecond values when the rate differs.
 
 ## Visual principles
 
 - Build structure with scale, weight, spacing and luminance.
-- Keep the frame near-achromatic. Use colour only when it carries meaning.
+- Let the profile's `ink` / `paper` / `text` roles carry the frame. Use `brand` and `accent` only
+  when they carry meaning.
 - Show the subject clearly. Do not decorate over controls or content the viewer must read.
 - One clear focal point beats several equal ones.
 
-## Colour
+## Colour and type come from the profile
 
-| Role | Value |
-|---|---|
-| Background | `#000000` |
-| Surface | `#161616` |
-| Text | `#F8F8F8` |
-| Text, secondary | `#A4A4A4` |
+This rulebook has no palette and no typeface of its own. Both are the creator's, in their profile
+(`capcutctl profile`: `tokens.color`, `tokens.scene.palette`, `tokens.font`), and the kit reads them
+(`kit/theme.ts`). What holds whatever the brand is:
 
-The palette has no accent of its own. When a piece needs one, take it from the subject: a colour
-already in its footage, interface or supplied material. One accent per piece, on at most one
-element per shot, never a title or a large fill. Beside captured UI avoid an accent that reads as
-one of that interface's states (red for error, green for success).
-
-Invert the palette for a piece whose footage is predominantly light. Put text on a plain
-background or surface; do not rely on a shadow or stroke for contrast.
-
-## Typography
-
-One clean sans (Inter, or Geist) plus its mono companion. No italic. No display faces.
+- Colours are **roles**. `ink` / `paper` / `text` / `muted` build the frame; `brand` fills a block
+  behind text; `accent` marks **one** element per shot, never a title or a large fill.
+- Which role leads is the **style's** call (`styles.NAME.lead` / `.accent`), not this page's.
+- Beside captured UI, do not use an accent that reads as one of that interface's states (the
+  error or success colour of that app).
+- Invert (`paper` ground, `ink` type) for a piece whose footage is predominantly light. Put text
+  on a plain ground; do not rely on a shadow or stroke for contrast.
+- One family, the profile's, plus its mono for technical micro-type. No italic.
 
 | Role | Size | Weight | Copy limit |
 |---|---:|---:|---:|
-| Title | 96 | 600 | 32 glyphs |
-| Subtitle | 60 | 400 | 64 |
-| Lower-third name | 48 | 500 | 28 |
-| Lower-third detail | 30 | 400 | 40 |
-| Label | 24 | 500 | 16 |
+| Title | 96 | display | 32 glyphs |
+| Subtitle | 60 | body | 64 |
+| Lower-third name | 48 | body | 28 |
+| Lower-third detail | 30 | body | 40 |
+| Label | 24 | body | 16 |
 
-Sizes are starting points; keep the order and rough ratios. **Rewrite copy that exceeds a limit
-instead of shrinking the type.** At most two text elements in one shot: a primary line and its
-qualifier. Left-align copy and anchor it low; centre only when it stands alone on a plain
-background.
+Sizes are starting points for a drawn piece; the native supers use the profile's `tokens.type`.
+Keep the order and rough ratios. **Rewrite copy that exceeds a limit instead of shrinking the
+type.** At most two text elements in one shot: a primary line and its qualifier.
 
 ## Captured imagery
 

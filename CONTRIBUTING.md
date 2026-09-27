@@ -43,7 +43,7 @@ or overwrite unrelated customizations. Review an existing entry before replacing
 ```bash
 agent_skills="${CODEX_HOME:-$HOME/.codex}/skills"
 mkdir -p "$agent_skills"
-for skill in capcut-cli capcut-editing capcut-motion-graphics capcut-motion-design; do
+for skill in capcut-cli capcut-editing capcut-motion; do
   if [ -e "$agent_skills/$skill" ] || [ -L "$agent_skills/$skill" ]; then
     printf 'Skipped existing skill: %s\n' "$agent_skills/$skill"
     continue

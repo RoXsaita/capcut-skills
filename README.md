@@ -8,18 +8,17 @@ Agent skills for producing production-grade, highly animated CapCut shorts with 
 |---|---|
 | `capcut-editing` | **Start here.** The whole procedure: style question, A-roll cut and sign-off, shot list, `edit.json`, `build`, `gate`, review, hand-off |
 | `capcut-cli` | The rules `capcutctl` enforces, and `reference.md` — the generated command reference |
-| `capcut-motion-design` | Motion design: full-frame scenes (openers, hook slams, transitions, reveals, name cards) and overlay graphics — the catalog, the grammar, the promotion bar |
-| `capcut-motion-graphics` | Drawn B-roll that does not look generated: the rulebook, named easings, the Remotion kit, alpha render → `capcutctl add --generated` |
+| `capcut-motion` | Motion design with taste, not templates: the creator's brand from their profile, a style per video type, one idea per video checked against a log; overlay graphics, full-frame scenes, and drawn B-roll via the Remotion kit |
 
 Install by symlink into the agent's skills directory; see [the install steps](CONTRIBUTING.md#install).
 Set up the CLI with its [SETUP.md](https://github.com/RoXsaita/capcut-editor-cli/blob/main/SETUP.md).
 
-**Agents: before the first write, ask which style to use** — the bundled house profile, a profile
-harvested from the user's own drafts (`capcutctl harvest --profile`), or blank. See
-`capcut-editing/SKILL.md`.
-
-The taste lives in the CLI's `presets/profile.json` (tokens, camera, seams, sound, density targets,
-motion grammar), not in these documents: `capcutctl build` applies it and `capcutctl gate` enforces it.
+**These skills hold no brand.** A creator's colours, font, rules and per-video-type styles live
+in their own profile, `~/.config/capcutctl/profile.json` (`capcutctl profile init` starts one),
+merged over the CLI's shipped, brand-neutral `presets/profile.json`. Neither repository stores
+it. So the skills can be updated freely, and every creator's videos stay in their own brand.
+`capcutctl build` applies the profile and `capcutctl gate` enforces it. Agents check
+`capcutctl profile where` before the first write; see `capcut-editing/SKILL.md`.
 `docs/` holds history that is not on an agent's path (the private recorder, retired scripts).
 
 ## Which `capcutctl` these skills describe

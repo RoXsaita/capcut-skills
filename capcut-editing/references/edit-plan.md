@@ -7,6 +7,7 @@ Paths are relative to the plan file. Unknown top-level keys refuse, so a typo is
 {
   "version": 1,
   "profile": "~/capcut-profile.json",
+  "style": "demo",
   "words": "~/Downloads/.video-index/face.whisper-large-v3-turbo.json",
   "shots": "shots.json",
   "layout": "auto",
@@ -21,7 +22,8 @@ Paths are relative to the plan file. Unknown top-level keys refuse, so a typo is
 
 | Key | Default | Meaning |
 |---|---|---|
-| `profile` | bundled | A profile override (`harvest --profile` writes one). Merges over `presets/profile.json`. |
+| `profile` | yours | A per-video override (`harvest --profile` or `reference --profile-out` writes one). Merges over the shipped defaults and the creator's `~/.config/capcutctl/profile.json`. |
+| `style` | none | A style from the profile's `styles` (`capcutctl profile` lists them). Its `pace.graphicEvery` becomes the gate's drought target; an unknown name refuses with the list. |
 | `words` | the transcript `cut` cached for the face | Word-level Whisper JSON the anchors resolve against. |
 | `shots` | none | A reviewed `match` shot list. Applied **once**; later changes go through `match`/`replace-media`, or restore a snapshot. |
 | `layout` | `"auto"` | `layout auto`: split-screen where B-roll covers the face, full face elsewhere. `false` leaves layouts alone. |

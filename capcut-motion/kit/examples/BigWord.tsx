@@ -13,7 +13,7 @@ import {BG, TEXT} from '../theme';
 // and its end is carried off the left edge. The shot leaves on its own pull.
 //
 // Ported from the "Analyzing" shot of the Diffusion Studio launch video (MIT).
-// Needs a condensed display face; `ANTON` from ../fonts is the reference.
+// Needs Anton (a condensed Latin display face) installed; it is outside the profile font on purpose.
 
 // Anton's advances per 2048 units of em, for the letters the reference used.
 // Anything else is set at the average — the pan's end will be a few pixels

@@ -36,7 +36,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILLS = ["capcut-cli", "capcut-editing", "capcut-motion-graphics", "capcut-motion-design"]
+SKILLS = ["capcut-cli", "capcut-editing", "capcut-motion"]
 REFERENCE = ROOT / "capcut-cli" / "reference.md"
 # What an agent reads on the happy path. Every line here is context spent before the first
 # edit; the old four-skill set was ~4,600 lines and 37 commits stale.

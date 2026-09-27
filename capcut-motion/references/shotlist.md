@@ -77,8 +77,8 @@ Columns, one row per graphic beat:
 | … | | | | | | | |
 
 **Copy** is checked against the role's limit (`kit/theme.ts` → `TYPE`); over it, rewrite.
-**Material** is real — frames from his footage (`ffmpeg -ss T -i FILE -frames:v 1`), his
-screenshots, his numbers — or it is a drawn prop; never stock. **Sound cue** is what `polish`
+**Material** is real — frames from the creator's footage (`ffmpeg -ss T -i FILE -frames:v 1`), their
+screenshots, their numbers — or it is a drawn prop; never stock. **Sound cue** is what `polish`
 will key on, not something baked into the render.
 
 Show the table to the user before building. A shot list is cheap; six renders are not.

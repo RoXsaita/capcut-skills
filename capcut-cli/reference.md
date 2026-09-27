@@ -14,7 +14,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `inspect` | Tracks, canvas and active timeline as JSON. | `capcutctl inspect --project NAME` |
 | `new` **T** | Create a project (clone of Preset 3, --blank, or --from a draft). | `capcutctl new --project NAME --blank --dry-run` |
 | `preflight` | Will this machine work: deps, artwork, SFX palette, drafts folder. | `capcutctl preflight` |
-| `profile` | The effective style profile (tokens, camera, sound, density, grammar). | `capcutctl profile` |
+| `profile` init\|show\|where | The effective style profile, its layers (bundled → yours → --profile), and init for your own. | `capcutctl profile where` |
 | `projects` | List CapCut drafts. | `capcutctl projects --json` |
 | `scenes` | Every clip: time, track, desc, media, source; --transcript adds what is said. | `capcutctl scenes --project NAME --transcript` |
 | `status` | Is CapCut running; optionally wait for it to close. | `capcutctl status --json` |
@@ -157,7 +157,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `fade`: `--at` `--dry-run` `--in` `--out` `--plan` `--project` `--segments` `--track`
 - `find`: `--boxes` `--context` `--focus` `--kind` `--media` `--min-score` `--moments` `--refresh` `--region` `--says` `--settle` `--shows` `--strip`
 - `finish`: `--dry-run` `--file` `--hits` `--json` `--music` `--offset` `--plan` `--polish` `--project` `--prompt` `--regen` `--track` `--volume` `--width`
-- `gate`: `--json` `--profile` `--project` `--record`
+- `gate`: `--json` `--profile` `--project` `--record` `--style`
 - `grade`: `--apply` `--clarity` `--dry-run` `--face-detail` `--from` `--layer` `--measure` `--plan` `--project` `--reference` `--reference-at` `--reset` `--samples` `--set` `--sharpen` `--source` `--strength` `--target` `--to` `--vignette`
 - `harvest`: `--out` `--plan` `--profile` `--projects` `--root`
 - `history`: `--project`
@@ -179,7 +179,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `polish`: `--dry-run` `--lead` `--motivated` `--no-interactions` `--no-sfx` `--no-transitions` `--project` `--track`
 - `preflight`: `--json` `--root`
 - `preview`: `--fps` `--from` `--native` `--no-cache` `--no-grade` `--out` `--project` `--resolution` `--to`
-- `profile`: `--json` `--profile`
+- `profile`: `--dry-run` `--force` `--json` `--profile`
 - `projects`: `--json` `--root`
 - `punch`: `--at` `--dry-run` `--ease` `--ease-position` `--hold` `--kind` `--no-ease` `--on` `--plan` `--project` `--ramp` `--segment` `--track` `--word` `--zoom`
 - `qa`: `--allow-missing` `--at-broll` `--at-cuts` `--at-scenes` `--cut-window` `--expect` `--fps` `--from` `--guide` `--label` `--languages` `--native` `--no-cache` `--no-grade` `--ocr` `--out` `--preview` `--project` `--rects-only` `--resolution` `--selftest` `--sheet` `--times` `--to` `--width` `--z`
