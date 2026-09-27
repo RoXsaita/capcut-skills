@@ -76,6 +76,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 |---|---|---|
 | `animate` **T** | Native CapCut intro/outro animation on a clip. | `capcutctl animate --project NAME --segments ID --intro fade-in --dry-run` |
 | `brands` | Known brands, spoken aliases, and which have artwork. | `capcutctl brands` |
+| `captions` **T** | Word-by-word editable native captions from the edited narration (or --cues); EXPERIMENTAL styling. | `capcutctl captions --project NAME --dry-run` |
 | `endcard` **T** | The CTA card on the talking head near the end. | `capcutctl endcard --project NAME --text Follow --dry-run` |
 | `logo` **T** | Brand mark pop with its cue, timed off the transcript or --at. | `capcutctl logo --project NAME --auto --plan` |
 | `mograph` add\|list\|preview\|render\|rerender\|scene-preview\|scene-render\|scenes **T** | Rendered HTML/JS motion graphics: list, preview, render, add on a word, rerender. | `capcutctl mograph add --project NAME --template keyword-super --params '{"text":"أسرع"}' --say "أسرع" --dry-run` |
@@ -141,6 +142,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `apply`: `--dry-run` `--force-running` `--no-backup` `--project` `--spec`
 - `blur-broll`: `--dry-run` `--plan` `--project` `--segment`
 - `build`: `--dry-run` `--edit` `--force` `--json` `--project`
+- `captions`: `--cues` `--dry-run` `--lang` `--name` `--project` `--script` `--track`
 - `check-export`: `--json` `--media` `--peak` `--project` `--sheet` `--target` `--times`
 - `close`: `--json` `--timeout`
 - `contract`: `--json` `--markdown`
