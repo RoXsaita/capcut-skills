@@ -103,7 +103,10 @@ the brand stays the same:
 
 Nobody can watch the clip in real time here, so stills are the review: `mograph scene-preview`
 / `mograph preview` sheets for native pieces, `kit/scripts/stills.sh` for Remotion, then
-`capcutctl qa` on the composite. On every frame, check:
+`capcutctl qa` on the composite. Every image inspection also follows the
+[whole-frame review and fix/recheck rule](../capcut-editing/SKILL.md#5-review-and-hand-off),
+even when testing one graphic. Inspect layout relationships through motion, including frames
+that must follow and resize with their video. On every frame, check:
 
 - **The tells** in [taste.md](references/taste.md): no decoration standing in for structure,
   no linear entrances, no slides, no butted cuts, no sub-pixel drift, no copy shrunk to fit.

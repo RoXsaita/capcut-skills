@@ -166,9 +166,17 @@ capcutctl preview --project NAME --from 0 --to 8 --out /tmp/open.mp4
 capcutctl doctor --project NAME
 ```
 
-Look at the frames: the graphic reads at phone size, sits clear of the face and the UI element
-being discussed, and the picture proves the words. Check the opening and one dense section with
-sound. Then tell the user, in this order:
+On every image inspection, including targeted checks, review the whole frame: lines and borders,
+caption presence and readability, positioning, alignment, spacing, crops, geometry, overlaps,
+and consistency with adjacent shots and the creator's brand. Graphics must read at phone size,
+clear the face and relevant UI, and support the spoken point. Fix concrete issues systematically
+within the requested edit, then inspect the complete updated frame again.
+
+Apply branding to the intended layout elements: for this creator, indigo belongs on frames and
+dividers, with white captions. An indigo frame around the watched video must follow its position
+and resize with it, keeping consistent spacing throughout the motion.
+
+Check the opening and one dense section with sound. Then tell the user, in this order:
 
 1. The project name, and that it is ready in CapCut.
 2. The gate verdict and every WARN (e.g. `mograph-import` until the Mac checklist in the CLI's

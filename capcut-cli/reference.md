@@ -63,11 +63,12 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 
 | Command | What it is for | Example |
 |---|---|---|
-| `cursor` **T** | Native halo that follows recorded pointer telemetry. | `capcutctl cursor --project NAME --auto --plan` |
+| `cursor` **T** | Editable halo or polished spring pointer and click ripples from recorded telemetry. | `capcutctl cursor --project NAME --auto --style polished --plan` |
 | `keyframe` **T** | Eased camera move: --to scale or --focus a source rectangle. | `capcutctl keyframe --project NAME --segments ID --at 12 --to 1.3 --hold 1.2 --plan` |
 | `pace` **T** | Speed as arithmetic: compress waiting B-roll, never the face. | `capcutctl pace --project NAME` |
 | `punch` **T** | Eased push onto a named on-screen element (OCR locates it). | `capcutctl punch --project NAME --on Publish --segment ID --dry-run` |
 | `ramp` **T** | Split a B-roll clip at its result: ramp the wait, land the result at 1x. | `capcutctl ramp --project NAME --segment ID --speed 20 --dry-run` |
+| `screen-motion` **T** | Sparse native eased zooms and connected pans across screen targets. | `capcutctl screen-motion --project NAME --segment ID --regions regions.json --plan` |
 | `zoom` **T** | Face pushes on stressed words (--stress), or at explicit times. | `capcutctl zoom --project NAME --stress --plan` |
 
 ## Graphics and text
@@ -146,7 +147,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `check-export`: `--json` `--media` `--peak` `--project` `--sheet` `--target` `--times`
 - `close`: `--json` `--timeout`
 - `contract`: `--json` `--markdown`
-- `cursor`: `--auto` `--dry-run` `--plan` `--project` `--segment`
+- `cursor`: `--auto` `--dry-run` `--plan` `--project` `--segment` `--size` `--style`
 - `cut`: `--drop` `--dry-run` `--force` `--fps` `--in-place` `--into` `--keep` `--lang` `--model` `--no-repair` `--order` `--project` `--recover-beat` `--reindex` `--review` `--selftest` `--trim-beat`
 - `denoise`: `--dry-run` `--plan` `--project`
 - `diff`: `--against` `--allow` `--project` `--snapshot`
@@ -192,6 +193,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `review`: `--fps` `--id` `--out` `--project` `--width`
 - `rm`: `--dry-run` `--force-running` `--project`
 - `scenes`: `--name` `--project` `--track` `--transcript`
+- `screen-motion`: `--connect-gap` `--dry-run` `--glide` `--plan` `--project` `--regions` `--replace` `--segment` `--zoom-in` `--zoom-out`
 - `shift`: `--at` `--by` `--dry-run` `--project` `--segments` `--track`
 - `snapshot`: `--label` `--project`
 - `status`: `--json` `--timeout` `--wait-for-close`
