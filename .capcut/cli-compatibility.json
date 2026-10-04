@@ -10,8 +10,8 @@
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "403e078",
-    "branch": "feat/xray",
+    "commit": "222c010",
+    "branch": "main",
     "cliVersion": "0.1.1"
   }
 }
