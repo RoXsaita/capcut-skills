@@ -5,6 +5,38 @@ krusemedia's video-editor-agent); the CLI repo's `docs/specs/agent-editor-survey
 the comparison. Command syntax and every option live in
 [capcut-cli/reference.md](../../capcut-cli/reference.md); this page is the judgement.
 
+## `xray` measures the whole render
+
+`check-export` (below) is the quick summary; the X-ray is the full evidence and a superset of it.
+
+```bash
+capcutctl xray scan final.mp4 --project NAME --speech [--lang ar] [--jev]   # exit 1 on FAIL
+capcutctl xray window final.mp4 --frames 470-479                            # exact frames, by PTS
+capcutctl xray frame final.mp4 --t 15.9 --crop 0,1300,1080,400              # native-resolution look
+capcutctl gate --project NAME --xray final.xray                             # its FAILs block
+```
+
+**Four verdicts.** FAIL is a defect a detector is sure of. UNKNOWN needs your eyes: a one-frame
+state at a cut, a stutter, a click, a caption over screen text. NOT CHECKED names what it cannot
+see (logos, lip sync, motion the draft does not declare). Never report UNKNOWN or NOT CHECKED as
+clean. Numbers are tagged A (authored in the draft), M (measured on the export) or E (estimated).
+
+**What it reads.** Every frame (luma in 30px tiles) and every audio sample; text and faces with
+Vision on every 6th frame plus the middle of every authored caption, Latin-first and Arabic-first.
+With `--project`: transitions, effects, graphics and animations from the draft explain findings
+inside them; captions are the draft's text read on screen. `--speech` transcribes the export and
+checks captions and spoken numbers against it. `--jev` (sends transcript and screen text to
+TypeSafe) judges whether the screen backs each sentence and ranks UNKNOWNs by how noticeable they
+are; it only reorders the queue, never a verdict. One-time setup: `capcutctl xray jev-setup`.
+
+**Measured** with `xray bench` (planted defects in re-encoded copies of two finished videos): one
+black frame and two white frames 24/24 and 16/16 (every one mid-shot at FAIL; beside a cut it is UNKNOWN), clicks 15/16,
+clipping 10/14, a one-frame local patch 11/18, repeated frames in motion 4/4, zero false alarms.
+**Blind spots:** a one-frame local patch in a handheld or moving shot or the frame before a cut;
+mild clipping; screen text under a caption that is itself caption-sized; Arabic ligatures OCR
+misses (an unread caption is UNKNOWN). Run `xray bench` on a new kind of footage before trusting
+a PASS on it.
+
 ## `check-export` reads the rendered file
 
 Every other check reads the draft, and the file that gets posted can still be wrong. Run it on any

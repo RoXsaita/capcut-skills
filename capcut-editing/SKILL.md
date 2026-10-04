@@ -184,12 +184,14 @@ Check the opening and one dense section with sound. Then tell the user, in this 
 3. What you could not check (sound in native effects, motion easing at full speed).
 4. Ask how many minutes of manual fixing it took, and record it — the target is under ten.
 
-**Any rendered file** — an authorized export, or one the user supplies — gets
-`capcutctl check-export --media FILE --project NAME` first. It reads the render, not the draft:
-black inside the edit, stray 1–2 frame shots, dead air, loudness, true peak, canvas and length.
-FAIL exits 1. Then `export-grid --times` on the moments it lists, and look at them before calling
-any of them a defect. Thresholds and what FAIL vs WARN means:
-[references/render-qa.md](references/render-qa.md).
+**Any rendered file** — an authorized export, or one the user supplies — gets an X-ray:
+`capcutctl xray scan FILE --project NAME --speech` (or `export --xray DIR` at export time). It
+measures every frame and sample of the render and reads every caption, against the draft and the
+profile: PASS / FAIL / UNKNOWN / NOT CHECKED, exit 1 on FAIL. Read `score.txt`, then look at the
+queue's windows with `xray window` (exact frames) before calling anything a defect, and fold it into
+the gate with `gate --project NAME --xray DIR`. Every UNKNOWN and NOT CHECKED goes in the hand-off.
+How to read it, what each verdict means, the measured catch rates and blind spots:
+[references/render-qa.md](references/render-qa.md). `check-export` is the quick summary.
 
 **For anything that will be published, get a fresh-eyes critique before hand-off.** Give a
 sub-agent with no context the grid or contact sheet, the `check-export` report, the creative log

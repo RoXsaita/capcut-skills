@@ -106,6 +106,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `qa` | Composite real frames (incl. keyframes, grades, mograph clips); --expect gates text. | `capcutctl qa --project NAME --times 3,9,15 --sheet` |
 | `reference` | Measure a reference reel's pacing in the gate's terms; --profile-out writes the density override. | `capcutctl reference --media reel.mp4 --project NAME --sheet shots.png` |
 | `review` | Proxy + EDL + contact sheet into outputs/. | `capcutctl review --project NAME` |
+| `xray` audio\|bench\|frame\|jev-setup\|scan\|selftest\|window | Every frame and sample of a real export measured; exact-frame queries; honest verdicts. | `capcutctl xray scan export.mp4 --project NAME` |
 
 ## Snapshots and repair
 
@@ -153,12 +154,12 @@ Every option each command accepts, from `capcutctl contract`.
 - `diff`: `--against` `--allow` `--project` `--snapshot`
 - `doctor`: `--json` `--project` `--root`
 - `endcard`: `--at` `--dry-run` `--hold` `--no-sfx` `--project` `--scale` `--text`
-- `export`: `--grid` `--out` `--overwrite` `--project` `--times`
+- `export`: `--grid` `--out` `--overwrite` `--project` `--times` `--xray`
 - `export-grid`: `--media` `--out` `--times`
 - `fade`: `--at` `--dry-run` `--in` `--out` `--plan` `--project` `--segments` `--track`
 - `find`: `--boxes` `--context` `--focus` `--kind` `--media` `--min-score` `--moments` `--refresh` `--region` `--says` `--settle` `--shows` `--strip`
 - `finish`: `--dry-run` `--file` `--hits` `--json` `--music` `--offset` `--plan` `--polish` `--project` `--prompt` `--regen` `--track` `--volume` `--width`
-- `gate`: `--json` `--profile` `--project` `--record` `--style`
+- `gate`: `--json` `--profile` `--project` `--record` `--style` `--xray`
 - `grade`: `--apply` `--clarity` `--dry-run` `--face-detail` `--from` `--layer` `--measure` `--plan` `--project` `--reference` `--reference-at` `--reset` `--samples` `--set` `--sharpen` `--source` `--strength` `--target` `--to` `--vignette`
 - `harvest`: `--out` `--plan` `--profile` `--projects` `--root`
 - `history`: `--project`
@@ -203,5 +204,6 @@ Every option each command accepts, from `capcutctl contract`.
 - `verify-shots`: `--json` `--out` `--project` `--shots`
 - `volume`: `--at` `--dry-run` `--level` `--project` `--segments` `--track`
 - `wrap`: `--dry-run` `--glow` `--no-ease` `--no-sfx` `--no-zoom` `--only` `--plan` `--project` `--stress` `--text` `--track` `--words` `--zoom-at`
+- `xray`: `--crop` `--frame` `--frames` `--from` `--jev` `--json` `--lang` `--no-text` `--out` `--per-family` `--project` `--rounds` `--seed` `--speech` `--t` `--to` `--xray`
 - `zoom`: `--at` `--auto` `--dry-run` `--ease` `--hold` `--min-length` `--no-ease` `--plan` `--project` `--stress` `--to` `--track` `--words`
 
