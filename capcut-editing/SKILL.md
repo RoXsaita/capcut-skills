@@ -172,9 +172,9 @@ and consistency with adjacent shots and the creator's brand. Graphics must read 
 clear the face and relevant UI, and support the spoken point. Fix concrete issues systematically
 within the requested edit, then inspect the complete updated frame again.
 
-Apply branding to the intended layout elements: for this creator, indigo belongs on frames and
-dividers, with white captions. An indigo frame around the watched video must follow its position
-and resize with it, keeping consistent spacing throughout the motion.
+Apply the brand to the layout elements the profile's `brand.rules` assign it to (frames, dividers,
+captions). A frame around the watched video must follow its position and resize with it, keeping
+consistent spacing throughout the motion.
 
 Check the opening and one dense section with sound. Then tell the user, in this order:
 
