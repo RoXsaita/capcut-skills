@@ -15,7 +15,8 @@ CLI does the mechanics; you make the calls a transcript cannot: which take, whic
 shot proves which sentence, which words deserve a graphic, and what the music should feel like.
 
 **The loop:** cut the face → user signs it off → shot list → `edit.json` → `build` → fix
-until `gate` passes → review frames → hand off. Everything after sign-off is one command.
+until `gate` passes → review frames → hand off; a final export adds the gates and the Gemini review (§6).
+Everything after sign-off is one command.
 
 ## 0. Setup and the one style question
 
@@ -166,6 +167,22 @@ Fix every **FAIL**, then rebuild:
 | `opening-snap` | Start the shot on its final framing: drop the snap keys, set the clip to the post-snap scale/position |
 | `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot |
 | `caption-style` | `capcutctl captions --restyle --project NAME`: every word, Arabic or English, in one style (Changa ExtraBold 28, white, black stroke); text and timing kept |
+| `captions` | None: `capcutctl captions --project NAME`. Two layers (double captions): delete the extra track |
+| `ending` | The follow ender (or `endcard` in edit.json) must run to the last frame |
+| `length` (warn) | Over 90s: say so in the hand-off; 45–60s is ideal, 75s fine |
+
+The final gates below run on the export (`export`, or `gate --xray DIR`) and are measured on the
+export's own transcript and samples, not the draft:
+
+| FAIL | Fix |
+|---|---|
+| `first-word` | The first word lands after 0.5s: trim the head of the first clip |
+| `speech-gaps` | A silence over 0.7s between words: `capcutctl ripple`. A deliberate pause: `--pause SECONDS` on `export`/`gate`, and say so in the hand-off |
+| `last-word` | The last word runs into the ender: extend the last face clip's tail |
+| `export-format` / `export-audio` | Not 1080x1920@30, no audio stream, or silence before the ender: fix the draft or the export settings, re-export |
+| `xray:audio.loudness` / `loudness-jumps` | `capcutctl loudness --project NAME`, then re-export; a step over 6 LU in 1s is one segment much louder than its neighbour |
+| `xray:video.stutter` / `xray:video.opens_black` | Look at the frames with `xray window` first; a real frozen or black frame is a media or seam bug |
+| `review` | Gemini blockers not yet verified, or accepted ones still in the export (§6) |
 
 **WARN** rows are not blockers, but each one goes in the hand-off by name.
 
@@ -217,6 +234,38 @@ queue's windows with `xray window` (exact frames) before calling anything a defe
 the gate with `gate --project NAME --xray DIR`. Every UNKNOWN and NOT CHECKED goes in the hand-off.
 How to read it, what each verdict means, the measured catch rates and blind spots:
 [references/render-qa.md](references/render-qa.md). `check-export` is the quick summary.
+
+## 6. Final export: gates, then Gemini, at most two rounds
+
+A final export (only when the user asks for one) is the last loop, and `export` runs it without
+being told: **edit → export → gates → Gemini review → fix → re-export**.
+
+```bash
+capcutctl export --project NAME --out final.mp4 [--script script.txt]   # exit 1 until it all passes
+capcutctl review-video --decide final.review/round-1/review.json --issue G3 --verdict reject --reason "…"
+capcutctl gate --project NAME --xray final.xray --review final.review/round-1/review.json
+```
+
+1. `export` X-rays the file with its own transcript (`final.xray/`) and gates draft plus X-ray.
+   A FAIL stops there: fix (tables above), re-export. Gemini never sees a failing export.
+2. When the gates pass, `export` runs `review-video`: Gemini (the free web app in the creator's
+   own signed-in Chrome, driven through Claude in Chrome; Chrome comes to the front for about a
+   minute) watches a proxy with sound and returns JSON into `final.review/round-N/`.
+3. **Gemini is a second opinion, not ground truth.** A review that cannot quote the first spoken
+   sentence is discarded automatically (re-run). For every issue, open its evidence
+   (`evidence/G*-frames.png`, `-audio.wav`; `xray window` for exact frames) and decide it with
+   `--verdict accept|reject --reason "one line"`. Reject what is wrong, vague, not in the frames,
+   or against the approved script or the creator's style (`notes`, the profile). Never act on an
+   undecided issue.
+4. Fix only accepted issues, then re-export: that is round 2. Only accepted **blockers** block
+   (`gate --review`); the rest is advice.
+5. After two rounds `review-video` refuses (`REVIEW_ROUNDS_EXHAUSTED`): hand off with the remaining
+   notes and the accepted/rejected log (`review.json`). Never loop on a score. `--reset-rounds`
+   only for a genuinely new edit.
+
+If the review cannot run (login wall, Claude in Chrome not connected, usage limit, timeout), the
+export fails by name: say so, never fall back to a paid API. In the hand-off, give the gate
+verdict, the Gemini model and round, and each issue with its verdict and reason.
 
 **For anything that will be published, get a fresh-eyes critique before hand-off.** Give a
 sub-agent with no context the grid or contact sheet, the `check-export` report, the creative log
