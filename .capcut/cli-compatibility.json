@@ -10,7 +10,7 @@
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "3aaeaa0",
+    "commit": "6a59275",
     "branch": "feat/quality-gates",
     "cliVersion": "0.1.1"
   }

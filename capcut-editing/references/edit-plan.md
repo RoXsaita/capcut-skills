@@ -32,6 +32,7 @@ Paths are relative to the plan file. Unknown top-level keys refuse, so a typo is
 | `graphics` | `[]` | Rendered motion graphics, below. |
 | `logos` | `"auto"` | Brands heard in the cut pop once, on the first surviving mention. `[{ "brand": "claude", "say": "كلود" }]` for explicit ones, `false` for none. A brand with no artwork becomes a text `brand-chip`. |
 | `endcard` | none | `{ "text": "Follow" }` — the CTA card on the talking head near the end. |
+| `ending` | the profile's `ending.auto` | The 3-second follow ending appended after the last frame. It opens on the edit's own last picture (captured from the final clip's media with its scale/position), so it continues seamlessly. `true` / `false` (`false` also removes one placed earlier) / `{ "pill", "headline", "sub", "badge", "frame", "noSfx" }` to override the profile's copy for this video (`"badge": ""` hides the badge; e.g. `{ "pill": "الجزء الثاني جاي", "badge": "2" }` for a two-parter). Copy lives in the profile, never in the repo. |
 | `sound.seams` | `"motivated"` | Transitions + their SFX on picture changes only. `false` for hard cuts (a profile with `seams.hardCutsByDefault`). |
 | `sound.music` | `false` | `{ "file": "bed.mp3" }` or `{ "prompt": "…" }` (needs `GEMINI_API_KEY`); optional `volume`, `hits` (seconds). Default hits are the graphics and picture changes. |
 | `sound.duck` | `true` | Duck the bed under speech with native volume keys. |

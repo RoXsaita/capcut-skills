@@ -80,6 +80,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `brands` | Known brands, spoken aliases, and which have artwork. | `capcutctl brands` |
 | `captions` **T** | Word-by-word native captions, one style for Arabic and English alike; --restyle fixes an existing track. | `capcutctl captions --project NAME --dry-run` |
 | `endcard` **T** | The CTA card on the talking head near the end. | `capcutctl endcard --project NAME --text Follow --dry-run` |
+| `ending` **T** | Append a repeatable 3-second avatar/follow ending using private profile data, or render it alone. | `capcutctl ending --project NAME --dry-run` |
 | `logo` **T** | Brand mark pop with its cue, timed off the transcript or --at. | `capcutctl logo --project NAME --auto --plan` |
 | `mograph` add\|list\|preview\|render\|rerender\|scene-preview\|scene-render\|scenes **T** | Rendered HTML/JS motion graphics: list, preview, render, add on a word, rerender. | `capcutctl mograph add --project NAME --template keyword-super --params '{"text":"أسرع"}' --say "أسرع" --dry-run` |
 | `motion` **T** | EXPERIMENTAL native text/logo recipes; prefer mograph. | `capcutctl motion list` |
@@ -159,6 +160,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `diff`: `--against` `--allow` `--project` `--snapshot`
 - `doctor`: `--json` `--project` `--root`
 - `endcard`: `--at` `--dry-run` `--hold` `--no-sfx` `--project` `--scale` `--text`
+- `ending`: `--dry-run` `--frame` `--no-sfx` `--out` `--profile` `--project`
 - `export`: `--grid` `--no-gate` `--no-review` `--out` `--overwrite` `--pause` `--project` `--review-model` `--script` `--times` `--xray`
 - `export-grid`: `--media` `--out` `--times`
 - `fade`: `--at` `--dry-run` `--in` `--out` `--plan` `--project` `--segments` `--track`

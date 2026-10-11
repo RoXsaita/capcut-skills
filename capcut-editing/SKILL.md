@@ -129,6 +129,11 @@ Details and OCR discipline: [references/broll.md](references/broll.md).
   1–3 words, never the whole sentence, at most one per ~6s. **Numbers:** `number-pop`.
   **Instructions:** `punch` onto the element, or a `callout-box` on a *static* shot (never both on
   one target). **CTA:** `cta-card` + endcard. Leave rests: not every sentence gets a graphic.
+- **Ending:** the profile's `ending.auto` appends the 3-second follow ending after the last
+  frame, opening on that frame; nothing to write. `"ending": false` skips it; `"ending": { "pill":
+  "…", "badge": "2" }` swaps the copy for one video (a two-parter). Read `stages.ending.captured`:
+  `approximate` non-empty means the opening frame is not exact (eased keys, masks, effects on the
+  last clip); `onTop` lists layers CapCut draws over it (the endcard) that cut away at the seam.
 - **Brands:** `"logos": "auto"` pops each brand once, on its first surviving mention; a brand with no
   artwork becomes a text `brand-chip`. A versus video pops both or neither.
 - **Music:** a story-specific brief or a local `file`; the bed aligns to the graphics and picture
@@ -148,7 +153,8 @@ capcutctl gate --project NAME                            # re-check on its own a
 ```
 
 `build` applies, in order: reviewed shots (once) → `layout auto` → stress pushes → graphics on their
-words with their sounds → logo pops → endcard → motivated seams → music → duck → loudness → gate.
+words with their sounds → logo pops → endcard → follow ending → motivated seams → music → duck →
+loudness → gate.
 Every stage replaces its own output; an unchanged plan on an unchanged cut is a no-op.
 
 Fix every **FAIL**, then rebuild:
@@ -168,7 +174,7 @@ Fix every **FAIL**, then rebuild:
 | `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot |
 | `caption-style` | `capcutctl captions --restyle --project NAME`: every word, Arabic or English, in one style (Changa ExtraBold 28, white, black stroke); text and timing kept |
 | `captions` | None: `capcutctl captions --project NAME`. Two layers (double captions): delete the extra track |
-| `ending` | The follow ender (or `endcard` in edit.json) must run to the last frame |
+| `ending` | The follow ender (profile `ending.auto`, or `"ending": true`) or an `endcard` must run to the last frame. After a recut outside `build`, rerun `capcutctl ending --project NAME` |
 | `length` (warn) | Over 90s: say so in the hand-off; 45–60s is ideal, 75s fine |
 
 The final gates below run on the export (`export`, or `gate --xray DIR`) and are measured on the
