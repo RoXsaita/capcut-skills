@@ -27,6 +27,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | Command | What it is for | Example |
 |---|---|---|
 | `cut` | Analyse a face take (transcript, energy, beats), then build the reviewed keep/order. | `capcutctl cut VIDEO --keep 0,2-9 --order 0,2,3,4,5,6,7,8,9 --dry-run` |
+| `ripple` **T** | Delete a timeline range on every track and pull everything after it up, keeping each clip's speed. | `capcutctl ripple --project NAME --from 9.64 --to 10.18 --dry-run` |
 
 ## Screen recordings (B-roll)
 
@@ -77,11 +78,12 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 |---|---|---|
 | `animate` **T** | Native CapCut intro/outro animation on a clip. | `capcutctl animate --project NAME --segments ID --intro fade-in --dry-run` |
 | `brands` | Known brands, spoken aliases, and which have artwork. | `capcutctl brands` |
-| `captions` **T** | Word-by-word editable native captions from the edited narration (or --cues); EXPERIMENTAL styling. | `capcutctl captions --project NAME --dry-run` |
+| `captions` **T** | Word-by-word native captions, one style for Arabic and English alike; --restyle fixes an existing track. | `capcutctl captions --project NAME --dry-run` |
 | `endcard` **T** | The CTA card on the talking head near the end. | `capcutctl endcard --project NAME --text Follow --dry-run` |
 | `logo` **T** | Brand mark pop with its cue, timed off the transcript or --at. | `capcutctl logo --project NAME --auto --plan` |
 | `mograph` add\|list\|preview\|render\|rerender\|scene-preview\|scene-render\|scenes **T** | Rendered HTML/JS motion graphics: list, preview, render, add on a word, rerender. | `capcutctl mograph add --project NAME --template keyword-super --params '{"text":"أسرع"}' --say "أسرع" --dry-run` |
 | `motion` **T** | EXPERIMENTAL native text/logo recipes; prefer mograph. | `capcutctl motion list` |
+| `sfx` **T** | Place a named palette sound at explicit times: typing under a typed command, a click on the real Enter. | `capcutctl sfx --project NAME --sound typing --cues 8.03:2.8:2,31.1:1.2:10 --volume 0.5 --dry-run` |
 | `wrap` **T** | Logos from what is said + the endcard in one pass. | `capcutctl wrap --project NAME --plan` |
 
 ## Seams, music and mix
@@ -98,6 +100,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 
 | Command | What it is for | Example |
 |---|---|---|
+| `alpha` | Premultiply ProRes alpha overlays in place; CapCut paints a straight file's hidden colour as a haze. | `capcutctl alpha --project NAME` |
 | `check-export` | QA the rendered file: black, flash frames, freezes, dead air, loudness, true peak, canvas and length. | `capcutctl check-export --media final.mp4 --project NAME` |
 | `diff` | What changed since a snapshot or another project; --allow proves a scoped edit stayed in scope. | `capcutctl diff --project NAME --snapshot NAME --allow SEGMENT-ID,track:broll` |
 | `doctor` | Structural integrity; must be error-free before hand-off. | `capcutctl doctor --project NAME` |
@@ -140,11 +143,12 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 Every option each command accepts, from `capcutctl contract`.
 
 - `add`: `--allow-ephemeral` `--at` `--cover` `--derived-from` `--derived-offset` `--desc` `--dry-run` `--dur` `--generated` `--height` `--media` `--media-duration` `--no-localize` `--project` `--src` `--src-dur` `--track` `--volume` `--width`
+- `alpha`: `--check` `--dry-run` `--force` `--force-running` `--project`
 - `animate`: `--at` `--dry-run` `--intro` `--intro-dur` `--outro` `--outro-dur` `--plan` `--project` `--replace-existing` `--segments` `--track`
 - `apply`: `--dry-run` `--force-running` `--no-backup` `--project` `--spec`
 - `blur-broll`: `--dry-run` `--plan` `--project` `--segment`
 - `build`: `--dry-run` `--edit` `--force` `--json` `--project`
-- `captions`: `--cues` `--dry-run` `--lang` `--name` `--project` `--script` `--track`
+- `captions`: `--cues` `--dry-run` `--lang` `--name` `--project` `--restyle` `--script` `--track`
 - `check-export`: `--json` `--media` `--peak` `--project` `--sheet` `--target` `--times`
 - `close`: `--json` `--timeout`
 - `contract`: `--json` `--markdown`
@@ -192,9 +196,11 @@ Every option each command accepts, from `capcutctl contract`.
 - `replace-media`: `--allow-ephemeral` `--at` `--derived-from` `--derived-offset` `--dry-run` `--file` `--generated` `--height` `--media` `--media-duration` `--no-localize` `--project` `--retime` `--segments` `--track` `--width`
 - `restore`: `--dry-run` `--force-running` `--no-backup` `--project` `--snapshot`
 - `review`: `--fps` `--id` `--out` `--project` `--width`
+- `ripple`: `--dry-run` `--from` `--project` `--to`
 - `rm`: `--dry-run` `--force-running` `--project`
 - `scenes`: `--name` `--project` `--track` `--transcript`
 - `screen-motion`: `--connect-gap` `--dry-run` `--glide` `--plan` `--project` `--regions` `--replace` `--segment` `--zoom-in` `--zoom-out`
+- `sfx`: `--cues` `--dry-run` `--project` `--sound` `--track` `--volume`
 - `shift`: `--at` `--by` `--dry-run` `--project` `--segments` `--track`
 - `snapshot`: `--label` `--project`
 - `status`: `--json` `--timeout` `--wait-for-close`

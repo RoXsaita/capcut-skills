@@ -17,6 +17,19 @@ Concrete traps already hit on this project. Read before starting.
 - **Trusting a graphic you have not looked at.** Run `mograph preview` with the real text and
   `qa` at its hold frame. Arabic that fell back to another face refuses to render; check the
   line fits the band.
+## Review misses (a real edit, 2026-10-04)
+
+- **Captions on the face.** Hand-set cue positions were inverted: frame centre (50) on full face,
+  20 on split shots, so 36 of 47 words sat on the eyes or mouth. `gate` now fails `caption-face`.
+- **Mistimed hits.** A Claim click 0.66s before the dialog changed; an impact 0.12s after the lid
+  shut. Placed by guess, never checked against the frame.
+- **Gaps where the B-roll came in.** 0.74s and 0.50s of silence straddling two seams. The A-roll
+  was approved, but the screen shot entering on a silence made it read as a stall.
+- **Snap re-frames.** Every terminal shot opened on a wrong crop for 0.3s, then snapped. `gate`
+  now fails `opening-snap`.
+- **Parked leftovers.** 30s of another tool's template clips (audio on) parked after the end; the
+  draft was 73s for a 36s video. Remove them before hand-off.
+
 ## Process
 
 - **Building blind.** The #1 failure. 83s of timeline written from arithmetic, never previewed,

@@ -181,7 +181,7 @@ hand-compute these numbers again — and do not invent new ones.
 | `split-screen` | `scale 1.0`, `transform.y -0.5208333333333334`, `Split`/line mask `centerY 0.5415114961139896` `rotation 180` → fills the BOTTOM half from y=960 | indigo bar, `scale (1.8272246516061672, 0.7521039538453399)`, `transform.y -0.6036269430051813` |
 | `circle` | `scale 0.19`, `transform (-0.5559524128804151, 0.6692708333333334)`, `Circle` mask `height 0.5618028307506959` `centerY -0.04329882358536104` | white ring, `scale 0.2728009828009824`, `transform (-0.5559524128804151, 0.6640625)`, **plus its own circle mask** |
 | `full-face` | `scale 1.0`, `transform (0, 0)`, no mask — the unmasked principal clip | — |
-| `background` | — | blurred copy of the subject, `scale 1.12`, `alpha 0.72`, `Blur` effect, on a track BELOW |
+| `background` | — | the profile's **clear** room plate (`brand.background.plate`), cover-fit, opaque, no effect, on a track BELOW. **Never a blurred copy of the subject** (2026-10-11: "never ever put the blurry background"). No plate in the profile → no background layer |
 | `screen` | — | the rl2 window recording centred inside the indigo frame, with the circle pip (`layout screen`) |
 
 ```bash
@@ -214,7 +214,7 @@ the JSON and against the CapCut timeline the author screenshotted:
 | track | content | note |
 |---|---|---|
 | 0 | main — **always empty** | the author calls it "the cover" and never uses it |
-| 1 | blurred backdrop (the face again, under an effect) | furthest back |
+| 1 | clear room plate (never a blurred face) | furthest back |
 | 2 | screen-recording B-roll | `attribute: 1` (muted) |
 | 3 | indigo rect **when it frames the screen recording** | circle-inset scenes only |
 | 4 | **the talking head — carries every transition** | gapless, spans the timeline |

@@ -33,7 +33,7 @@ exactly the gap this file exists to close.
 | SFX | **24 cues across 3 audio lanes**, hand-synced |
 | Camera moves | **14 segments** with Position + Scale + Rotation keyframes (punch-ins, drifting pans) |
 | Transitions | *(library)* **342 across 57 of 88 projects** — a core part of the style, NOT zero. `reference A` having none is the exception. See "The seam formula". |
-| Video effects | *(library)* 402, but **370 of them are `Blur`** — the background plate `capcutctl layout background` already writes. Treat as "no effects except the blur plate". |
+| Video effects | *(library)* 402, but **370 of them are `Blur`** — the background plate `capcutctl layout background` already writes. Historical: that blur plate is retired — the backdrop is now the clear room plate (2026-10-11). Treat as "no effects". |
 | Text | essentially none (one element) |
 
 The author cuts hard and lets **sound + speed** carry the edit. Breath where a result or a line must be read; punch where the cut is the point. A move that adds neither clarity, emotion, nor momentum stays off the timeline. Adding a *video effect* or a colour grade

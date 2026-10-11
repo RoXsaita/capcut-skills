@@ -36,9 +36,18 @@ numbers from a live project.
 ## Decisions that must not be silently undone
 
 - **Transitions are part of the house style**, not a deviation. See `style.md`
-  → "The seam formula". `polish` (and `build`'s seam stage) owns them. **Video effects** other
-  than the `Blur` background plate (`layout background`) stay off unless the
-  user asks.
+  → "The seam formula". `polish` (and `build`'s seam stage) owns them. **Video effects** stay
+  off unless the user asks. **No blurred background, ever**: circles and screen cards sit on the
+  clear room plate (`layout background` / `layout screen` place it from the profile). `gate`
+  fails `clear-background` on any blurred face copy; `layout background` deletes it and lands the
+  plate. Never add CapCut's Blur effect or Background → Blur by hand.
+- **One caption style.** English words match the Arabic ones exactly: Changa ExtraBold, size 28,
+  white, black stroke (2026-10-11: "I want the English captions to match the Arabic ones").
+  `captions` writes it; `gate` fails `caption-style` on any word that differs; `captions
+  --restyle` fixes an existing track without touching text or timing.
+- **Alpha overlays are premultiplied.** CapCut reads ProRes alpha premultiplied; a straight file
+  paints its glow's hidden colour as a haze (the yellow-filled callout, 2026-10-11). Renders
+  premultiply at encode; `gate` fails `alpha-premultiplied`; `capcutctl alpha --project` fixes.
 - **Overlays only.** Main track always empty. See `style.md` rule zero.
 - **Face stays 1×.** Recut length with `cut --keep`; never speed the talking head.
 

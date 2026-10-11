@@ -80,6 +80,13 @@ repeated line (usually the last, if it is also the most complete), false starts,
 and the running order (hook → explanation → proof → payoff → CTA). Boundaries, dead air and seam
 repair are arithmetic — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
 
+**Replace the room before sign-off** when the profile sets `brand.background.plate`
+(`capcutctl profile show`). Composite the talking head onto that exact plate on every A-roll,
+unless the creator opts out for this video. Follow the profile's `brand.background` rule,
+framing and matting notes, and its `pipeline` file. Keep the derived face 1:1 with the
+original, swap it in with `replace-media --derived-from`, and check a frame against the plate.
+No plate in the profile → leave the room as shot. Never blur it (gate `clear-background`).
+
 **Stop and get the cut signed off.** Everything else anchors to it. After sign-off a recut is
 cheap — `build` re-anchors every graphic to its words — but a wrong keep-list poisons all of it.
 
@@ -155,6 +162,10 @@ Fix every **FAIL**, then rebuild:
 | `graphic-sfx` | The cue is missing on this machine (`preflight`), or `"sfx": null` was set by mistake |
 | `chip-and-logo` | Remove the brand-chip; the logo pop already names the brand |
 | `same-screen-transitions` / `seam-variety` | Rebuild (motivated seams) — never decorate an A-roll splice |
+| `caption-face` | Captions at position 20 on full face, on the seam (50) on a split — never frame centre |
+| `opening-snap` | Start the shot on its final framing: drop the snap keys, set the clip to the post-snap scale/position |
+| `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot |
+| `caption-style` | `capcutctl captions --restyle --project NAME`: every word, Arabic or English, in one style (Changa ExtraBold 28, white, black stroke); text and timing kept |
 
 **WARN** rows are not blockers, but each one goes in the hand-off by name.
 
@@ -175,6 +186,20 @@ within the requested edit, then inspect the complete updated frame again.
 Apply the brand to the layout elements the profile's `brand.rules` assign it to (frames, dividers,
 captions). A frame around the watched video must follow its position and resize with it, keeping
 consistent spacing throughout the motion.
+
+**Before the first hand-off, check the three things the gate cannot** (each one cost a full
+round on a real edit, rated 5–6/10):
+
+1. **Dead air at every seam.** Measure the face audio across each cut (energy, not Whisper: it
+   stretches a segment's first word back over the silence). A pause over ~0.3s at a seam,
+   above all where a screen shot comes in, reads as a gap: `capcutctl ripple --from S --to S`
+   removes it on every track, keeping ~0.1s either side of the words.
+2. **Every hit on its frame.** For each SFX, find the frame its event happens (frame-diff the
+   render or the source: the dialog changes, the number lands, the lid shuts) and put the sound
+   there. A click goes on the frame the UI reacts, not at the shot start; every graphic beat that
+   moves (a tag landing) gets its sound.
+3. **Captions drawn on the frames.** `qa` cannot draw native text, so composite each caption's
+   text at its `transform.y` onto the qa frame and look; `gate` catches only the geometry.
 
 Check the opening and one dense section with sound. Then tell the user, in this order:
 

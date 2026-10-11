@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Render a Remotion composition to ProRes 4444 with alpha, then print the
+# Render a Remotion composition to ProRes 4444 with PREMULTIPLIED alpha, then print the
 # capcutctl line that places it as generated B-roll.
 #
 #   kit/scripts/render-alpha.sh <entry> <compositionId> <out.mov> [--opaque]
@@ -30,6 +30,13 @@ fi
 
 mkdir -p "$(dirname "$out")"
 npx remotion render "$entry" "$comp" "$out" "${args[@]}"
+
+# CapCut composites ProRes alpha as PREMULTIPLIED. Remotion writes straight alpha, so every glow
+# and soft edge keeps full colour under near-zero alpha and CapCut paints it as a coloured haze.
+# Premultiply in place; capcutctl refuses to leave a leaking file (and gate fails one).
+if [ "$mode" != "--opaque" ]; then
+  capcutctl alpha "$out" --force-running >/dev/null
+fi
 
 if command -v ffprobe >/dev/null 2>&1; then
   ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt,width,height,nb_frames,r_frame_rate -of default=nw=1 "$out"
