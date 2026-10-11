@@ -172,7 +172,10 @@ Fix every **FAIL**, then rebuild:
 | `length` (warn) | Over 90s: say so in the hand-off; 45–60s is ideal, 75s fine |
 
 The final gates below run on the export (`export`, or `gate --xray DIR`) and are measured on the
-export's own transcript and samples, not the draft:
+export itself, not the draft. Speech timing comes from voice-band energy in the export's audio;
+Whisper only says which words exist (its word clock stretches over silences and hides a late
+start, a gap or a clipped tail). A music bed within 20 dB of the voice can hide a pause:
+look at the waveform in `xray window` when the bed is loud.
 
 | FAIL | Fix |
 |---|---|
@@ -180,8 +183,9 @@ export's own transcript and samples, not the draft:
 | `speech-gaps` | A silence over 0.7s between words: `capcutctl ripple`. A deliberate pause: `--pause SECONDS` on `export`/`gate`, and say so in the hand-off |
 | `last-word` | The last word runs into the ender: extend the last face clip's tail |
 | `export-format` / `export-audio` | Not 1080x1920@30, no audio stream, or silence before the ender: fix the draft or the export settings, re-export |
-| `xray:audio.loudness` / `loudness-jumps` | `capcutctl loudness --project NAME`, then re-export; a step over 6 LU in 1s is one segment much louder than its neighbour |
-| `xray:video.stutter` / `xray:video.opens_black` | Look at the frames with `xray window` first; a real frozen or black frame is a media or seam bug |
+| `speech` | No transcript of the export: re-run with the X-ray's `--speech` (export does it) |
+| `export-loudness` / `loudness-jumps` | Integrated loudness outside -14 ±2.5 LUFS (`final.loudnessTolerance`): `capcutctl loudness --project NAME`, then re-export. A step over 6 LU in 1s is one segment much louder than its neighbour |
+| `xray:video.frozen` / `xray:video.opens_black` | The picture stuck past `maxStatic`, or a black open: check the frames with `xray window` first; a real one is a media or seam bug. A single repeated frame (`video.stutter`) only warns |
 | `review` | Gemini blockers not yet verified, or accepted ones still in the export (§6) |
 
 **WARN** rows are not blockers, but each one goes in the hand-off by name.
@@ -251,8 +255,11 @@ capcutctl gate --project NAME --xray final.xray --review final.review/round-1/re
 2. When the gates pass, `export` runs `review-video`: Gemini (the free web app in the creator's
    own signed-in Chrome, driven through Claude in Chrome; Chrome comes to the front for about a
    minute) watches a proxy with sound and returns JSON into `final.review/round-N/`.
-3. **Gemini is a second opinion, not ground truth.** A review that cannot quote the first spoken
-   sentence is discarded automatically (re-run). For every issue, open its evidence
+3. **Gemini is a second opinion, not ground truth.** A review is discarded automatically unless
+   Gemini proves it heard the sound: its quote of the first spoken sentence must match the
+   transcript (words ≥0.6) and cover it (≥0.75; a model reading captions off a muted copy
+   scored 0.5), and its audio-only answer (music in the last 2s) must match the draft. A
+   discarded review is retried and does not use a round; after two discards it hands off. For every issue, open its evidence
    (`evidence/G*-frames.png`, `-audio.wav`; `xray window` for exact frames) and decide it with
    `--verdict accept|reject --reason "one line"`. Reject what is wrong, vague, not in the frames,
    or against the approved script or the creator's style (`notes`, the profile). Never act on an
@@ -264,7 +271,9 @@ capcutctl gate --project NAME --xray final.xray --review final.review/round-1/re
    only for a genuinely new edit.
 
 If the review cannot run (login wall, Claude in Chrome not connected, usage limit, timeout), the
-export fails by name: say so, never fall back to a paid API. In the hand-off, give the gate
+export fails by name: say so, never fall back to a paid API. **Never the Gemini API**: the
+review is the gemini.google.com page in the creator's own Chrome, and the headless driver runs
+with every API key stripped from its environment. In the hand-off, give the gate
 verdict, the Gemini model and round, and each issue with its verdict and reason.
 
 **For anything that will be published, get a fresh-eyes critique before hand-off.** Give a
