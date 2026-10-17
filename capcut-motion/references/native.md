@@ -37,6 +37,7 @@ capcutctl mograph list            # the overlay templates
 | Textless breather | `shape-grid` | `ball` | `particle-word` with `from: "dots"` |
 | Reveal a name, tool or number | `particle-word` | `text`, `caption`, `from`, `exit` | `style-stinger`, a hard cut |
 | Energy, montage beat | `style-stinger` | `count` 4/8, `word`, `words`, `looks` | hard cuts either side |
+| Chapter change, the house transition | `seam-wipe` | `text?` (1–3 word label on a brand slab), `beats?` | the seam on both sides; place it with `--at` = cut − 0.2 s so the cut lands under the open band |
 | Sign-off | `dot-signature` | `name`, `role`, `footer`, `hold` | the end |
 
 Text follows the profile's languages. `word-slam`, `particle-word` and `dot-signature` lay Arabic out by word,
