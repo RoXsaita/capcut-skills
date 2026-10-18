@@ -80,6 +80,8 @@ Read the whole transcript in story order and decide: which complete take, which 
 repeated line (usually the last, if it is also the most complete), false starts, near-duplicates,
 and the running order (hook → explanation → proof → payoff → CTA). Boundaries, dead air and seam
 repair are arithmetic — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
+**The CTA always goes at the end**, wherever it was said (use `--order`); the follow ender sits on it.
+**Less face, more content:** by default the content fills the frame with his face as the small circle; full face only for a few seconds (hook, key line, CTA); split screen sometimes, not by default.
 
 **Replace the room before sign-off** when the profile sets `brand.background.plate`
 (`capcutctl profile show`). Composite the talking head onto that exact plate on every A-roll,
@@ -102,6 +104,8 @@ Edit `shots.json`: weak matches stay on the face (a valid answer). The picture m
 words**: verify the verb on before/action/after frames, separate waiting (ramp it) from the action
 (readable) and the result (hold it), one focus per shot, and the first 1.5s must show proof.
 Details and OCR discipline: [references/broll.md](references/broll.md).
+
+When a line is about something a Claude Code session did ("the agent studied Apple's video"), don't hand-search a long rl2 take: `python3 <capcut-cli repo>/tools/claude_timeline.py --take <take> --grep "words"` returns the take, video time (`vt`) and session of that moment (it also writes `<take>/claude-timeline.jsonl`); seek there, then verify the frame. `*` means the session was likely on screen, a hint, not proof.
 
 ## 3. Write `edit.json` — the judgement
 

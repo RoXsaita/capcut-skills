@@ -31,7 +31,7 @@ A brand can also name a **house look** (`brand.house` in the profile): the templ
 every video uses by default, such as the super for hooks and claims and the chapter transition.
 Use them whenever the beat calls for that job, at their own cadence. The per-video idea is built on
 top of the house look and never replaces it. The log rules below apply to the idea and the opener
-beat; using the house pieces again is not a repeat. The profile is the creator's file, outside every repository:
+beat; using the house pieces again is not a repeat. When the house look names a `frame`, the layout frame is one `frame-travel` overlay keyed on the cuts (seam strip → box → gone on full-screen shots → back) instead of a static border per layout. The profile is the creator's file, outside every repository:
 `~/.config/capcutctl/profile.json` merged over the CLI's shipped neutral defaults. Nothing
 personal goes in this skill.
 
