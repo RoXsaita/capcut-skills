@@ -32,6 +32,7 @@ Paths are relative to the plan file. Unknown top-level keys refuse, so a typo is
 | `graphics` | `[]` | Rendered motion graphics, below. |
 | `logos` | `"auto"` | Brands heard in the cut pop once, on the first surviving mention. `[{ "brand": "claude", "say": "كلود" }]` for explicit ones, `false` for none. A brand with no artwork becomes a text `brand-chip`. |
 | `endcard` | none | `{ "text": "Follow" }` — the CTA card on the talking head near the end. |
+| `ending` | the profile's `ending.auto` | The 3-second follow ending appended after the last frame. It opens on the edit's own last picture (captured from the final clip's media with its scale/position), so it continues seamlessly. `true` / `false` (`false` also removes one placed earlier) / `{ "pill", "headline", "sub", "badge", "frame", "noSfx" }` to override the profile's copy for this video (`"badge": ""` hides the badge; e.g. `{ "pill": "الجزء الثاني جاي", "badge": "2" }` for a two-parter). Copy lives in the profile, never in the repo. |
 | `sound.seams` | `"motivated"` | Transitions + their SFX on picture changes only. `false` for hard cuts (a profile with `seams.hardCutsByDefault`). |
 | `sound.music` | `false` | `{ "file": "bed.mp3" }` or `{ "prompt": "…" }` (needs `GEMINI_API_KEY`); optional `volume`, `hits` (seconds). Default hits are the graphics and picture changes. |
 | `sound.duck` | `true` | Duck the bed under speech with native volume keys. |
@@ -60,6 +61,12 @@ platform-UI zones tinted red).
 
 ## Templates
 
+When the profile names a house look (`brand.house`), its pieces replace the defaults in this table for their
+job: `brand.house.super` sets the Hook and Claim supers instead of `hook-title` / `keyword-super`,
+and `brand.house.transition` is the scene for a chapter change. The beats and their sounds stay
+the same.
+
+
 | Template | Use it for | Params | Sound |
 |---|---|---|---|
 | `hook-title` | The first-second hook, 2–5 words, key word wiped under an indigo block | `text`, `key?` (word, index, or `false`), `layout?`, `center?`, `hold?` | impact |
@@ -67,6 +74,7 @@ platform-UI zones tinted red).
 | `number-pop` | A stat: counts up, holds, label under it; Latin digits | `value`, `prefix?`, `suffix?`/`unit?`, `label?`, `decimals?`, `layout?`, `center?`, `hold?` | pop |
 | `callout-box` | A rounded stroke that draws around a UI target on a **static** shot | `box: [x, y, w, h]` canvas px, `label?`, `color?` (`accent`/`indigo`), `gap?`, `hold?` | enter |
 | `cta-card` | "اكتب [keyword] في التعليقات" comment card, keyword in an indigo chip | `keyword`, `text?` (with a `{keyword}` slot), `layout?`, `center?`, `hold?` | select |
+| `slab-super` | A hook or claim on solid square slabs: optional small tag above, the line in an ink slab and a brand slab for the key, text rising inside each, accent underline under the key | `text` (1–4 words), `key?` (words of `text`, or `false`), `tag?` (1–3 words), `underline?`, `layout?`, `center?`, `hold?` | pop |
 | `brand-chip` | A white pill naming a tool when there is no logo art (automatic under `logos: auto`) | `name`, `logo?`, `from?` (`right`/`left`), `layout?`, `center?`, `hold?` | pop |
 
 `callout-box` coordinates are **canvas** pixels. Get them from the frame you will show: `qa --times T`

@@ -15,7 +15,8 @@ CLI does the mechanics; you make the calls a transcript cannot: which take, whic
 shot proves which sentence, which words deserve a graphic, and what the music should feel like.
 
 **The loop:** cut the face → user signs it off → shot list → `edit.json` → `build` → fix
-until `gate` passes → review frames → hand off. Everything after sign-off is one command.
+until `gate` passes → review frames → hand off; a final export adds the gates and the Gemini review (§6).
+Everything after sign-off is one command.
 
 ## 0. Setup and the one style question
 
@@ -79,6 +80,8 @@ Read the whole transcript in story order and decide: which complete take, which 
 repeated line (usually the last, if it is also the most complete), false starts, near-duplicates,
 and the running order (hook → explanation → proof → payoff → CTA). Boundaries, dead air and seam
 repair are arithmetic — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
+**The CTA always goes at the end**, wherever it was said (use `--order`); the follow ender sits on it.
+**Less face, more content:** by default the content fills the frame with his face as the small circle; full face only for a few seconds (hook, key line, CTA); split screen sometimes, not by default.
 
 **Replace the room before sign-off** when the profile sets `brand.background.plate`
 (`capcutctl profile show`). Composite the talking head onto that exact plate on every A-roll,
@@ -101,6 +104,8 @@ Edit `shots.json`: weak matches stay on the face (a valid answer). The picture m
 words**: verify the verb on before/action/after frames, separate waiting (ramp it) from the action
 (readable) and the result (hold it), one focus per shot, and the first 1.5s must show proof.
 Details and OCR discipline: [references/broll.md](references/broll.md).
+
+When a line is about something a Claude Code session did ("the agent studied Apple's video"), don't hand-search a long rl2 take: `python3 <capcut-cli repo>/tools/claude_timeline.py --take <take> --grep "words"` returns the take, video time (`vt`) and session of that moment (it also writes `<take>/claude-timeline.jsonl`); seek there, then verify the frame. `*` means the session was likely on screen, a hint, not proof.
 
 ## 3. Write `edit.json` — the judgement
 
@@ -128,6 +133,11 @@ Details and OCR discipline: [references/broll.md](references/broll.md).
   1–3 words, never the whole sentence, at most one per ~6s. **Numbers:** `number-pop`.
   **Instructions:** `punch` onto the element, or a `callout-box` on a *static* shot (never both on
   one target). **CTA:** `cta-card` + endcard. Leave rests: not every sentence gets a graphic.
+- **Ending:** the profile's `ending.auto` appends the 3-second follow ending after the last
+  frame, opening on that frame; nothing to write. `"ending": false` skips it; `"ending": { "pill":
+  "…", "badge": "2" }` swaps the copy for one video (a two-parter). Read `stages.ending.captured`:
+  `approximate` non-empty means the opening frame is not exact (eased keys, masks, effects on the
+  last clip); `onTop` lists layers CapCut draws over it (the endcard) that cut away at the seam.
 - **Brands:** `"logos": "auto"` pops each brand once, on its first surviving mention; a brand with no
   artwork becomes a text `brand-chip`. A versus video pops both or neither.
 - **Music:** a story-specific brief or a local `file`; the bed aligns to the graphics and picture
@@ -147,7 +157,8 @@ capcutctl gate --project NAME                            # re-check on its own a
 ```
 
 `build` applies, in order: reviewed shots (once) → `layout auto` → stress pushes → graphics on their
-words with their sounds → logo pops → endcard → motivated seams → music → duck → loudness → gate.
+words with their sounds → logo pops → endcard → follow ending → motivated seams → music → duck →
+loudness → gate.
 Every stage replaces its own output; an unchanged plan on an unchanged cut is a no-op.
 
 Fix every **FAIL**, then rebuild:
@@ -166,6 +177,26 @@ Fix every **FAIL**, then rebuild:
 | `opening-snap` | Start the shot on its final framing: drop the snap keys, set the clip to the post-snap scale/position |
 | `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot |
 | `caption-style` | `capcutctl captions --restyle --project NAME`: every word, Arabic or English, in one style (Changa ExtraBold 28, white, black stroke); text and timing kept |
+| `captions` | None: `capcutctl captions --project NAME`. Two layers (double captions): delete the extra track |
+| `ending` | The follow ender (profile `ending.auto`, or `"ending": true`) or an `endcard` must run to the last frame. After a recut outside `build`, rerun `capcutctl ending --project NAME` |
+| `length` (warn) | Over 90s: say so in the hand-off; 45–60s is ideal, 75s fine |
+
+The final gates below run on the export (`export`, or `gate --xray DIR`) and are measured on the
+export itself, not the draft. Speech timing comes from voice-band energy in the export's audio;
+Whisper only says which words exist (its word clock stretches over silences and hides a late
+start, a gap or a clipped tail). A music bed within 20 dB of the voice can hide a pause:
+look at the waveform in `xray window` when the bed is loud.
+
+| FAIL | Fix |
+|---|---|
+| `first-word` | The first word lands after 0.5s: trim the head of the first clip |
+| `speech-gaps` | A silence over 0.7s between words: `capcutctl ripple`. A deliberate pause: `--pause SECONDS` on `export`/`gate`, and say so in the hand-off |
+| `last-word` | The last word runs into the ender: extend the last face clip's tail |
+| `export-format` / `export-audio` | Not 1080x1920@30, no audio stream, or silence before the ender: fix the draft or the export settings, re-export |
+| `speech` | No transcript of the export: re-run with the X-ray's `--speech` (export does it) |
+| `export-loudness` / `loudness-jumps` | Integrated loudness outside -14 ±2.5 LUFS (`final.loudnessTolerance`): `capcutctl loudness --project NAME`, then re-export. A step over 6 LU in 1s is one segment much louder than its neighbour |
+| `xray:video.frozen` / `xray:video.opens_black` | The picture stuck past `maxStatic`, or a black open: check the frames with `xray window` first; a real one is a media or seam bug. A single repeated frame (`video.stutter`) only warns |
+| `review` | Gemini blockers not yet verified, or accepted ones still in the export (§6) |
 
 **WARN** rows are not blockers, but each one goes in the hand-off by name.
 
@@ -217,6 +248,43 @@ queue's windows with `xray window` (exact frames) before calling anything a defe
 the gate with `gate --project NAME --xray DIR`. Every UNKNOWN and NOT CHECKED goes in the hand-off.
 How to read it, what each verdict means, the measured catch rates and blind spots:
 [references/render-qa.md](references/render-qa.md). `check-export` is the quick summary.
+
+## 6. Final export: gates, then Gemini, at most two rounds
+
+A final export (only when the user asks for one) is the last loop, and `export` runs it without
+being told: **edit → export → gates → Gemini review → fix → re-export**.
+
+```bash
+capcutctl export --project NAME --out final.mp4 [--script script.txt]   # exit 1 until it all passes
+capcutctl review-video --decide final.review/round-1/review.json --issue G3 --verdict reject --reason "…"
+capcutctl gate --project NAME --xray final.xray --review final.review/round-1/review.json
+```
+
+1. `export` X-rays the file with its own transcript (`final.xray/`) and gates draft plus X-ray.
+   A FAIL stops there: fix (tables above), re-export. Gemini never sees a failing export.
+2. When the gates pass, `export` runs `review-video`: Gemini (the free web app in the creator's
+   own signed-in Chrome, driven through Claude in Chrome; Chrome comes to the front for about a
+   minute) watches a proxy with sound and returns JSON into `final.review/round-N/`.
+3. **Gemini is a second opinion, not ground truth.** A review is discarded automatically unless
+   Gemini proves it heard the sound: its quote of the first spoken sentence must match the
+   transcript (words ≥0.6) and cover it (≥0.75; a model reading captions off a muted copy
+   scored 0.5), and its audio-only answer (music in the last 2s) must match the draft. A
+   discarded review is retried and does not use a round; after two discards it hands off. For every issue, open its evidence
+   (`evidence/G*-frames.png`, `-audio.wav`; `xray window` for exact frames) and decide it with
+   `--verdict accept|reject --reason "one line"`. Reject what is wrong, vague, not in the frames,
+   or against the approved script or the creator's style (`notes`, the profile). Never act on an
+   undecided issue.
+4. Fix only accepted issues, then re-export: that is round 2. Only accepted **blockers** block
+   (`gate --review`); the rest is advice.
+5. After two rounds `review-video` refuses (`REVIEW_ROUNDS_EXHAUSTED`): hand off with the remaining
+   notes and the accepted/rejected log (`review.json`). Never loop on a score. `--reset-rounds`
+   only for a genuinely new edit.
+
+If the review cannot run (login wall, Claude in Chrome not connected, usage limit, timeout), the
+export fails by name: say so, never fall back to a paid API. **Never the Gemini API**: the
+review is the gemini.google.com page in the creator's own Chrome, and the headless driver runs
+with every API key stripped from its environment. In the hand-off, give the gate
+verdict, the Gemini model and round, and each issue with its verdict and reason.
 
 **For anything that will be published, get a fresh-eyes critique before hand-off.** Give a
 sub-agent with no context the grid or contact sheet, the `check-export` report, the creative log

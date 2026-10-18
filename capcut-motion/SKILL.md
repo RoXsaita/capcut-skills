@@ -25,7 +25,13 @@ This skill runs between them with three layers, and it holds **none** of the bra
 | **Idea** | The one visual motif this video is built on | invented here, per video; logged | Every video |
 
 The brand makes a video recognisable, the style makes it right for its type, and the idea
-keeps it from being boring. The profile is the creator's file, outside every repository:
+keeps it from being boring.
+
+A brand can also name a **house look** (`brand.house` in the profile): the templates and scenes
+every video uses by default, such as the super for hooks and claims and the chapter transition.
+Use them whenever the beat calls for that job, at their own cadence. The per-video idea is built on
+top of the house look and never replaces it. The log rules below apply to the idea and the opener
+beat; using the house pieces again is not a repeat. When the house look names a `frame`, the layout frame is one `frame-travel` overlay keyed on the cuts (seam strip → box → gone on full-screen shots → back) instead of a static border per layout. The profile is the creator's file, outside every repository:
 `~/.config/capcutctl/profile.json` merged over the CLI's shipped neutral defaults. Nothing
 personal goes in this skill.
 
@@ -78,7 +84,9 @@ Then check it against the log. The rules below are what keep the videos from rep
 the brand stays the same:
 
 - The idea is not the same as any of the last 3 videos' ideas.
-- The opening beat's archetype differs from the last video's opener.
+- The opening beat's archetype differs from the last video's opener. The archetype is what the
+  beat shows (a number, a proof, a big word), not the template that sets its words, so the house
+  super can open every video.
 - Across the last 5 videos, no archetype opens more than twice.
 - Inside a video, no two adjacent beats share an archetype, and none appears three times.
 

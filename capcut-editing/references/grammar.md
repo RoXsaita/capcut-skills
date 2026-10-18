@@ -31,6 +31,12 @@ the claim, the number, the list, the "all of it".
 
 ## What each beat gets
 
+When the profile names a house look (`brand.house`), its pieces replace the defaults below for their
+job: `brand.house.super` sets the Hook and Claim supers instead of `hook-title` / `keyword-super`,
+and `brand.house.transition` is the scene for a chapter change. The beats and their sounds stay
+the same.
+
+
 | Beat | Camera | Graphic | Sound |
 |---|---|---|---|
 | Hook (0–1.5s) | proof on screen by 1.5s; a snap punch | `hook-title` | impact on frame 0 |

@@ -80,6 +80,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `brands` | Known brands, spoken aliases, and which have artwork. | `capcutctl brands` |
 | `captions` **T** | Word-by-word native captions, one style for Arabic and English alike; --restyle fixes an existing track. | `capcutctl captions --project NAME --dry-run` |
 | `endcard` **T** | The CTA card on the talking head near the end. | `capcutctl endcard --project NAME --text Follow --dry-run` |
+| `ending` **T** | Append a repeatable 3-second avatar/follow ending using private profile data, or render it alone. | `capcutctl ending --project NAME --dry-run` |
 | `logo` **T** | Brand mark pop with its cue, timed off the transcript or --at. | `capcutctl logo --project NAME --auto --plan` |
 | `mograph` add\|list\|preview\|render\|rerender\|scene-preview\|scene-render\|scenes **T** | Rendered HTML/JS motion graphics: list, preview, render, add on a word, rerender. | `capcutctl mograph add --project NAME --template keyword-super --params '{"text":"أسرع"}' --say "أسرع" --dry-run` |
 | `motion` **T** | EXPERIMENTAL native text/logo recipes; prefer mograph. | `capcutctl motion list` |
@@ -109,6 +110,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 | `qa` | Composite real frames (incl. keyframes, grades, mograph clips); --expect gates text. | `capcutctl qa --project NAME --times 3,9,15 --sheet` |
 | `reference` | Measure a reference reel's pacing in the gate's terms; --profile-out writes the density override. | `capcutctl reference --media reel.mp4 --project NAME --sheet shots.png` |
 | `review` | Proxy + EDL + contact sheet into outputs/. | `capcutctl review --project NAME` |
+| `review-video` | Gemini watches the final export in your own Chrome; a verified second opinion, two rounds max. | `capcutctl review-video --media final.mp4 --project NAME` |
 | `xray` audio\|bench\|frame\|jev-setup\|scan\|selftest\|window | Every frame and sample of a real export measured; exact-frame queries; honest verdicts. | `capcutctl xray scan export.mp4 --project NAME` |
 
 ## Snapshots and repair
@@ -158,12 +160,13 @@ Every option each command accepts, from `capcutctl contract`.
 - `diff`: `--against` `--allow` `--project` `--snapshot`
 - `doctor`: `--json` `--project` `--root`
 - `endcard`: `--at` `--dry-run` `--hold` `--no-sfx` `--project` `--scale` `--text`
-- `export`: `--grid` `--out` `--overwrite` `--project` `--times` `--xray`
+- `ending`: `--dry-run` `--frame` `--no-sfx` `--out` `--profile` `--project`
+- `export`: `--grid` `--no-gate` `--no-review` `--out` `--overwrite` `--pause` `--project` `--review-model` `--script` `--times` `--xray`
 - `export-grid`: `--media` `--out` `--times`
 - `fade`: `--at` `--dry-run` `--in` `--out` `--plan` `--project` `--segments` `--track`
 - `find`: `--boxes` `--context` `--focus` `--kind` `--media` `--min-score` `--moments` `--refresh` `--region` `--says` `--settle` `--shows` `--strip`
 - `finish`: `--dry-run` `--file` `--hits` `--json` `--music` `--offset` `--plan` `--polish` `--project` `--prompt` `--regen` `--track` `--volume` `--width`
-- `gate`: `--json` `--profile` `--project` `--record` `--style` `--xray`
+- `gate`: `--json` `--pause` `--profile` `--project` `--record` `--review` `--style` `--xray`
 - `grade`: `--apply` `--clarity` `--dry-run` `--face-detail` `--from` `--layer` `--measure` `--plan` `--project` `--reference` `--reference-at` `--reset` `--samples` `--set` `--sharpen` `--source` `--strength` `--target` `--to` `--vignette`
 - `harvest`: `--out` `--plan` `--profile` `--projects` `--root`
 - `history`: `--project`
@@ -196,6 +199,7 @@ Every option each command accepts, from `capcutctl contract`.
 - `replace-media`: `--allow-ephemeral` `--at` `--derived-from` `--derived-offset` `--dry-run` `--file` `--generated` `--height` `--media` `--media-duration` `--no-localize` `--project` `--retime` `--segments` `--track` `--width`
 - `restore`: `--dry-run` `--force-running` `--no-backup` `--project` `--snapshot`
 - `review`: `--fps` `--id` `--out` `--project` `--width`
+- `review-video`: `--decide` `--issue` `--json` `--media` `--model` `--project` `--reason` `--reset-rounds` `--script` `--speech` `--verdict`
 - `ripple`: `--dry-run` `--from` `--project` `--to`
 - `rm`: `--dry-run` `--force-running` `--project`
 - `scenes`: `--name` `--project` `--track` `--transcript`

@@ -13,6 +13,7 @@
       "cursor",
       "denoise",
       "endcard",
+      "ending",
       "fade",
       "finish",
       "grade",
@@ -291,15 +292,34 @@
       ],
       "transactional": true
     },
+    "ending": {
+      "group": "graphics",
+      "summary": "Append a repeatable 3-second avatar/follow ending using private profile data, or render it alone.",
+      "example": "capcutctl ending --project NAME --dry-run",
+      "options": [
+        "--dry-run",
+        "--frame",
+        "--no-sfx",
+        "--out",
+        "--profile",
+        "--project"
+      ],
+      "transactional": true
+    },
     "export": {
       "group": "export",
       "summary": "Native CapCut export through the macOS bridge; explicit request only.",
       "example": "capcutctl export --project NAME --out final.mp4 --grid grid.png",
       "options": [
         "--grid",
+        "--no-gate",
+        "--no-review",
         "--out",
         "--overwrite",
+        "--pause",
         "--project",
+        "--review-model",
+        "--script",
         "--times",
         "--xray"
       ],
@@ -381,9 +401,11 @@
       "example": "capcutctl gate --project NAME",
       "options": [
         "--json",
+        "--pause",
         "--profile",
         "--project",
         "--record",
+        "--review",
         "--style",
         "--xray"
       ],
@@ -988,6 +1010,25 @@
         "--out",
         "--project",
         "--width"
+      ],
+      "transactional": false
+    },
+    "review-video": {
+      "group": "check",
+      "summary": "Gemini watches the final export in your own Chrome; a verified second opinion, two rounds max.",
+      "example": "capcutctl review-video --media final.mp4 --project NAME",
+      "options": [
+        "--decide",
+        "--issue",
+        "--json",
+        "--media",
+        "--model",
+        "--project",
+        "--reason",
+        "--reset-rounds",
+        "--script",
+        "--speech",
+        "--verdict"
       ],
       "transactional": false
     },
