@@ -10,7 +10,7 @@ Every claim carries a source and a type:
 - **OBSERVED**: read off public pages on the research date; small samples.
 - **OPINION**: advice with no data behind it. **UNVERIFIED**: could not be traced to a source.
 
-What the evidence can and cannot settle is at the end (§7). Read that before quoting a number.
+What the evidence can and cannot settle is at the end (§8). Read that before quoting a number.
 
 ## 1. Platform statements
 
@@ -80,7 +80,7 @@ a counter-example (wins without carousels, or no carousel evidence).
 | Tim Hanson | LinkedIn | B | Four rules: ≤ 2 text layers + 1 image; text big enough for a phone; one idea per slide; chain the hook across slides 1–3. 103 carousels, ~5M views. | CREATOR ([newsletter](https://penfriend.beehiiv.com/p/my-4-design-rules-for-5-million-views-on-linkedin-2863ffde2d538e0a)) |
 | Charlie Hills | LinkedIn ~200K | B | AI infographics and carousels; whitespace, numbered steps, save/repost + question CTA | CREATOR via podcast |
 | Zain Kahn | IG 74K, LinkedIn 1M | B | Pinned "8 prompts" carousel; now mostly video | OBSERVED |
-| Ali Abdaal | IG 1.1M | B | Occasional carousel with "comment SUPERFOCUS" for his own app | OBSERVED |
+| Ali Abdaal | IG 1.1M | B | Occasional carousel with "comment SUPERFOCUS" for their own app | OBSERVED |
 | Rowan Cheung | IG 505K | B | Rare, personal carousels; not an education format | OBSERVED |
 | The AI Break | newsletter | B | 10 slides: hook (≤ 15 words, tension) → what you'll learn → 7 tips → CTA | OPINION ([substack](https://theaibreak.substack.com/p/tutorial-how-to-create-viral-linkedin)) |
 | Buffer's LinkedIn tester | LinkedIn | B | See §2 | CREATOR |
@@ -109,7 +109,7 @@ a counter-example (wins without carousels, or no carousel evidence).
 | Tori Dunlap (Her First 100K) | TikTok, IG | C | Grew on video; best content was usable right away (a negotiation script) | CREATOR ([podcast](https://creatorscience.com/podcast/tori-dunlap/)) |
 | Lara Acosta | LinkedIn | C | Story-led text posts now; earlier praised carousels | UNVERIFIED |
 
-## 4. His own account (detail in [examples.md](examples.md))
+## 4. The reference account (detail in [examples.md](examples.md))
 
 Instagram, June–October 2026, 22 carousels and 66 reels:
 
@@ -122,12 +122,12 @@ Instagram, June–October 2026, 22 carousels and 66 reels:
   first-person recaps of a reel's story sat at 0.03 % and 1.5 % of their reels, and a third
   (with no reel behind it) at 0.5× the carousel median.
 - "Free" / "$0" / "no account" was on the cover of 3 of the top 4 by raw reach.
-- The two outliers (20× and 9× median) both came the day after a reel reached 10–15× his reel
+- The two outliers (20× and 9× median) both came the day after a reel reached 10–15× its reel
   median; the stronger one followed a reel whose comment keyword had promised the guide.
 - The near-black icon-diagram run (four carousels in September) had the lowest save rates in
   the set (0.8–1.2 %).
-- TikTok, same period: his 20 photo posts had a median of about twice the views of his 53
-  videos. His single best TikTok photo post far outran its Instagram twin.
+- TikTok, same period: its 20 photo posts had a median of about twice the views of its 53
+  videos. Its single best TikTok photo post far outran its Instagram twin.
 
 ## 5. Rule → evidence map
 
@@ -136,48 +136,105 @@ Every rule in SKILL.md, with the strongest support it has.
 | Rule | Strongest evidence |
 |---|---|
 | Carousels are for saves and sends; design for one of the two | STUDY (saves, consistent across 4 studies); PLATFORM (sends per reach) |
-| Ride a fresh reel; post within 24 h | His data only (two outliers, one 3-day-late flop). No platform or study evidence either way; Instagram's "not many posts from one account in a row" argues against posting in the same hour. |
-| Every reel ≥ 10× median gets a guide carousel | His data (inference from the missed opportunity) |
-| Cover: second person, the reader's result, names tool + task + payoff | His data (strongest discriminator); CREATOR (Chris Do: benefit, not self-reference) |
+| Ride a fresh reel; post within 24 h | Reference-account data only (two outliers, one 3-day-late flop). No platform or study evidence either way; Instagram's "not many posts from one account in a row" argues against posting in the same hour. |
+| Every reel ≥ 10× median gets a guide carousel | Reference-account data (inference from the missed opportunity) |
+| Cover: second person, the reader's result, names tool + task + payoff | Reference-account data (strongest discriminator); CREATOR (Chris Do: benefit, not self-reference) |
 | Slide 2 hooks on its own | PLATFORM-via-press (second chance) |
 | 8–10 slides | STUDY (Socialinsider 2020; LinkedIn MagicPost 9–12); CREATOR (Chris Do 10, Ruben 10, Bellabes ≤ 10) |
 | One idea per slide; each slide stands alone | CREATOR (Do, Lau, Hanson); OPINION (Appleby) |
 | Best slide late (7–9), but a quiet save line mid-way is fine | CREATOR (Do) vs CREATOR (Bellabes): they conflict; we take both |
 | Type sizes (≥ 40 px body, ≥ 28 px anything) | Derived: a phone shows the 1080-px slide ~375–430 pt wide, so 40 px ≈ 14 pt. CREATOR (Hanson: "if it's hard to read on a phone, it's too small"). No study. |
 | ≤ 40 words per slide; text-heavy loses | CREATOR (Buffer test n = 6; Lau's "essay slides"); OPINION (25–50 words). No measured number exists. |
-| Real screens, cropped and annotated; no image-model UI | CREATOR (proof inside the slides: Do, Visual Capitalist, Jasmine Star); his data (icon/AI-drawn runs lowest saves). **No controlled test of real vs redrawn UI exists anywhere.** |
+| Real screens, cropped and annotated; no image-model UI | CREATOR (proof inside the slides: Do, Visual Capitalist, Jasmine Star); reference-account data (icon/AI-drawn runs lowest saves). **No controlled test of real vs redrawn UI exists anywhere.** |
 | One annotation per slide; dim, don't blur | OPINION (annotation-tool vendors); house rule (no blur) |
 | The copy-ready slide (prompt or checklist) | OBSERVED (prompt lists are the big AI pages' top posts); CREATOR (Ruben's TL;DR checklist) |
-| One honest step | His data (the 4× "free has a price" carousel); untested elsewhere |
+| One honest step | Reference-account data (the 4× "free has a price" carousel); untested elsewhere |
 | One CTA; a keyword must name what you get | CREATOR (Do, Lau); PLATFORM (engagement-bait definition); OBSERVED (keywords inflate comments on lead-gen accounts; the biggest pages don't use them) |
-| Caption: steps, honest line, share line naming a person | His data (the top carousel named the most specific person, someone job-hunting, and had 5.2 % shares vs ≤ 2.3 % for the rest); CREATOR (Visual Capitalist: aim for the private forward) |
+| Caption: steps, honest line, share line naming a person | Reference-account data (the top carousel named the most specific person, someone job-hunting, and had 5.2 % shares vs ≤ 2.3 % for the rest); CREATOR (Visual Capitalist: aim for the private forward) |
 | Add music on Instagram | PLATFORM-via-press |
 | 1080 × 1440 (3:4), safe zone 1080 × 1350 | PLATFORM-via-press (grid Jan 2025, feed 3:4 May 2025) |
-| Post on TikTok photo mode too | His data (photo median ≈ 2× video); STUDY conflicting |
+| Post on TikTok photo mode too | Reference-account data (photo median ≈ 2× video); STUDY conflicting |
 | No arrow-based swipe cue in Arabic | Swipe direction in an Arabic-language app is UNVERIFIED; general RTL guidance mirrors carousels ([Finastra](https://design.fusionfabric.cloud/foundations/rtl)) |
 | `dir="rtl"`, isolate Latin runs, start lines in Arabic | [W3C strings and bidi](https://www.w3.org/International/articles/strings-and-bidi/); a [Meta developer-forum report](https://developers.secure.facebook.com/community/threads/823471853107377) of Arabic+Latin captions misplacing punctuation |
 | The profile's Arabic font | The ten common candidates (IBM Plex Sans Arabic, Cairo, Tajawal, Changa, Readex Pro, Rubik, Noto Kufi/Naskh Arabic, Alexandria, Almarai) all ship Arabic + Latin on Google Fonts (checked 2026-10-19). No study ranks them. |
 | Line height 1.5–1.7 for Arabic body; never letter-space Arabic | Type-design practice (OPINION); letter-spacing breaks joined script (well known, not a performance claim) |
-| AI-slop tells | House taste plus his data; **no study measured AI illustrations, emoji bullets or vague claims**. The nearest: Lau's failure modes, the 2020 template backlash. |
+| Plan locked before visuals; claims marked observed / documented / suggested | CREATOR (the creator's own earlier pipeline, §6) |
+| 8–22 words per slide, review over 30; 100 px inset | CREATOR (§6); the word budget is an editorial constraint, not a measured threshold |
+| OCR readback against the locked copy | CREATOR (§6: image-model diacritic errors); still useful with typeset text |
+| Read the result at 24 h and 7 days; change one thing at a time | CREATOR (§6) |
+| AI-slop tells | House taste plus reference-account data; **no study measured AI illustrations, emoji bullets or vague claims**. The nearest: Lau's failure modes, the 2020 template backlash. |
 
-## 6. Rules we did not adopt, and why
+## 6. What the creator's earlier carousel pipeline taught
+
+Before this skill, the reference account's carousels came from an in-house agent pipeline with
+its own skill, an editorial contract, and three internal reviews (September 2026). Compared after
+this skill was first drafted; type: CREATOR (the creator's own production notes and reviews).
+
+**Adopted**
+
+- **Write and lock the plan before any visual**: hook, story, value, why-save and the rejected
+  weak version; copy is locked before rendering (§3 of SKILL.md).
+- **Claims marked observed / documented / suggested**, and never invent an experience, a result
+  or a number. Their reviews found AI-written copy drifting into invented first-person claims.
+- **Experience → the reader's capability**: the carousel must make sense to someone who never saw
+  the reel and add something for someone who did. Their audit found carousels that only switched
+  "I" to "you" sentence by sentence.
+- **Counter-evidence that a real story plus a prompt is not enough** (the IKEA and Skills packs):
+  the reader has to want the outcome and see a short path. Setup-heavy topics (tokens, user IDs)
+  need existing demand.
+- **Companion vs standalone** as an explicit decision, and **1 in 3 outside the "free" default**
+  as exploration.
+- **Word budget 8–22 per slide, review over 30**, and **a 100 px inset on all four edges** of
+  1080 × 1440.
+- **One number story**, identical on every slide and in the caption (their commonest defect).
+- **Exact-frame proof stills** cropped to the number (the creator rejected small looped windows that
+  cut the amount off), a **timeline instead of an unreadable screenshot**, equal treatment of
+  both sides of a comparison.
+- **Text readback against the locked copy** (OCR with `ar-SA`), at most two QA rounds.
+- **No production language on slides**; one useful qualification instead of disclaimers.
+- **The keyword only when delivery is verified**; never promise a DM that isn't wired.
+- **The learning loop** at 24 h and 7 days, saves and shares per 1K views, and its decision
+  table; change one thing at a time; organic sequences are comparisons, not A/B tests.
+- **Instagram's API cannot attach music to a carousel**: music means posting from the app.
+
+**Dropped, and why**
+
+- **Image-model slide generation** (AI-drawn slides with real proof composited in afterwards):
+  the creator now wants genuine, real-UI carousels; the same reviews call AI-recreated UI
+  "illustration, not proof"; image models misspell Arabic and add wrong diacritics, which forced
+  slide-by-slide repairs; and the AI-drawn and icon-diagram runs are the account's weakest.
+  Text is now typeset by the render engine, and every visual is a real capture or a simple
+  typeset diagram.
+- **The near-black default design**: the creator moved to light; the black icon-diagram run had
+  the lowest save rates in the set.
+- **Six slides as a fixed format**: it was a production constraint, never tested; the evidence
+  points to 8–10.
+- **Compiling several old experiments into one summed claim** as a "strong pattern": the one
+  carousel built that way reached 0.5× the median, with no fresh reel behind it.
+- **Animated carousels and a vertical slideshow video** (as a Trial Reel, a TikTok video or a
+  YouTube Short): out of scope; the creator chose static only. A Trial Reel of the static slides
+  remains a cheap distribution test to propose separately.
+- **Pipeline mechanics** (dashboard registration, contact-sheet masters, publish jobs, API
+  tokens): they belong to the render engine and the dashboard, not to the editorial skill.
+
+## 7. Rules we did not adopt from outside creators, and why
 
 - **"Comment KEYWORD" on every post**: the biggest AI pages don't use it, and the platform has not
   said whether it counts as engagement bait. Kept as an option for when there is something real
   to send.
-- **Face on the cover**: no consensus (Lau: no face for shareability). His face-led cover was a
+- **Face on the cover**: no consensus (Lau: no face for shareability). The reference account's face-led cover was a
   loser, but it was also a recap. Not a rule; tested only as part of "guide, not recap".
 - **Stock or 3D-object covers** (Do, Mura): fine for design and business audiences; for a tool
   tutorial the proof is the product, so we use real screens.
 - **Overlapping elements across slides** (Mura): conflicts with the unknown RTL swipe direction.
-- **Weekly roundup carousels** (the Arabic AI page's format): works for news pages; his
-  advantage is first-hand work, so roundups stay out unless every item is something he used.
+- **Weekly roundup carousels** (the Arabic AI page's format): works for news pages; this
+  creator's advantage is first-hand work, so roundups stay out unless every item was used first-hand.
 
-## 7. What is still unknown (test, don't assume)
+## 8. What is still unknown (test, don't assume)
 
 1. **Swipe direction in an Arabic-language Instagram app.** Check on a phone; record it here.
-2. **Real vs redrawn UI**: no controlled test anywhere. His next guide carousels can run it.
-3. **Slide count on his account**: all 22 had 6. Run 6 vs 9 on comparable topics.
+2. **Real vs redrawn UI**: no controlled test anywhere. The next guide carousels can run it.
+3. **Slide count on the reference account**: all 22 had 6. Run 6 vs 9 on comparable topics.
 4. **Keyword vs plain save CTA** on reach (not just comments).
 5. **Same-day vs next-day** after the reel.
 6. **Whether the second chance and the music-to-Reels-tab rule reach non-followers**: platform
