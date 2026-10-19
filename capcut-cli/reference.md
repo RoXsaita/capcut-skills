@@ -139,7 +139,7 @@ refuse while CapCut is open, and take `--dry-run` (resolve, validate, report, wr
 
 | Command | What it is for | Example |
 |---|---|---|
-| `carousel` | Guide-carousel twin of a reel that took off: trigger scan, rl2 click frames, 1080×1350 pack + QA, stage as a draft. | `capcutctl carousel build --spec pack.json` |
+| `carousel` | Static carousels from a slide spec (reel twins first): trigger scan, rl2 click frames, 3:4 pack + QA, stage as a draft. | `capcutctl carousel build --spec pack.json` |
 
 ## Development
 
