@@ -185,11 +185,13 @@ and not every slide needs a screenshot box.
 - Show **the creator's real UI** from the recording or a fresh capture, at Retina (2×) resolution.
   Never an image-model redraw of a UI (it is illustration, not proof, and image models misspell
   Arabic and add wrong diacritics), and never a stock mockup or fake device.
-- **One exception: terminal and CLI output may be typeset verbatim** in a mono card (a `prompt`
-  block renders one). A terminal at a normal font is about 24 px per line at source and can never
-  reach the 36 px floor as a crop. OCR the text from the real frame, check it against the frame
-  character by character, keep the real header or prompt line as the proof cue, and set it at
-  **≥ 40 px**. Never shorten, tidy or "fix" the output. Graphical UI always stays a real screenshot.
+- **One exception: terminal and CLI output may be typeset verbatim** in a mono card (the build's
+  `terminal` slide, §12). A terminal at a normal font is about 24 px per line at source and can
+  never reach the 36 px floor as a crop. OCR the text from the real frame, check it against the
+  frame character by character, keep the real header or prompt line as the proof cue, and set it
+  at **≥ 40 px**. Never shorten, tidy or "fix" the output. Graphical UI always stays a real
+  screenshot, and a terminal recorded at a larger font, shown as a screenshot, is still the
+  stronger proof.
 - **Grab the exact frame** where the number or result is on screen, sharp, and crop to it. A small
   window of the whole screen that cuts off the amount is the failure to avoid.
 - **Crop to the part that matters** so the UI's own text lands at **≥ 36 px** on the slide (the
@@ -367,6 +369,10 @@ the rendered page; a passing build still goes through §11.
    - `compare`: `shots: [a, b]`, each with a `label`, drawn with the same treatment;
    - `note`: `body` or a numbered `items` list, optional `shot` (the honest step, a takeaway, a
      timeline, a cheat sheet);
+   - `terminal`: a step whose proof is terminal output, retyped (the §6 exception): `terminal`
+     holds the frame (`take` or `image`, `t` / `click` / `typing`, `crop`), the locked `lines`
+     verbatim, `header` (how many top lines are the real header cue) and `highlight` (line
+     indexes). The build OCRs the frame twice and fails any line that differs by a letter or digit;
    - `prompt`: `blocks` of `{label, text}` (the copy-ready slide);
    - `cta`: `keyword`, or none, and the save line shows instead.
 
@@ -376,7 +382,7 @@ the rendered page; a passing build still goes through §11.
    step badge with `kicker: ""` when a slide isn't a step.
 4. **Set only what differs from the defaults.** The default `rules` already hold this skill's
    limits: `inset` 100, `bottomClear` 0.10, `minPx` (cover headline 96, headline 72, sub and body
-   44, code 40, anything 28), `maxWords` (cover headline 8, headline 7), `slideWords` 8–22 (a
+   44, code and terminal 40, anything 28), `maxWords` (cover headline 8, headline 7), `slideWords` 8–22 (a
    warning) and `maxSlideWords` 30 (fails unless the slide is `dense`). Per pack, set:
 
    | Rule | Set | Why |
@@ -403,8 +409,8 @@ the rendered page; a passing build still goes through §11.
 **Capture size limits what a slide can show.** UI text on the slide ≈ source line height × card
 width ÷ crop width; the plain theme's card is 872 px wide. A 1× capture with ~18 px lines reaches
 36 px only with a crop ≤ ~430 px wide; a terminal with ~24 px lines, ≤ ~580 px, too narrow for a
-full terminal line. Record terminal moments at a larger font or at 2×, or typeset the output
-verbatim (§6, the terminal exception); a graphical UI is always cropped from the real frame.
+full terminal line. Record terminal moments at a larger font or at 2×, or use a `terminal`
+slide (§6, the terminal exception); a graphical UI is always cropped from the real frame.
 Plan the capture before the layout.
 
 ## 13. After posting: read the result
