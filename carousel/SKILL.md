@@ -322,8 +322,8 @@ fix-and-recheck rounds; stop when nothing would be visible on a phone.
       inset. Measure it.
 - [ ] Every screenshot is a real capture, ≥ 60 % slide width, its own text ≥ 36 px on the slide,
       the number or result inside the crop.
-- [ ] Typeset terminal output (the §6 exception only): matches the real frame character by
-      character, keeps its real header or prompt line, set at ≥ 40 px; every GUI is a screenshot.
+- [ ] Typeset terminal output (the §6 exception only) is a `terminal` slide with locked `lines`
+      and QA PASS: its real header line kept, ≥ 40 px; every GUI is a screenshot.
 - [ ] Typed things (commands, flags, values) exactly as typed; prose numbers in the theme's digits.
 - [ ] At most one accent element; brand colour only on frames, dividers, step numbers, pins.
 - [ ] Personal data redacted with solid bars; no blur anywhere.
