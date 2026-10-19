@@ -40,8 +40,10 @@
       "screen-motion",
       "sfx",
       "shift",
+      "stage",
       "sync",
       "trim",
+      "variant",
       "volume",
       "wrap",
       "zoom"
@@ -168,6 +170,30 @@
       ],
       "transactional": true
     },
+    "carousel": {
+      "group": "social",
+      "summary": "Guide-carousel twin of a reel that took off: trigger scan, rl2 click frames, 1080×1350 pack + QA, stage as a draft.",
+      "example": "capcutctl carousel build --spec pack.json",
+      "options": [
+        "--analytics",
+        "--content",
+        "--dashboard",
+        "--dry-run",
+        "--item",
+        "--json",
+        "--log",
+        "--out",
+        "--pack",
+        "--platform",
+        "--platforms",
+        "--remote",
+        "--spec",
+        "--take",
+        "--text-px",
+        "--window-hours"
+      ],
+      "transactional": false
+    },
     "check-export": {
       "group": "check",
       "summary": "QA the rendered file: black, flash frames, freezes, dead air, loudness, true peak, canvas and length.",
@@ -268,10 +294,14 @@
     },
     "doctor": {
       "group": "check",
-      "summary": "Structural integrity; must be error-free before hand-off.",
-      "example": "capcutctl doctor --project NAME",
+      "summary": "Structural integrity; must be error-free before hand-off. --fix repairs a CapCut resave first.",
+      "example": "capcutctl doctor --project NAME --fix --dry-run",
       "options": [
+        "--dry-run",
+        "--fix",
+        "--force-running",
         "--json",
+        "--no-backup",
         "--project",
         "--root"
       ],
@@ -1123,6 +1153,25 @@
       ],
       "transactional": false
     },
+    "stage": {
+      "group": "safety",
+      "summary": "Stage-and-swap: edit a copy outside CapCut's folder with CapCut open; commit is the one closed-CapCut step.",
+      "example": "capcutctl stage start --project NAME",
+      "options": [
+        "--dry-run",
+        "--fix",
+        "--force-running",
+        "--no-backup",
+        "--project"
+      ],
+      "subcommands": [
+        "commit",
+        "discard",
+        "start",
+        "status"
+      ],
+      "transactional": true
+    },
     "status": {
       "group": "start",
       "summary": "Is CapCut running; optionally wait for it to close.",
@@ -1170,6 +1219,26 @@
         "--src",
         "--start",
         "--track"
+      ],
+      "transactional": true
+    },
+    "variant": {
+      "group": "build",
+      "summary": "A duplicate of a signed-off edit with another hook: body shifted, opening re-timed, levels kept, gated.",
+      "example": "capcutctl variant --project NAME --hooks hooks.json --hook b --dry-run",
+      "options": [
+        "--dry-run",
+        "--force-running",
+        "--hook",
+        "--hooks",
+        "--json",
+        "--lang",
+        "--name",
+        "--no-gate",
+        "--opening",
+        "--project",
+        "--src",
+        "--words"
       ],
       "transactional": true
     },
