@@ -27,8 +27,8 @@ prompt was not enough on its own: the reader has to want the outcome and see a s
 On TikTok, the same posts in photo mode had a higher median than the account's videos.
 
 **The loop:** gate the topic (§1) → pick the arc (§2) → write and lock the plan (§3) → capture the
-real screens (§6) → render → run the checklist (§11) → caption (§9) → post (§10) → read the
-result at 24 h and 7 days (§12).
+real screens (§6) → build (§12) → run the checklist (§11) → caption (§9) → post (§10) → read the
+result at 24 h and 7 days (§13).
 
 ## 0. Read the profile, the reel and the source first
 
@@ -187,8 +187,9 @@ and not every slide needs a screenshot box.
   Arabic and add wrong diacritics), and never a stock mockup or fake device.
 - **Grab the exact frame** where the number or result is on screen, sharp, and crop to it. A small
   window of the whole screen that cuts off the amount is the failure to avoid.
-- **Crop to the part that matters** so the UI's own text lands at ≥ 28 px on the slide: from a 2×
-  capture, at most ~860 px of source width (about 430 pt of screen) for a full-width placement.
+- **Crop to the part that matters** so the UI's own text lands at **≥ 36 px** on the slide (the
+  build's OCR check): from a 2× capture, at most ~780 px of source width (about 390 pt of screen)
+  for a full-width placement. Don't upscale a capture past ~2.8×; it reads soft.
 - **Present each crop as a proof card**: on the paper background, a plain card with a thin border
   and a soft shadow, at **≥ 60 % of the slide width**. Phone screenshots: crop to the relevant
   third, not the whole phone.
@@ -311,7 +312,7 @@ fix-and-recheck rounds; stop when nothing would be visible on a phone.
 - [ ] One idea with its own job; headline ≤ 7 words; 8–22 words (anything over 30 justified).
 - [ ] No text under 28 px; supporting text ≥ 40 px (Arabic ≥ 44 px); nothing inside the 100 px
       inset. Measure it.
-- [ ] Every screenshot is a real capture, ≥ 60 % slide width, its own text ≥ 28 px on the slide,
+- [ ] Every screenshot is a real capture, ≥ 60 % slide width, its own text ≥ 36 px on the slide,
       the number or result inside the crop.
 - [ ] At most one accent element; brand colour only on frames, dividers, step numbers, pins.
 - [ ] Personal data redacted with solid bars; no blur anywhere.
@@ -334,7 +335,35 @@ fix-and-recheck rounds; stop when nothing would be visible on a phone.
 - [ ] Music added in the Instagram app (or noted as missing); same PNGs queued for TikTok photo
       mode; alt text written.
 
-## 12. After posting: read the result
+## 12. Building it with `capcutctl carousel`
+
+The CLI's carousel commands turn the §3 plan into slides. They enforce a floor; this skill sets
+the bar, so a passing build still goes through §11.
+
+1. **Gate** (companion carousels): `capcutctl carousel scan --dashboard URL` lists the recent
+   reels that earn a guide twin (first-day reach above the median of the other reels, and a setup
+   the viewer can repeat). Stories are logged "story, no twin"; unclear ones "unsure", for a
+   person to decide. It doesn't judge standalone carousels or the topic filter (§1).
+2. **Find the frames**: `capcutctl carousel steps --take DIR` gives one candidate frame per real
+   click or typing burst in a screen-recording take, with a crop sized so the UI text reads at
+   ≥ 36 px. Pick the frame where the result is on screen (§6), not just the first click.
+3. **Write the spec** from the locked plan: `slug`, `title`, `caption`, `tiktokCaption`, and
+   `slides`, each with a `kind` (`cover`, `step`, `prompt`, `cta`), a `headline` and a `sub`; the
+   cover's `needs` (what the reader needs, which is the barrier-lowering line); each step's `shot`
+   (`take`, a time `t` or a `click` / `typing` event, `crop` as `[x, y, w, h]` in video pixels,
+   optional `highlight`); the prompt slide's `blocks`; the CTA's `keyword`.
+4. **Build and QA**: `capcutctl carousel build --spec pack.json --out DIR` renders the slides with
+   headless Chrome and fails on UI text under 36 px, privacy leaks (home paths, shell prompts,
+   emails) or a headline over 12 words. Then run §11 on the PNGs.
+5. **Stage as a draft**: `capcutctl carousel stage --pack DIR --dashboard URL --remote HOST:DIR
+   --item ID --platforms instagram,tiktok --dry-run`, then without `--dry-run`. It never publishes.
+
+Where the engine and this skill differ today, follow the stricter rule and say so in the hand-off:
+the engine takes 6–8 slides (this skill wants 8–10: build 8), knows only the setup-guide arc's
+four kinds (other arcs need their slides expressed as `step` slides or wait for new kinds), and
+requires a CTA keyword (use one only when delivery is real; otherwise hold the pack).
+
+## 13. After posting: read the result
 
 At about **24 hours and 7 days**, record for each carousel: the link, kind (companion or
 standalone) and the reel's reach, arc, cover line, slide count, keyword and keyword comments,
