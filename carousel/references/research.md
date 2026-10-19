@@ -118,11 +118,11 @@ Instagram, June–October 2026, 22 carousels and 66 reels:
   The pattern matches the studies: carousels are kept, reels travel.
 - All 22 had 6 slides, so slide count was never tested.
 - Ranking each carousel by its reach as a share of the same-topic reel posted just before it:
-  the top four (48 %, 42 %, 31 %, 18 %) had second-person, imperative or question covers; the
+  the top four (48 %, 42 %, 31 %, 24 %) had second-person, imperative or question covers; the
   first-person recaps of a reel's story sat at 0.03 % and 1.5 % of their reels, and a third
   (with no reel behind it) at 0.5× the carousel median.
 - "Free" / "$0" / "no account" was on the cover of 3 of the top 4 by raw reach.
-- The two outliers (20× and 9× median) both came the day after a reel reached 10–15× its reel
+- The two outliers (20× and 9× median) both came the day after a reel reached 15–20× its reel
   median; the stronger one followed a reel whose comment keyword had promised the guide.
 - The near-black icon-diagram run (four carousels in September) had the lowest save rates in
   the set (0.8–1.2 %).

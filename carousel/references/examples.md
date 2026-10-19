@@ -36,7 +36,7 @@ from platform and creator evidence, not from these examples.
 ### 2. "Hermes now gives free AI models": 9× median, 6% of a very big reel
 [instagram.com/p/Dcb5fFEnAIj](https://www.instagram.com/p/Dcb5fFEnAIj/) · save 5.3 % · share 2.3 %
 
-- Posted the day after a reel on the same news with roughly 15× the usual reel reach.
+- Posted the day after a reel on the same news with roughly 20× the usual reel reach.
 - **"Free" and "no API key, no account" on the cover**: the benefit and the removed obstacles.
 - Steps 1–3 (download, open the app, run it free), then a **troubleshooting slide** ("models not
   showing? update Hermes"). Troubleshooting is what people save for later.
@@ -85,7 +85,7 @@ problem?"). **Broke: cover promises the reader's outcome; carousel is the guide,
 ### Same mistake, smaller: "I let Claude cancel the subscription and get my money back": 1.7× median, 1.5% of the reel
 [instagram.com/p/DcHKGSnFuvo](https://www.instagram.com/p/DcHKGSnFuvo/)
 
-The reel asked for the keyword «دليل» (guide) and reached about 14× the usual reel. The carousel
+The reel asked for the keyword «دليل» (guide) and reached about 15× the usual reel. The carousel
 did contain the guide and real-looking receipts, but its cover was first person ("I let Claude…"),
 the story the viewer had already watched. **Broke: second-person cover.**
 

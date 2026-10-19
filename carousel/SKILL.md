@@ -63,7 +63,7 @@ Then decide which of two kinds it is:
   carousel promised "one of the strongest models in the world, free").
 
 Standing rule: **every reel that reaches 10× the reel median gets a guide carousel within 24 hours.**
-(A reel at ~40× median with 1,700+ saves got none; that was the biggest miss.)
+(A reel at ~40× the median got none; that was the biggest miss.)
 
 Topic filter: free / save money / get a job / remove a barrier has been the reference account's
 proven payoff. Keep about **1 in 3** carousels outside it, as exploration, so the filter keeps
@@ -359,7 +359,8 @@ the bar, so a passing build still goes through §11.
    --item ID --platforms instagram,tiktok --dry-run`, then without `--dry-run`. It never publishes.
 
 Where the engine and this skill differ today, follow the stricter rule and say so in the hand-off:
-the engine takes 6–8 slides (this skill wants 8–10: build 8), knows only the setup-guide arc's
+the canvas is decided as 1080 × 1440 but the engine may still render 1080 × 1350 until its change
+lands (check the PNG size; don't fail a pack on it, flag it); the engine takes 6–8 slides (this skill wants 8–10: build 8), knows only the setup-guide arc's
 four kinds (other arcs need their slides expressed as `step` slides or wait for new kinds), and
 requires a CTA keyword (use one only when delivery is real; otherwise hold the pack).
 
