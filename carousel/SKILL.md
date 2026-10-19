@@ -189,7 +189,7 @@ and not every slide needs a screenshot box.
   window of the whole screen that cuts off the amount is the failure to avoid.
 - **Crop to the part that matters** so the UI's own text lands at **≥ 36 px** on the slide (the
   build's OCR check): from a 2× capture, at most ~780 px of source width (about 390 pt of screen)
-  for a full-width placement; from a 1× capture, ~470 px (§12). Don't upscale a capture past ~2.8×; it reads soft.
+  for a full-width placement; from a 1× capture, ~430 px (§12). Don't upscale a capture past ~2.8×; it reads soft.
 - **Present each crop as a proof card**: on the paper background, a plain card with a thin border
   and a soft shadow, at **≥ 60 % of the slide width**. Phone screenshots: crop to the relevant
   third, not the whole phone.
@@ -285,8 +285,8 @@ doesn't drag the punctuation to the wrong side. No "in this carousel I will expl
   loses its sides on the grid). The 100 px inset (§6) keeps everything inside the 1080 × 1350 safe
   zone. TikTok photo mode is built around 9:16; third-party guides (no TikTok source) say other
   ratios show with bars rather than cropped, with the caption and buttons over the lower part. So
-  post the same 3:4 slides, keep the bottom 10 % free of anything that must be read, and check the
-  first post in the app.
+  post the same slides on a 1080 × 1920 page, the slide in the top 90 % (the build makes this copy,
+  §12), and check the first post in the app.
 - Alt text per slide on Instagram: the slide's headline plus what the screenshot shows.
 
 ## 11. Pre-publish checklist
@@ -332,15 +332,15 @@ fix-and-recheck rounds; stop when nothing would be visible on a phone.
 - [ ] Line 1 names tool + task; steps; honest line; share line naming a person; save/keyword line.
 - [ ] The creator's dialect, lines start in Arabic, no "this carousel explains…".
 - [ ] Every slide 1080 × 1440; nothing important in the bottom 10 %.
-- [ ] Music added in the Instagram app (or noted as missing); same PNGs queued for TikTok photo
-      mode; alt text written.
+- [ ] Music added in the Instagram app (or noted as missing); the 9:16 copies queued for TikTok
+      photo mode; alt text written.
 
 ## 12. Building it with `capcutctl carousel`
 
 The CLI's carousel commands turn the §3 plan into slides. The engine holds no taste: what its QA
-enforces comes from the spec's `rules`, the look from `theme`, the fixed words from `labels`. Its
-defaults are a floor; this skill sets the bar through those three blocks, and a passing build still
-goes through §11.
+enforces comes from the spec's `rules`, the look from its `theme` (a folder: `theme.json` plus a
+template), the fixed words from `labels`. Its default rules are this skill's numbers, measured on
+the rendered page; a passing build still goes through §11.
 
 1. **Gate** (companion carousels): `capcutctl carousel scan --dashboard URL` lists the recent
    reels that earn a guide twin (first-day reach above the median of the other reels, and a setup
@@ -350,50 +350,52 @@ goes through §11.
    click or typing burst in a screen-recording take, with a crop sized so the UI text reads at
    ≥ 36 px. Pick the frame where the result is on screen (§6), not just the first click.
 3. **Write the spec** from the locked plan: `slug`, `title`, `caption`, `tiktokCaption`, and
-   `slides`. Each slide has a `kind` and a `headline`:
+   `slides`. Each slide has a `kind`, a `headline` and, on Instagram, an `alt` (or each shot's
+   `alt`; §10). One kind per visual role (§6):
    - `cover`: `sub`, a `shot` (the proof element), `needs` (the barrier-lowering line, §4);
-   - `step`: a required `shot`, `sub`, `kicker`, `number`, `body`;
-   - `text`: `headline`, `sub`, `body`, optional `shot` (the honest step, a takeaway, a timeline);
+   - `step`: a required `shot`, `sub`, `kicker`, `number`;
+   - `proof`: a receipt, with the one number lifted out as `figure` and the `shot` as evidence;
+   - `compare`: `shots: [a, b]`, each with a `label`, drawn with the same treatment;
+   - `note`: `body` or a numbered `items` list, optional `shot` (the honest step, a takeaway, a
+     timeline, a cheat sheet);
    - `prompt`: `blocks` of `{label, text}` (the copy-ready slide);
    - `cta`: `keyword`, or none, and the save line shows instead.
 
    A `shot` is a crop of a real frame: `take` or `image`; a time `t`, a `click` or a `typing`
    event; `crop` `[x, y, w, h]` in source pixels; one `highlight` rectangle (the single
-   annotation); `masks` for redaction (solid colour, never blur); `dark` for a dark UI.
-4. **Tune `rules` and `theme` to this skill** (the engine's defaults are looser):
+   annotation); `masks` for redaction (solid colour, never blur); `dark` for a dark UI. Drop the
+   step badge with `kicker: ""` when a slide isn't a step.
+4. **Set only what differs from the defaults.** The default `rules` already hold this skill's
+   limits: `inset` 100, `bottomClear` 0.10, `minPx` (cover headline 96, headline 72, sub and body
+   44, code 40, anything 28), `maxWords` (cover headline 8, headline 7), `slideWords` 8–22 (a
+   warning) and `maxSlideWords` 30 (fails unless the slide is `dense`). Per pack, set:
 
-   | Block | Set | Why |
+   | Rule | Set | Why |
    |---|---|---|
-   | `rules.slideCount` | `[8, 10]` | §2 (engine default 6–10) |
-   | `rules.maxHeadlineWords` | `8` | §4 cover ≤ 8, §6 headlines ≤ 7 (default 12) |
-   | `rules.requireKeyword` | `true` only when the reel promised a keyword and its delivery is real | §8 |
-   | `rules.requirePrompt` | `false` for arcs with no copy-ready slide (receipts, mistakes, comparison) | §2 |
-   | `theme.h1Cover` / `theme.h1` | `96` / `72` | §4, §6 (defaults 80 / 60) |
-   | `theme.sub`, `theme.body` | `44` | §6, Arabic (defaults 34 / 38) |
+   | `slideCount` | `[8, 10]` | §2 (default 6–10) |
+   | `requireKeyword` | `true` only when the reel promised a keyword and its delivery is real | §8 |
+   | `requirePrompt` | `false` for arcs with no copy-ready slide (receipts, mistakes, comparison) | §2 |
+   | `dense` (on a slide) | `true` only for the one cheat-sheet slide | §6 |
 
-   Bigger type means fewer words fit: if a headline wraps past two lines, cut words, don't shrink
-   the type. Brand colours come from the profile; don't put them in the spec.
+   Never lower a `minPx` or raise a `maxWords` to make a slide pass: cut words. The look is the
+   `theme`: a name, a folder path, or `{name, …}` with overrides of its vars. Brand colours come
+   from the profile; don't put them in the spec.
 5. **Build and QA**: `capcutctl carousel build --spec pack.json --out DIR` renders 1080 × 1440
-   slides (`canvas` `"3x4"`, the default) with headless Chrome and exits 1 on UI text in a shot
-   under 36 px, a step card under 55 % of the slide height, OCR text touching a shot's side edge,
-   text outside the safe margins (which keep the centred 1080 × 1350 crop whole), the slide count,
-   headline length, or any privacy leak (home paths, shell prompts, emails). Then run §11 on
+   slides (`canvas` `"3x4"`, the default) plus a 1080 × 1920 copy for TikTok with the bottom 10 %
+   clear, and exits 1 on any text below its `minPx`, text or a card inside the inset or in the
+   bottom 10 %, a headline over its words, a slide over 30 words, UI text in a shot under 36 px, a
+   step card under 55 % of the slide height, OCR text touching a shot's side edge, the slide count,
+   or any privacy leak (home paths, shell prompts, emails). Then run §11 on
    `exports/instagram-3x4/` and the contact sheet.
 6. **Stage as a draft**: `capcutctl carousel stage --pack DIR --dashboard URL --remote HOST:DIR
    --item ID --platforms instagram,tiktok --dry-run`, then without `--dry-run`. It takes only a
    pack whose QA passed, and it never publishes.
 
-**Arcs the four layouts don't name.** There is no `proof` or `compare` kind yet. A receipt is a
-`step` (or a `text` with a `shot`) with one `highlight` on the number and the number repeated in
-the `headline`; drop the step badge with `kicker: ""` when it isn't a step. A comparison is two
-consecutive slides with the same crop width and the same treatment, one result each. A cheat
-sheet is a `text` or a `prompt` slide.
-
-**Capture size limits what a slide can show.** On the 952 px card, UI text on the slide ≈ source
-line height × 952 ÷ crop width. A 1× capture with ~18 px lines reaches 36 px only with a crop
-≤ ~470 px wide; an 80-column terminal (~24 px lines), ≤ ~630 px. A long output line (~800 px)
-cannot show whole at 36 px: crop to the part that matters, or record at 2×. Plan the capture
-before the layout.
+**Capture size limits what a slide can show.** UI text on the slide ≈ source line height × card
+width ÷ crop width; the plain theme's card is 872 px wide. A 1× capture with ~18 px lines reaches
+36 px only with a crop ≤ ~430 px wide; a terminal with ~24 px lines, ≤ ~580 px, too narrow for a
+full terminal line. Record terminal moments at a larger font or at 2×, and crop to the part that
+matters. Plan the capture before the layout.
 
 ## 13. After posting: read the result
 

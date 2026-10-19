@@ -10,7 +10,7 @@
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "6892bc2",
+    "commit": "fc764c6",
     "branch": "feat/guide-carousel-twin",
     "cliVersion": "0.1.1"
   }
