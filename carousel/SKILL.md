@@ -189,7 +189,7 @@ and not every slide needs a screenshot box.
   window of the whole screen that cuts off the amount is the failure to avoid.
 - **Crop to the part that matters** so the UI's own text lands at **≥ 36 px** on the slide (the
   build's OCR check): from a 2× capture, at most ~780 px of source width (about 390 pt of screen)
-  for a full-width placement. Don't upscale a capture past ~2.8×; it reads soft.
+  for a full-width placement; from a 1× capture, ~470 px (§12). Don't upscale a capture past ~2.8×; it reads soft.
 - **Present each crop as a proof card**: on the paper background, a plain card with a thin border
   and a soft shadow, at **≥ 60 % of the slide width**. Phone screenshots: crop to the relevant
   third, not the whole phone.
@@ -337,8 +337,10 @@ fix-and-recheck rounds; stop when nothing would be visible on a phone.
 
 ## 12. Building it with `capcutctl carousel`
 
-The CLI's carousel commands turn the §3 plan into slides. They enforce a floor; this skill sets
-the bar, so a passing build still goes through §11.
+The CLI's carousel commands turn the §3 plan into slides. The engine holds no taste: what its QA
+enforces comes from the spec's `rules`, the look from `theme`, the fixed words from `labels`. Its
+defaults are a floor; this skill sets the bar through those three blocks, and a passing build still
+goes through §11.
 
 1. **Gate** (companion carousels): `capcutctl carousel scan --dashboard URL` lists the recent
    reels that earn a guide twin (first-day reach above the median of the other reels, and a setup
@@ -348,21 +350,50 @@ the bar, so a passing build still goes through §11.
    click or typing burst in a screen-recording take, with a crop sized so the UI text reads at
    ≥ 36 px. Pick the frame where the result is on screen (§6), not just the first click.
 3. **Write the spec** from the locked plan: `slug`, `title`, `caption`, `tiktokCaption`, and
-   `slides`, each with a `kind` (`cover`, `step`, `prompt`, `cta`), a `headline` and a `sub`; the
-   cover's `needs` (what the reader needs, which is the barrier-lowering line); each step's `shot`
-   (`take`, a time `t` or a `click` / `typing` event, `crop` as `[x, y, w, h]` in video pixels,
-   optional `highlight`); the prompt slide's `blocks`; the CTA's `keyword`.
-4. **Build and QA**: `capcutctl carousel build --spec pack.json --out DIR` renders the slides with
-   headless Chrome and fails on UI text under 36 px, privacy leaks (home paths, shell prompts,
-   emails) or a headline over 12 words. Then run §11 on the PNGs.
-5. **Stage as a draft**: `capcutctl carousel stage --pack DIR --dashboard URL --remote HOST:DIR
-   --item ID --platforms instagram,tiktok --dry-run`, then without `--dry-run`. It never publishes.
+   `slides`. Each slide has a `kind` and a `headline`:
+   - `cover`: `sub`, a `shot` (the proof element), `needs` (the barrier-lowering line, §4);
+   - `step`: a required `shot`, `sub`, `kicker`, `number`, `body`;
+   - `text`: `headline`, `sub`, `body`, optional `shot` (the honest step, a takeaway, a timeline);
+   - `prompt`: `blocks` of `{label, text}` (the copy-ready slide);
+   - `cta`: `keyword`, or none, and the save line shows instead.
 
-Where the engine and this skill differ today, follow the stricter rule and say so in the hand-off:
-the canvas is decided as 1080 × 1440 but the engine may still render 1080 × 1350 until its change
-lands (check the PNG size; don't fail a pack on it, flag it); the engine takes 6–8 slides (this skill wants 8–10: build 8), knows only the setup-guide arc's
-four kinds (other arcs need their slides expressed as `step` slides or wait for new kinds), and
-requires a CTA keyword (use one only when delivery is real; otherwise hold the pack).
+   A `shot` is a crop of a real frame: `take` or `image`; a time `t`, a `click` or a `typing`
+   event; `crop` `[x, y, w, h]` in source pixels; one `highlight` rectangle (the single
+   annotation); `masks` for redaction (solid colour, never blur); `dark` for a dark UI.
+4. **Tune `rules` and `theme` to this skill** (the engine's defaults are looser):
+
+   | Block | Set | Why |
+   |---|---|---|
+   | `rules.slideCount` | `[8, 10]` | §2 (engine default 6–10) |
+   | `rules.maxHeadlineWords` | `8` | §4 cover ≤ 8, §6 headlines ≤ 7 (default 12) |
+   | `rules.requireKeyword` | `true` only when the reel promised a keyword and its delivery is real | §8 |
+   | `rules.requirePrompt` | `false` for arcs with no copy-ready slide (receipts, mistakes, comparison) | §2 |
+   | `theme.h1Cover` / `theme.h1` | `96` / `72` | §4, §6 (defaults 80 / 60) |
+   | `theme.sub`, `theme.body` | `44` | §6, Arabic (defaults 34 / 38) |
+
+   Bigger type means fewer words fit: if a headline wraps past two lines, cut words, don't shrink
+   the type. Brand colours come from the profile; don't put them in the spec.
+5. **Build and QA**: `capcutctl carousel build --spec pack.json --out DIR` renders 1080 × 1440
+   slides (`canvas` `"3x4"`, the default) with headless Chrome and exits 1 on UI text in a shot
+   under 36 px, a step card under 55 % of the slide height, OCR text touching a shot's side edge,
+   text outside the safe margins (which keep the centred 1080 × 1350 crop whole), the slide count,
+   headline length, or any privacy leak (home paths, shell prompts, emails). Then run §11 on
+   `exports/instagram-3x4/` and the contact sheet.
+6. **Stage as a draft**: `capcutctl carousel stage --pack DIR --dashboard URL --remote HOST:DIR
+   --item ID --platforms instagram,tiktok --dry-run`, then without `--dry-run`. It takes only a
+   pack whose QA passed, and it never publishes.
+
+**Arcs the four layouts don't name.** There is no `proof` or `compare` kind yet. A receipt is a
+`step` (or a `text` with a `shot`) with one `highlight` on the number and the number repeated in
+the `headline`; drop the step badge with `kicker: ""` when it isn't a step. A comparison is two
+consecutive slides with the same crop width and the same treatment, one result each. A cheat
+sheet is a `text` or a `prompt` slide.
+
+**Capture size limits what a slide can show.** On the 952 px card, UI text on the slide ≈ source
+line height × 952 ÷ crop width. A 1× capture with ~18 px lines reaches 36 px only with a crop
+≤ ~470 px wide; an 80-column terminal (~24 px lines), ≤ ~630 px. A long output line (~800 px)
+cannot show whole at 36 px: crop to the part that matters, or record at 2×. Plan the capture
+before the layout.
 
 ## 13. After posting: read the result
 
