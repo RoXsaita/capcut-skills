@@ -185,6 +185,11 @@ and not every slide needs a screenshot box.
 - Show **the creator's real UI** from the recording or a fresh capture, at Retina (2×) resolution.
   Never an image-model redraw of a UI (it is illustration, not proof, and image models misspell
   Arabic and add wrong diacritics), and never a stock mockup or fake device.
+- **One exception: terminal and CLI output may be typeset verbatim** in a mono card (a `prompt`
+  block renders one). A terminal at a normal font is about 24 px per line at source and can never
+  reach the 36 px floor as a crop. OCR the text from the real frame, check it against the frame
+  character by character, keep the real header or prompt line as the proof cue, and set it at
+  **≥ 40 px**. Never shorten, tidy or "fix" the output. Graphical UI always stays a real screenshot.
 - **Grab the exact frame** where the number or result is on screen, sharp, and crop to it. A small
   window of the whole screen that cuts off the amount is the failure to avoid.
 - **Crop to the part that matters** so the UI's own text lands at **≥ 36 px** on the slide (the
@@ -229,8 +234,9 @@ as a template.
   with `dir="rtl"` on the slide and wrap each Latin run in `<bdi>` (or `unicode-bidi: isolate`), so
   punctuation and numbers don't jump to the wrong end. Prefer the Latin term at the start or end of
   a line, not between two Arabic clauses, and check every line with a Latin run by eye.
-- **Digits**: one system per carousel. Step numbers and prices as they appear on the real screen
-  (usually Western digits).
+- **Digits**: anything the reader types or matches on screen (commands, flags, values: `400k`,
+  `/advisor`) stays exactly as typed. Prose numbers follow the theme's digit system (the theme
+  decides).
 - **Dialect over formal**: the slide text sounds like the reel ("خلّي كلود…"), not like a manual
   ("هذا الكاروسيل يشرح لك…", an AI-caption tell).
 
@@ -314,6 +320,9 @@ fix-and-recheck rounds; stop when nothing would be visible on a phone.
       inset. Measure it.
 - [ ] Every screenshot is a real capture, ≥ 60 % slide width, its own text ≥ 36 px on the slide,
       the number or result inside the crop.
+- [ ] Typeset terminal output (the §6 exception only): matches the real frame character by
+      character, keeps its real header or prompt line, set at ≥ 40 px; every GUI is a screenshot.
+- [ ] Typed things (commands, flags, values) exactly as typed; prose numbers in the theme's digits.
 - [ ] At most one accent element; brand colour only on frames, dividers, step numbers, pins.
 - [ ] Personal data redacted with solid bars; no blur anywhere.
 - [ ] **Text readback**: OCR every slide (for example macOS Vision with `ar-SA` and `en-US`) and
@@ -394,8 +403,9 @@ the rendered page; a passing build still goes through §11.
 **Capture size limits what a slide can show.** UI text on the slide ≈ source line height × card
 width ÷ crop width; the plain theme's card is 872 px wide. A 1× capture with ~18 px lines reaches
 36 px only with a crop ≤ ~430 px wide; a terminal with ~24 px lines, ≤ ~580 px, too narrow for a
-full terminal line. Record terminal moments at a larger font or at 2×, and crop to the part that
-matters. Plan the capture before the layout.
+full terminal line. Record terminal moments at a larger font or at 2×, or typeset the output
+verbatim (§6, the terminal exception); a graphical UI is always cropped from the real frame.
+Plan the capture before the layout.
 
 ## 13. After posting: read the result
 
