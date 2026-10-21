@@ -199,6 +199,11 @@ def check_cli_parity() -> None:
         fail(".capcut/cli-compatibility.json",
              f"requiredContractVersion {compat.get('requiredContractVersion')} but the "
              f"vendored contract is version {contract.get('contractVersion')}")
+    synced_commit = str((compat.get("contractSyncedFrom") or {}).get("commit") or "")
+    if synced_commit.endswith("-dirty"):
+        fail(".capcut/cli-compatibility.json",
+             f"contractSyncedFrom.commit {synced_commit!r} was synced from uncommitted CLI "
+             "changes — commit them in the CLI and run scripts/sync-cli.sh from a clean tree")
     synced = (compat.get("contractSyncedFrom") or {}).get("cliVersion")
     if synced and synced != contract.get("cliVersion"):
         fail(".capcut/cli-compatibility.json",

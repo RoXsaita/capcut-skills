@@ -7,6 +7,7 @@ copy, and asserts the checker reports it.
 """
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -130,6 +131,15 @@ def _(repo: Path) -> str:
     return "refresh both together"
 
 
+@case("a contract synced from a dirty CLI tree")
+def _(repo: Path) -> str:
+    path = repo / ".capcut" / "cli-compatibility.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["contractSyncedFrom"]["commit"] = "abc1234-dirty"
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return "synced from uncommitted CLI changes"
+
+
 @case("a vendored contract of the wrong shape")
 def _(repo: Path) -> str:
     edit(repo / ".capcut" / "cli-compatibility.json",
@@ -164,6 +174,109 @@ def _(repo: Path) -> str:
     return "contradicts the style profile"
 
 
+# ------------------------------------------------------------------ scripts/sync-cli.sh
+
+SYNC_CASES: list[tuple[str, object]] = []
+
+
+def sync_case(name: str):
+    def register(fn):
+        SYNC_CASES.append((name, fn))
+        return fn
+    return register
+
+
+def git(cli: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(cli), "-c", "user.name=test", "-c", "user.email=test@example.invalid",
+                    *args], check=True, capture_output=True, text=True)
+
+
+def stub_cli(repo: Path) -> Path:
+    """A throwaway CLI clone whose `contract` prints exactly what the skills vendor."""
+    cli = repo.parent / "cli"
+    (cli / "bin").mkdir(parents=True)
+    (cli / "src").mkdir()
+    (cli / "docs").mkdir()
+    contract = (repo / ".capcut" / "cli-contract.json").read_text(encoding="utf-8")
+    shutil.copy(repo / ".capcut" / "cli-contract.json", cli / "bin" / "contract.json")
+    shutil.copy(repo / "capcut-cli" / "reference.md", cli / "bin" / "reference.md")
+    (cli / "docs" / "cli-contract.json").write_text(contract, encoding="utf-8")
+    (cli / "bin" / "capcutctl.mjs").write_text(
+        "import fs from 'node:fs';\n"
+        "const file = process.argv.includes('--markdown') ? 'reference.md' : 'contract.json';\n"
+        "process.stdout.write(fs.readFileSync(new URL(`./${file}`, import.meta.url)));\n",
+        encoding="utf-8")
+    (cli / "src" / "cli.mjs").write_text("export {};\n", encoding="utf-8")
+    version = json.loads(contract)["cliVersion"]
+    (cli / "package.json").write_text(json.dumps({"version": version}) + "\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", "-b", "main", str(cli)], check=True)
+    git(cli, "add", "-A")
+    git(cli, "commit", "-q", "-m", "stub")
+    return cli
+
+
+def run_sync(repo: Path, *args: str) -> tuple[int, str]:
+    done = subprocess.run(["bash", "scripts/sync-cli.sh", *args], cwd=repo,
+                          capture_output=True, text=True, timeout=120)
+    return done.returncode, done.stdout + done.stderr
+
+
+@sync_case("a clean CLI tree syncs")
+def _(repo: Path, cli: Path):
+    return run_sync(repo, str(cli)), None
+
+
+@sync_case("an uncommitted src/ edit is refused")
+def _(repo: Path, cli: Path):
+    (cli / "src" / "cli.mjs").write_text("export const changed = 1;\n", encoding="utf-8")
+    return run_sync(repo, str(cli)), "uncommitted changes"
+
+
+@sync_case("--allow-dirty stamps -dirty, which validate rejects")
+def _(repo: Path, cli: Path):
+    (cli / "src" / "new.mjs").write_text("export {};\n", encoding="utf-8")
+    return run_sync(repo, "--allow-dirty", str(cli)), "synced from uncommitted CLI changes"
+
+
+@sync_case("a detached HEAD is refused")
+def _(repo: Path, cli: Path):
+    git(cli, "checkout", "-q", "--detach")
+    return run_sync(repo, str(cli)), "detached HEAD"
+
+
+@sync_case("a committed contract that differs from the generated one is refused")
+def _(repo: Path, cli: Path):
+    (cli / "docs" / "cli-contract.json").write_text("{}\n", encoding="utf-8")
+    git(cli, "commit", "-q", "-am", "stale contract")
+    return run_sync(repo, str(cli)), "differs from"
+
+
+def sync_main() -> int:
+    if not shutil.which("node") or not shutil.which("git"):
+        print("skipped     sync-cli.sh cases (node and git are required)")
+        return 0
+    failures = 0
+    for name, scenario in SYNC_CASES:
+        repo = sandbox()
+        try:
+            (code, output), expected = scenario(repo, stub_cli(repo))
+            if expected is None and code != 0:
+                print(f"REFUSED     {name}\n{output}", file=sys.stderr)
+                failures += 1
+            elif expected is not None and code == 0:
+                print(f"NOT CAUGHT  {name}", file=sys.stderr)
+                failures += 1
+            elif expected is not None and expected not in output:
+                print(f"WRONG REASON {name}\n  wanted: {expected}\n  got:\n{output}", file=sys.stderr)
+                failures += 1
+            else:
+                print(f"ok          {name}")
+        finally:
+            shutil.rmtree(repo.parent, ignore_errors=True)
+    print(f"\n{len(SYNC_CASES) - failures}/{len(SYNC_CASES)} sync-cli.sh cases pass")
+    return failures
+
+
 def main() -> int:
     # The unmodified repository must pass, or every case below proves nothing.
     code, output = run(ROOT)
@@ -171,7 +284,8 @@ def main() -> int:
         print(f"the repository itself does not validate:\n{output}", file=sys.stderr)
         return 1
 
-    failures = 0
+    failures = sync_main()
+    missed = 0
     for name, mutate in CASES:
         repo = sandbox()
         try:
@@ -179,18 +293,18 @@ def main() -> int:
             code, output = run(repo)
             if code == 0:
                 print(f"NOT CAUGHT  {name}", file=sys.stderr)
-                failures += 1
+                missed += 1
             elif expected not in output:
                 print(f"WRONG REASON {name}\n  wanted: {expected}\n  got:\n{output}",
                       file=sys.stderr)
-                failures += 1
+                missed += 1
             else:
                 print(f"caught      {name}")
         finally:
             shutil.rmtree(repo.parent, ignore_errors=True)
 
-    print(f"\n{len(CASES) - failures}/{len(CASES)} regressions caught")
-    return 1 if failures else 0
+    print(f"\n{len(CASES) - missed}/{len(CASES)} regressions caught")
+    return 1 if failures + missed else 0
 
 
 if __name__ == "__main__":

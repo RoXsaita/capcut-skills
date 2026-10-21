@@ -40,17 +40,66 @@ bundled one); `CAPCUTCTL_ASSET_DIR` overrides artwork.
 Every **T** command in the reference snapshots the project, applies the same operation to the
 root draft and the active timeline as separate documents, validates references, timing,
 transforms and masks, writes all three mirrors (`draft_info.json`, `.bak`, `template-2.tmp`)
-atomically, runs `doctor`, and restores the snapshot if anything fails. It refuses while CapCut is
-running — CapCut holds the draft in memory and overwrites you on its next autosave. `capcutctl
-close` first.
+atomically, runs `doctor`, and restores the snapshot if anything fails. A failure is
+`ROLLED_BACK`; its details carry `restored` (boolean), and `snapshot: null` means nothing live
+was rewritten. A direct write refuses while CapCut is running — CapCut holds the draft in memory
+and overwrites you on its next autosave. Two ways through:
+
+- **Close it yourself.** Run `capcutctl close`; never ask the creator to quit, and never close
+  during an export the creator started. `CLOSE_CANCELLED` means a dialog blocked the quit: say so
+  in one line, wait with `capcutctl status --wait-for-close --timeout N`, and keep doing
+  read-only and `--dry-run` work meanwhile. `CLOSE_TIMEOUT` / `CLOSE_REFUSED`: retry once, then
+  report.
+- **Stage with CapCut open.** `capcutctl stage start --project NAME` copies the draft outside
+  CapCut's folder, and every later command edits the copy. Only
+  `capcutctl stage commit --project NAME` needs CapCut closed. `STAGE_CONFLICT` (exit 5) means
+  the creator saved in CapCut meanwhile: never force it. `export` refuses while a stage is
+  active (`STAGE_ACTIVE`); `capcutctl stage discard --project NAME` drops the copy.
+
+**After any CapCut open or save**, before the next write, run
+`capcutctl doctor --project NAME --fix --dry-run`, then `--fix`. It restores the `capcutctl_*`
+keys a save strips and merges byte-identical duplicate ids. Never hand-write `materials.dedupe`
+or `material.patch` specs for this.
 
 **`--dry-run` is a guarantee about transactional commands only:** resolve, validate, report what
 would change, write nothing. The exact list is `capcutctl contract | jq -r '.dryRun.commands[]'`.
 `snapshot`, `init-spec --output`, `harvest --out` and `review` write files and do not take it.
 
-`capcutctl history` / `restore` / `diff --snapshot` recover and compare. `capcutctl sync` repairs
-mirror drift. `capcutctl apply --spec` runs arbitrary v1 operations transactionally — the escape
-hatch, not the first resort.
+`capcutctl history` / `restore` / `diff --snapshot` recover and compare. `--snapshot` takes a
+NAME or a LABEL: a label picks the newest `<ts>-LABEL`, as in
+`capcutctl restore --project NAME --snapshot pre-build`; a timestamp fragment no longer matches.
+An unknown one is `SNAPSHOT_NOT_FOUND` (exit 2) listing the 5 newest; `restore` reports
+`snapshotName` and `resolvedFrom`. After a restore a plain `build` rebuilds by itself ("build
+outputs missing (restore?)"); `build --force` is only for snapshots taken before snapshots
+carried `.capcutctl/build.json`. Snapshots are hardlinked mirrors: replace a file, never edit
+one in place, or `restore` refuses with `SNAPSHOT_CHECKSUM`. `capcutctl sync` repairs mirror
+drift. `capcutctl apply --spec` runs arbitrary v1 operations transactionally — the escape hatch,
+not the first resort.
+
+## Flags
+
+- `--segments ID[,ID...]` takes a list on `remove`, `volume`, `fade`, `animate` and
+  `replace-media`: one transaction, one snapshot, and an unknown id fails the whole list
+  (`SELECTOR_EMPTY`). `trim`, `shift`, `keyframe` and `punch` refuse a list
+  (`MULTIPLE_SEGMENTS`); `punch` refuses `--segment` together with `--segments`.
+- `--key=value` works everywhere; a boolean given `=value` is `FLAG_TAKES_NO_VALUE`, a repeated
+  flag `DUPLICATE_FLAG`, a non-number `BAD_NUMBER` (`0,5`: write `0.5`). `--plan` never writes:
+  on every command that takes it, it is a dry run.
+- `UNKNOWN_COMMAND` / `UNKNOWN_OPTION` name the nearest match. `capcutctl <cmd> --help` prints
+  only that command's slice.
+
+## Shell
+
+- The Bash tool may run zsh: an unquoted `$LIST` stays one word and an unquoted glob fails "no
+  matches found". Pass a comma list where the command takes one (`--segments` above, `qa --times`);
+  loop only where `MULTIPLE_SEGMENTS` refuses, over an array or `${=LIST}`, first item `--dry-run`.
+- Wait with background runs or condition loops, never `sleep` polling. Check CapCut with
+  `capcutctl doctor` (`CAPCUT_RUNNING`) or `pgrep -x CapCut`, never `pgrep -f` or `ps | grep`.
+- Heavy renders (`preview`, `xray scan`, `gate --xray`, mograph batches): when the environment
+  sets `CAPCUTCTL_HEAVY_LOCK`, `blur-broll` and `denoise` take it themselves; wrap the others in
+  `lockf -k "$CAPCUTCTL_HEAVY_LOCK"`. Never hard-code a lock path.
+- `preflight` rows for Caption generation and the background plate/pipeline are non-blocking
+  (optional): `captions --cues` works without ASR, and an unset plate means the room stays as shot.
 
 ## The media-origin contract
 
@@ -84,6 +133,23 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 - **A logo whose pixel size cannot be read is refused** (`LOGO_SIZE_UNKNOWN`) rather than squashed.
 - **`--track`** takes a name or an index everywhere. A name creates/reuses an overlay; a number never
   creates one (inserting a track renumbers everything above it).
+- **Spec times are seconds; integers above 100000 are µs.** Anything from 3600 to 100000 refuses
+  with `BAD_TIME`: pass seconds, or `startUs` / `durationUs` (integer µs, on `timeline.set` and
+  on `segment.clone` target/source). Raw `segment.patch` timeranges are integer µs; a fractional
+  value is read as seconds. `timeline.set` refuses a duration more than 60s past the last clip
+  (or the parked end) with `DURATION_OUT_OF_RANGE` unless `"force": true`.
+- **`validation` entries with `level: "warning"`, `preexisting: true`** are errors the project
+  already had; they do not block an unrelated edit. An edit that creates `TRANSITION_ORPHANED` or
+  any `TIMELINE_ID_MISMATCH` fails `VALIDATION_FAILED` at the dry run; `capcutctl polish`
+  rebuilds transitions. Doctor also reports the error `NON_INTEGER_TIMERANGE`, `BAD_NUMBER` (a
+  null volume, fade or keyframe value), and the warnings `ZERO_DURATION_SEGMENT`,
+  `SUBFRAME_SEGMENT`, `SPEED_MATERIAL_MISMATCH`, `SHARED_SEGMENT_EXTRA`.
+- **Shared materials.** `material.patch` refuses `SHARED_MATERIAL` on a speed, audio_fade or mask
+  more than one segment uses, unless `"shared": true`. `replace.media` refuses
+  `CONFLICTING_MATERIAL_ID` when copies differ (`capcutctl sync`). `trim`, `pace` and
+  `replace-media --retime` clone a shared speed for the edited clip themselves — no need to clone
+  first. `sync` and `materials.dedupe` merge only byte-identical copies; conflicting ones stay,
+  counted in `conflictingMaterialIds` and listed in `unmerged`.
 
 ## Behaviour worth knowing before you reach for a verb
 
@@ -95,18 +161,43 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 - **`gate`** — reads the draft, not pixels or sound; FAIL exits 1.
 - **`mograph`** — deterministic HTML/JS graphics, tight-bbox ProRes 4444 or a PNG with native eased
   keys; `importVerified: false` until the CLI's `docs/mograph.md` checklist passes on this CapCut.
+  Renders are `<id>-<fingerprint>.mov`; `rerender` keeps the live position (`moved` when it was
+  dragged). `MOGRAPH_CANVAS` = profile/draft canvas mismatch; `MOGRAPH_SAFE_ZONE` gives `suggestCenter`.
 - **`logo`** — default entrance is the profile's measured pop (0.01 → scale over 0.13s) with its pop
   cue 0.1s ahead; once per brand, first surviving mention. `--motion` recipes are experimental.
-- **`polish`** — owns transitions: clears and rebuilds them on the principal track, slicing it so each
-  transition has a clip on both sides (CapCut drops one that does not). Sound leads picture by
-  ~0.14s. `--motivated` = picture changes only.
+- **`polish`** — rebuilds its own transitions on the principal track and keeps hand-placed ones,
+  slicing so each transition has a clip on both sides (CapCut drops one that does not). Sound leads
+  picture by ~0.14s. `--motivated` = picture changes only.
 - **`pace` / `ramp`** — speed is arithmetic; never touches the face; never writes `curve_speed`.
+  `ramp --reach-back S` lets the wait start before the in-point; `REACH_LIMITED` names the span it
+  needs, `ANIMATED` refuses a keyframed clip.
+- **`trim`** — the principal track refuses a length change (`PRINCIPAL_TRACK`); use `cut --keep`
+  or `trim --retime`. **`split`** (new) cuts one clip in two; refusals are `SPLIT_*`.
+- **`add`** — refuses audio (`ADD_AUDIO`). `--layer top|under-face` places a new track;
+  `TRACK_PLACEMENT` refuses a reused track on the other side. When the hint says `underPrincipal`,
+  run `capcutctl layout auto`.
+- **`replace-media`** — `--all` relinks every clip sharing the material; `--derived-offset` shifts
+  the source window (`SOURCE_BEFORE_START`).
+- **`punch`** — `--word` is a timing source like `--at` (`PUNCH_TIMING_CONFLICT`,
+  `PUNCH_NO_TRANSCRIPT`, `PUNCH_NO_TIME`).
 - **`grade`** — preserves source colour by default; corrections are explicit (`--set`) and
   approximate; compare in CapCut.
 - **`music` / `loudness`** — the bed moves, speech and picture never do; loudness limits peaks and
-  refuses an unsafe mix rather than clipping; neither emulates CapCut's native DSP.
+  refuses an unsafe mix rather than clipping; neither emulates CapCut's native DSP. `loudness`
+  matches speech; SFX keep their placed level (never raised; name one with `--segments`), parked
+  clips are skipped, volume keys scale, duck keyframes no longer block `--measure`, and
+  `--peak-only` limits the mix only.
+- **`sfx`** — `--sound` or `--file` (`SFX_SOURCE`); overlaps take the next lane (`sfx-keys-2`);
+  exact repeats are skipped as `SFX_DUPLICATE`. Word swaps, whooshes and voice patches are
+  `capcutctl sfx --file PATH --cues AT[:DUR]`, never an alpha-0 carrier clip.
+- **`captions`** — `captions --replace` redoes them, `--reposition [--clamp]` re-places words after
+  a layout change; `PYTHON_MISSING_DEPENDENCY` names the install.
+- **`preview`** — `--max-minutes` stops a slow render (`PREVIEW_TOO_SLOW`): shorten `--from/--to`,
+  or `export --no-gate`.
 - **`export`** — CapCut's real renderer through a bounded macOS UI bridge. **Only on an explicit
-  request.**
+  request.** Its gate uses the profile/style `build` recorded; `--profile` / `--style` override
+  it. `EXPORT_TAIL_PAST_CONTENT` refuses a draft that runs past the edit's end,
+  `EXPORT_DURATION_MISMATCH` a render of the wrong length.
 
 ## Motion design — read capcut-motion first
 

@@ -25,7 +25,7 @@ Paths are relative to the plan file. Unknown top-level keys refuse, so a typo is
 | `profile` | yours | A per-video override (`harvest --profile` or `reference --profile-out` writes one). Merges over the shipped defaults and the creator's `~/.config/capcutctl/profile.json`. |
 | `style` | none | A style from the profile's `styles` (`capcutctl profile` lists them). Its `pace.graphicEvery` becomes the gate's drought target; an unknown name refuses with the list. |
 | `words` | the transcript `cut` cached for the face | Word-level Whisper JSON the anchors resolve against. |
-| `shots` | none | A reviewed `match` shot list. Applied **once**; later changes go through `match`/`replace-media`, or restore a snapshot. |
+| `shots` | none | A reviewed `match` shot list. Applied **once**; later changes go through `match`/`replace-media`, or restore a snapshot by label (`restore --snapshot pre-build`) and run a plain `build`, which rebuilds when its outputs are missing. |
 | `layout` | `"auto"` | `layout auto`: split-screen where B-roll covers the face, full face elsewhere. `false` leaves layouts alone. |
 | `camera.stress` | `true` | Small eased pushes on the words hit hardest (`zoom --stress`). Skipped, with the reason, if the energy index is missing. |
 | `camera.reframe` / `cursor` | `false` | Opt-in Vision face reframing / pointer halo from telemetry. |
@@ -87,4 +87,6 @@ that `qa` frame. Never place a callout over a clip that is moving (punching or p
 - Change the plan, rebuild. Graphics the plan no longer names are removed; the rest are replaced.
 - Recut the face (`cut --into`), rebuild. Every anchored graphic lands on its word again.
 - Fix a typo in one graphic without a rebuild: `capcutctl mograph rerender --project NAME --id ID --params '{"text":"…"}'`.
-- `build --force` re-runs every stage even when nothing changed.
+- After `restore`, a plain `build` rebuilds by itself ("build outputs missing (restore?)").
+  `build --force` is only for a deliberate re-run with nothing changed, or a snapshot taken
+  before snapshots carried `.capcutctl/build.json`.
