@@ -31,15 +31,14 @@ the claim, the number, the list, the "all of it".
 
 ## What each beat gets
 
-When the profile names a house look (`brand.house`), its pieces replace the defaults below for their
-job: `brand.house.super` sets the Hook and Claim supers instead of `hook-title` / `keyword-super`,
-and `brand.house.transition` is the scene for a chapter change. The beats and their sounds stay
-the same.
-
+`build` does not read `brand.house`. When the profile names one, write its super template
+(e.g. `slab-super`) for Hook and Claim graphics instead of `hook-title` / `keyword-super`, and put
+its transition scene in `scenes` at a chapter change ([edit-plan.md](edit-plan.md#scenes)). The
+beats and their sounds stay the same.
 
 | Beat | Camera | Graphic | Sound |
 |---|---|---|---|
-| Hook (0–1.5s) | proof on screen by 1.5s; a snap punch | `hook-title` | impact on frame 0 |
+| Hook (0–1.5s) | frame 0 is the built result, never the raw input or an empty screen; something moves after 0s and by `density.hookEventBy` (0.5s): a snap punch, a cut, or the super's entrance. A shot at 0s does not count | `hook-title` | impact on frame 0 |
 | Claim | stress push (automatic) | `keyword-super` (1–3 words) | pop |
 | Number | hold still | `number-pop` | pop |
 | Brand mention | — | logo pop (native), or `brand-chip` without art | pop |
@@ -47,7 +46,7 @@ the same.
 | Demo action | 1× on the thing named; ramp the waiting | — | click / typing (from the trace) |
 | Result | punch → hold → release; 0.4–0.7× | — | idea / coin |
 | Reaction | face at 1×, clean | — | none |
-| CTA | full face | `cta-card` + endcard | select; music out |
+| CTA | full face | none (endcard keyword) | select; music out |
 
 ## Density (profile defaults)
 
@@ -69,6 +68,7 @@ the same.
 - Anything inside the platform UI (top bar, bottom caption band, right action rail).
 - A punch and a callout on the same target; camera motion on the circle layout.
 - An endcard longer than 3s with nothing new on it.
+- A drawn card over the face at the CTA (`cta-card`), unless the creator asks.
 
 ## Design system (tokens)
 

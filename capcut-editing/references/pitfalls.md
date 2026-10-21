@@ -8,7 +8,8 @@ Concrete traps already hit on this project. Read before starting.
   gate fails crowding (more than two things animating at once), template repeats inside 10s and
   entrances inside 6 frames; it warns when there is no rest from overlays. Leave sentences bare.
 - **Subtitling instead of emphasising.** A `keyword-super` is 1–3 words that matter, not the
-  sentence. Full captions are not the house style.
+  sentence. Word captions are still required, in one style (`capcutctl captions`); keyword supers
+  are emphasis on top of them, never a replacement.
 - **A spinning glow on a logo.** The native `orbit-glow` recipe rotated a blurred halo 720° on
   linear keys and dropped the pop sound; it is no longer the logo default. Recipes are opt-in
   and experimental.
@@ -92,6 +93,12 @@ Concrete traps already hit on this project. Read before starting.
 - **The speed invariant** (`source = target × speed`) must hold on every segment.
 - **Speed caps**: the user's own projects top out around 100×. To compress 900s into 1.5s you need
   600×, which is out of range — pick a shorter source span instead.
+- **A derived-face swap loses the transcript.** After
+  `capcutctl replace-media --project NAME --segments ID --all --file COMP --derived-from ORIGINAL`
+  the composited face has no transcript or energy index. Set edit.json `"words"` to the ORIGINAL
+  face's `.whisper` JSON before building and read build's exit code: `ANCHOR_ORPHANED`, or a build
+  rolled back, keeps the previous graphics while `gate` still passes, and stress pushes and the
+  duck skip (`DUCK_NO_SPEECH_INDEX` refuses up front).
 ## Media / environment
 
 - **Use the CLI's selected Python environment.** `pyproject.toml` and SETUP.md are the

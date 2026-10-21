@@ -174,6 +174,15 @@ def _(repo: Path) -> str:
     return "contradicts the style profile"
 
 
+@case("a cta-card over the face as the default CTA, or supers instead of captions")
+def _(repo: Path) -> str:
+    path = repo / "capcut-editing" / "references" / "grammar.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n| CTA | full face | `cta-card` + endcard | select |\n"
+                     "- Full captions are not the house style.\n")
+    return "the house CTA is full face"
+
+
 # ------------------------------------------------------------------ scripts/sync-cli.sh
 
 SYNC_CASES: list[tuple[str, object]] = []

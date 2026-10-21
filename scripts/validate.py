@@ -50,6 +50,9 @@ CONTRADICTIONS = [
     (r"captions happen outside capcut", "the profile decides captions (captions.mode: keywords)"),
     (r"no captions(/subtitles)? anywhere", "keyword supers are part of the profile's grammar"),
     (r"preferred: remotion", "footage stays CapCut-native; rendered media is mograph graphics only"),
+    (r"`cta-card`\s*\+\s*endcard", "the house CTA is full face + the endcard keyword; cta-card is opt-in only"),
+    (r"full captions are not the house style|keyword supers, not captions",
+     "word captions are required (one style); keyword supers are emphasis on top"),
 ]
 CONTRACT = ROOT / ".capcut" / "cli-contract.json"
 COMPAT = ROOT / ".capcut" / "cli-compatibility.json"

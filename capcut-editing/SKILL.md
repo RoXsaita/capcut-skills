@@ -14,8 +14,8 @@ The deliverable is a **CapCut project** the user can still drag, not a rendered 
 CLI does the mechanics; you make the calls a transcript cannot: which take, which order, which
 shot proves which sentence, which words deserve a graphic, and what the music should feel like.
 
-**The loop:** cut the face → user signs it off → shot list → `edit.json` → `build` → fix
-until `gate` passes → review frames → hand off; a final export adds the gates and the Gemini review (§6).
+**The loop:** cut the face → user signs it off → shot list → `edit.json` → `build` →
+`capcutctl captions --project NAME` → fix until `gate` passes → review frames → hand off; a final export adds the gates and the Gemini review (§6).
 Everything after sign-off is one command.
 
 ## 0. Setup and the one style question
@@ -63,7 +63,9 @@ Without it, the next round proposes the rejected look again.
   Brand, style and the video's own idea: [capcut-motion](../capcut-motion/SKILL.md).
 - **The face is always 1×.** Recut length with `cut`; never speed or trim-stretch the talking head.
 - **Never hand-write `draft_info.json`.** If the CLI cannot express an edit, extend the CLI.
-- **CapCut closed for writes** (`capcutctl close`). `doctor` error-free before any hand-off.
+- **CapCut open: stage multi-step work** (`capcutctl stage start --project NAME`); otherwise run
+  `capcutctl close` yourself before a write (`CLOSE_CANCELLED`: see [capcut-cli](../capcut-cli/SKILL.md)).
+  `doctor` error-free before any hand-off.
 - **Export only when the user explicitly asks.** "Finish/polish/finalise" means the editable project.
 
 ## 1. The talking head — then stop
@@ -87,8 +89,14 @@ repair are arithmetic — never hand-pick timestamps. Details: [references/aroll
 (`capcutctl profile show`). Composite the talking head onto that exact plate on every A-roll,
 unless the creator opts out for this video. Follow the profile's `brand.background` rule,
 framing and matting notes, and its `pipeline` file. Keep the derived face 1:1 with the
-original, swap it in with `replace-media --derived-from`, and check a frame against the plate.
-No plate in the profile → leave the room as shot. Never blur it (gate `clear-background`).
+original and swap it in with
+`capcutctl replace-media --project NAME --segments ID --all --file COMP --derived-from ORIGINAL`:
+`--all` relinks every clip sharing that material and keeps windows and keyframes. Check a frame
+against the plate. No plate in the profile → leave the room as shot. Never blur it (gate `clear-background`).
+**The derived face has no transcript or energy index.** Set edit.json `"words"` to the ORIGINAL
+face's `.whisper` JSON before building, and read build's exit code: `ANCHOR_ORPHANED`, or a build
+rolled back, keeps the previous graphics while `gate` still passes, and stress pushes and the duck
+skip (`DUCK_NO_SPEECH_INDEX` refuses up front).
 
 **Stop and get the cut signed off.** Everything else anchors to it. After sign-off a recut is
 cheap — `build` re-anchors every graphic to its words — but a wrong keep-list poisons all of it.
@@ -106,6 +114,8 @@ words**: verify the verb on before/action/after frames, separate waiting (ramp i
 Details and OCR discipline: [references/broll.md](references/broll.md).
 
 When a line is about something a Claude Code session did ("the agent studied Apple's video"), don't hand-search a long rl2 take: `python3 <capcut-cli repo>/tools/claude_timeline.py --take <take> --grep "words"` returns the take, video time (`vt`) and session of that moment (it also writes `<take>/claude-timeline.jsonl`); seek there, then verify the frame. `*` means the session was likely on screen, a hint, not proof.
+On a restarted (multi-part) take the rows also carry `file`, `file_t` and `gap`: seek `file` at
+`file_t`, never `vt`; a `gap` row is in no file.
 
 ## 3. Write `edit.json` — the judgement
 
@@ -114,25 +124,33 @@ When a line is about something a Claude Code session did ("the agent studied App
   "version": 1,
   "shots": "shots.json",
   "graphics": [
-    { "template": "hook-title",    "say": "بنيت موقع كامل", "params": { "text": "موقع كامل بدقيقة" } },
-    { "template": "keyword-super", "say": "مجاني",          "params": { "text": "مجاني بالكامل" } },
+    { "template": "slab-super",    "say": "بنيت موقع كامل", "params": { "text": "موقع كامل بدقيقة" } },
+    { "template": "slab-super",    "say": "مجاني",          "params": { "text": "مجاني بالكامل" } },
     { "template": "number-pop",    "say": "تسعين",          "params": { "value": 90, "suffix": "%", "label": "أسرع" } },
-    { "template": "callout-box",   "at": 21.4,               "params": { "box": [210, 640, 520, 120], "label": "Publish" } },
-    { "template": "cta-card",      "say": "اكتب",            "params": { "keyword": "AI" } }
+    { "template": "callout-box",   "at": 21.4,               "params": { "box": [210, 640, 520, 120], "label": "Publish" } }
   ],
   "logos": "auto",
-  "endcard": { "text": "Follow" },
-  "sound": { "music": { "prompt": "minimal tense synth pulse, opens up warm at the reveal, no drums under speech" } }
+  "endcard": { "text": "KEYWORD" },
+  "sound": { "music": { "file": "bed.wav" } }
 }
 ```
+
+Use the profile's `brand.house` pieces (here `slab-super`), else `hook-title` / `keyword-super`.
+`endcard` carries the KEYWORD: the word the CTA line asks viewers to comment.
 
 - **`say`** anchors a graphic to the words as spoken in the cut (Whisper's spelling; hamza/dots fold).
   It lands the profile's lead frames before the word. Use `occurrence` for the Nth time it is heard.
   `at` is only for things with no word (a callout on a screen moment).
-- **Hook:** a `hook-title` inside the first second, over proof. **Claims:** one `keyword-super` of
-  1–3 words, never the whole sentence, at most one per ~6s. **Numbers:** `number-pop`.
-  **Instructions:** `punch` onto the element, or a `callout-box` on a *static* shot (never both on
-  one target). **CTA:** `cta-card` + endcard. Leave rests: not every sentence gets a graphic.
+- **Hook:** frame 0 is the built result at its most striking, never the raw input photo or an
+  empty starting screen. Something must move after 0s and by `density.hookEventBy` (0.5s in the
+  shipped profile): a snap punch, a cut, or a hook super entering early enough. A shot at 0s does
+  not count. If the creator names the input, flash it for 0.5–1s in a split, then return to the
+  result. More in [references/style.md](references/style.md) ("Structure that works").
+- **Claims:** one super of 1–3 words, never the whole sentence, at most one per ~6s. **Numbers:**
+  `number-pop`. **Instructions:** `punch` onto the element, or a `callout-box` on a *static* shot
+  (never both on one target). Leave rests: not every sentence gets a graphic.
+- **CTA:** the line moved last (`--order`), full face, nothing drawn over the face; the endcard
+  carries the keyword in the last 2–4s; the profile's `ending.auto` follow ender comes after.
 - **Ending:** the profile's `ending.auto` appends the 3-second follow ending after the last
   frame, opening on that frame; nothing to write. `"ending": false` skips it; `"ending": { "pill":
   "…", "badge": "2" }` swaps the copy for one video (a two-parter). Read `stages.ending.captured`:
@@ -140,8 +158,11 @@ When a line is about something a Claude Code session did ("the agent studied App
   last clip); `onTop` lists layers CapCut draws over it (the endcard) that cut away at the seam.
 - **Brands:** `"logos": "auto"` pops each brand once, on its first surviving mention; a brand with no
   artwork becomes a text `brand-chip`. A versus video pops both or neither.
-- **Music:** a story-specific brief or a local `file`; the bed aligns to the graphics and picture
-  changes, ducks under speech, and never moves the picture.
+- **Music:** a local `file` first. Give the brief (mood, where it opens up) to the creator's own
+  music tool, wait for the WAV and pass `file`. `prompt` uses a paid Gemini/Lyria key: only when
+  the creator or the profile allows it. Without either, `build` refuses before its first write
+  (`MUSIC_BRIEF_REQUIRED` / `NO_API_KEY`, pointing at `sound.music.file`), so nothing is half-built.
+  The bed aligns to the graphics and picture changes, ducks under speech, and never moves the picture.
 
 Full schema, every template's params, and defaults: [references/edit-plan.md](references/edit-plan.md).
 The grammar behind these choices: [references/grammar.md](references/grammar.md).
@@ -156,16 +177,22 @@ capcutctl build --project NAME --edit edit.json          # exit 1 while the gate
 capcutctl gate --project NAME                            # re-check on its own at any time
 ```
 
-`build` applies, in order: reviewed shots (once) → `layout auto` → stress pushes → graphics on their
-words with their sounds → logo pops → endcard → follow ending → motivated seams → music → duck →
-loudness → gate.
+`build` applies, in order: reviewed shots (once) → `layout auto` → stress pushes → graphics and
+`scenes` on their words with their sounds → logo pops → endcard → follow ending → motivated seams →
+music bed → loudness → duck → gate.
 Every stage replaces its own output; an unchanged plan on an unchanged cut is a no-op.
+
+**`build` never writes captions**, so the first gate always FAILs `captions`; build prints
+`next: capcutctl captions`. Run `capcutctl captions --project NAME` once after the first build,
+when the cut is final. After any layout change, run `capcutctl captions --reposition --project NAME`
+(the `caption-face` FAIL prints it).
 
 Fix every **FAIL**, then rebuild:
 
 | Gate check | Usual fix |
 |---|---|
-| `hook` / `proof` / `first-picture` | Put a shot at 0s in `shots.json`; add a `hook-title` said in the first second |
+| `hook` | Something moves after 0s and by 0.5s: a snap punch, a cut, or the hook super anchored early enough. A shot at 0s does not count |
+| `proof` / `first-picture` | The result shot at 0s in `shots.json` |
 | `max-static` | A graphic, a `punch`, or a shorter shot in that window — or cut the dead air |
 | `simultaneity` / `entrance-spacing` | Move one graphic to a different word; drop it if the camera already moves |
 | `template-repeat` | A different template, or drop the second one |
@@ -177,7 +204,7 @@ Fix every **FAIL**, then rebuild:
 | `opening-snap` | Start the shot on its final framing: drop the snap keys, set the clip to the post-snap scale/position |
 | `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot |
 | `caption-style` | `capcutctl captions --restyle --project NAME`: every word, Arabic or English, in one style (Changa ExtraBold 28, white, black stroke); text and timing kept |
-| `captions` | None: `capcutctl captions --project NAME`. Two layers (double captions): delete the extra track |
+| `captions` | None: `capcutctl captions --project NAME`. To redo them (or two layers, `CAPTION_CONFLICT`): `capcutctl captions --replace --project NAME`, never `restore` or a `track.remove` spec |
 | `ending` | The follow ender (profile `ending.auto`, or `"ending": true`) or an `endcard` must run to the last frame. After a recut outside `build`, rerun `capcutctl ending --project NAME` |
 | `length` (warn) | Over 90s: say so in the hand-off; 45–60s is ideal, 75s fine |
 
@@ -198,7 +225,11 @@ look at the waveform in `xray window` when the bed is loud.
 | `xray:video.frozen` / `xray:video.opens_black` | The picture stuck past `maxStatic`, or a black open: check the frames with `xray window` first; a real one is a media or seam bug. A single repeated frame (`video.stutter`) only warns |
 | `review` | Gemini blockers not yet verified, or accepted ones still in the export (§6) |
 
-**WARN** rows are not blockers, but each one goes in the hand-off by name.
+**WARN** rows are not blockers, but each one goes in the hand-off by name. Gate `parked-tail`
+(clips parked past the end) is a WARN and `meta-restored` a NOTE.
+`export` judges with the profile and style the build recorded (`--profile`/`--style` override).
+`EXPORT_TAIL_PAST_CONTENT` (the draft runs past the edit's end): remove the parked clips with a
+`track.remove` or `segment.remove` spec, then `timeline.set` to the edit's length, and export again.
 
 ## 5. Review and hand off
 
@@ -236,7 +267,8 @@ Check the opening and one dense section with sound. Then tell the user, in this 
 
 1. The project name, and that it is ready in CapCut.
 2. The gate verdict and every WARN (e.g. `mograph-import` until the Mac checklist in the CLI's
-   `docs/mograph.md` has passed; `unseen` native layers; missing SFX).
+   `docs/mograph.md` has passed; `unseen` native layers; missing SFX), every `SKIPPED <stage>` line
+   build printed, and any review WARN (`REVIEW_ROUNDS_EXHAUSTED`, `REVIEW_DISCARDED_AGAIN`).
 3. What you could not check (sound in native effects, motion easing at full speed).
 4. Ask how many minutes of manual fixing it took, and record it — the target is under ten.
 
@@ -291,6 +323,9 @@ sub-agent with no context the grid or contact sheet, the `check-export` report, 
 and any reference sheet. Brief it to find problems, not to praise: a verdict, then ranked problems
 with timecodes and evidence, then the five fixes to do first. You stop seeing your own edit; a
 reader with no context still sees a payoff line cut short or text too small to read at phone size.
+
+**Hook or trial variants:** `capcutctl variant --project NAME --hooks hooks.json --hook b --dry-run`,
+then the same without `--dry-run`. Never hand-duplicate a project.
 
 **Revisions.** For a note like "change only X", snapshot, make the change, then prove its scope
 before saying it is done: `capcutctl diff --project NAME --snapshot LABEL --allow SEGMENT-ID,track:NAME`.

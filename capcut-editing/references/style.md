@@ -226,8 +226,10 @@ These are not "probably nots". Each was counted across the whole library:
 | Rotation | `KFTypeRotation` present 435× but the value is `0.0` everywhere | never tilts |
 
 In the hand edits the premium feel came from **pace, motion and the seam formula**. The profile keeps
-all three and adds rendered typography on top (keyword supers, not captions; no colour grade, no
-CapCut loudness normalisation, no AI beat sync — those verdicts still stand).
+all three and adds rendered typography on top: word captions are required, in one style, and
+keyword supers are emphasis on top of them (the Captions row above describes the hand-edit
+library only). No colour grade, no CapCut loudness normalisation, no AI beat sync — those
+verdicts still stand.
 
 ### Eased keyframes exist and are underused
 

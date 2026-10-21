@@ -6,9 +6,15 @@ ends with `doctor` and user approval; it does not require a full proxy render.
 ## While editing
 
 ```bash
-capcutctl qa --project NAME --times 3,9,15 --guide 960
+capcutctl qa --project NAME --times 3,9,15
 capcutctl preview --project NAME --from 9 --to 15 --out preview.mp4
 ```
+
+`qa` writes one frame per time, named by it (`t30.png` for 30s), and draws no guide line unless
+you pass `--guide Y` (`--guide 960` is the half line). Run `preview` at the default `--fps 6`,
+under the heavy lock when the environment sets one (`lockf -k "$CAPCUTCTL_HEAVY_LOCK" capcutctl preview …`).
+`PREVIEW_TOO_SLOW` (exit 3) means it would overrun `--max-minutes`: shorten `--from`/`--to`, or,
+when export is authorized, watch a non-final native render (`export --no-gate`) instead.
 
 Use timestamped frames for source/action evidence, crops, caption space and camera
 rest/peak/return. Use a bounded proxy when the question requires playback, such as a
