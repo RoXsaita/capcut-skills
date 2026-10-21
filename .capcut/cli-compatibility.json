@@ -10,8 +10,8 @@
   "requiredContractVersion": 2,
   "minimumCliVersion": "0.1.1",
   "contractSyncedFrom": {
-    "commit": "fee6999",
-    "branch": "review/2026-10-19-rebased",
+    "commit": "8e31879",
+    "branch": "main",
     "cliVersion": "0.1.1"
   }
 }
