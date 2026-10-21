@@ -41,7 +41,8 @@ Never apply one creator's brand to another. Don't write a brand into a skill or 
 If they hand over a **reference reel** ("edit it like this"), measure it before you plan:
 `capcutctl reference --media reel.mp4 --sheet shots.png --profile-out ref-profile.json`.
 Read the pacing numbers and the shot sheet, say in plain words what you would copy, and hold the
-edit to it with `gate --profile ref-profile.json`. Details: [references/render-qa.md](references/render-qa.md).
+edit to it with `gate --profile ref-profile.json`. A lasting recalibration goes in the user profile,
+never the CLI's shipped presets. Details: [references/render-qa.md](references/render-qa.md).
 
 ## Every session: read the creative log first
 
@@ -81,7 +82,7 @@ capcutctl doctor --project NAME
 Read the whole transcript in story order and decide: which complete take, which instance of a
 repeated line (usually the last, if it is also the most complete), false starts, near-duplicates,
 and the running order (hook → explanation → proof → payoff → CTA). Boundaries, dead air and seam
-repair are arithmetic — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
+repair are arithmetic (gate `seam-silence` measures every seam) — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
 **The CTA always goes at the end**, wherever it was said (use `--order`); the follow ender sits on it.
 **Content fills the frame by default:** either full screen with the face as the small circle, or
 an equal split. The ~80% boxed card on the plate is rare, and only when zoomed so the UI reads.
@@ -198,16 +199,20 @@ Fix every **FAIL**, then rebuild:
 |---|---|
 | `hook` | Something moves after 0s and by 0.5s: a snap punch, a cut, or the hook super anchored early enough. A shot at 0s does not count |
 | `proof` / `first-picture` | The result shot at 0s in `shots.json` |
-| `max-static` | A graphic, a `punch`, or a shorter shot in that window — or cut the dead air |
+| `max-static` | Put a `punch` or a graphic on the spoken beat inside each stretch first; never split a shot just to satisfy the gate. The FAIL lists up to 6 stretches (+N more); the JSON row has `stretches` [{gap, from, to}], worst first, and `value` is the worst gap |
 | `simultaneity` / `entrance-spacing` | Move one graphic to a different word; drop it if the camera already moves |
 | `template-repeat` | A different template, or drop the second one |
 | `safe-zones` | `params.layout` or `params.center` into the text band |
 | `graphic-sfx` | The cue is missing on this machine (`preflight`), or `"sfx": null` was set by mistake |
 | `chip-and-logo` | Remove the brand-chip; the logo pop already names the brand |
 | `same-screen-transitions` / `seam-variety` | Rebuild (motivated seams) — never decorate an A-roll splice |
-| `caption-face` | Captions at position 20 on full face, on the seam (50) on a split — never frame centre |
+| `seam-silence` | An A-roll seam with a head over 0.30s, or tail+gap+head over 0.45s: run the `capcutctl ripple --from A --to B` the FAIL prints, exactly. WARN `not checked: no energy index for X`: run `cut` on that take (it writes the index). A deliberate pause: `--pause SECONDS` on `gate`/`export` |
+| `caption-face` | Captions at position 20 on full face, on the seam (50) on a split, and on a circle keep captions clear of the avatar — never frame centre. The FAIL ends with `capcutctl captions --reposition --project NAME`. Unnamed CapCut subtitle tracks and a track named plain `captions` count as captions, not graphic entrances |
 | `opening-snap` | Start the shot on its final framing: drop the snap keys, set the clip to the post-snap scale/position |
-| `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot |
+| `clear-background` | `capcutctl layout background --project NAME`: deletes every blurred copy of the face, whoever added it, and puts the clear room plate in its slot. It also repairs CapCut's own canvas blur in place, so never send the user into CapCut to change the background fill |
+| `card-background` | A card or circle over black: set `brand.background.plate` in the user profile, then `capcutctl layout background --project NAME` (circles) or `--at SECONDS` (a card) |
+| `alpha-premultiplied` | Always reported. A FAIL: `capcutctl alpha --project NAME`. A WARN `not checked: FILE (missing\|unprobeable)` or `no project directory` is named in the hand-off, never read as a pass |
+| `layout-filled` | A split or circle stretch of 0.3s or more with no B-roll, still or mograph scene behind the face: fill it with `capcutctl layout broll`, or return to full face |
 | `caption-style` | `capcutctl captions --restyle --project NAME`: every word, Arabic or English, in one style (Changa ExtraBold 28, white, black stroke); text and timing kept |
 | `captions` | None: `capcutctl captions --project NAME`. To redo them (or two layers, `CAPTION_CONFLICT`): `capcutctl captions --replace --project NAME`, never `restore` or a `track.remove` spec |
 | `ending` | The follow ender (profile `ending.auto`, or `"ending": true`) or an `endcard` must run to the last frame. After a recut outside `build`, rerun `capcutctl ending --project NAME` |
@@ -221,8 +226,8 @@ look at the waveform in `xray window` when the bed is loud.
 
 | FAIL | Fix |
 |---|---|
-| `first-word` | The first word lands after 0.5s: trim the head of the first clip |
-| `speech-gaps` | A silence over 0.7s between words: `capcutctl ripple`. A deliberate pause: `--pause SECONDS` on `export`/`gate`, and say so in the hand-off |
+| `first-word` | The first word lands after 0.5s: trim the head of the first clip. The onset needs 250 ms of sustained voice within 12 dB of the speech level, so an opening whoosh or music bed no longer passes and the start can read later than before |
+| `speech-gaps` | A silence over 0.7s between words: `capcutctl ripple`. A deliberate pause: `--pause SECONDS` on `export`/`gate` (it covers seams too), and say so in the hand-off |
 | `last-word` | The last word runs into the ender: extend the last face clip's tail |
 | `export-format` / `export-audio` | Not 1080x1920@30, no audio stream, or silence before the ender: fix the draft or the export settings, re-export |
 | `speech` | No transcript of the export: re-run with the X-ray's `--speech` (export does it) |
@@ -230,8 +235,10 @@ look at the waveform in `xray window` when the bed is loud.
 | `xray:video.frozen` / `xray:video.opens_black` | The picture stuck past `maxStatic`, or a black open: check the frames with `xray window` first; a real one is a media or seam bug. A single repeated frame (`video.stutter`) only warns |
 | `review` | Gemini blockers not yet verified, or accepted ones still in the export (§6) |
 
-**WARN** rows are not blockers, but each one goes in the hand-off by name. Gate `parked-tail`
-(clips parked past the end) is a WARN and `meta-restored` a NOTE.
+**WARN** rows are not blockers: in the hand-off, every WARN by name; NOTEs as one line. Gate
+`parked-tail` (clips parked past the end) is a WARN; `meta-restored`, `mograph-import` and
+`unseen-layers` are NOTEs, and an export X-ray (`gate --xray`) clears the last two unless it is
+another project's X-ray. Gate JSON always has `noted`.
 `export` judges with the profile and style the build recorded (`--profile`/`--style` override).
 `EXPORT_TAIL_PAST_CONTENT` (the draft runs past the edit's end): remove the parked clips with a
 `track.remove` or `segment.remove` spec, then `timeline.set` to the edit's length, and export again.
@@ -254,14 +261,11 @@ Apply the brand to the layout elements the profile's `brand.rules` assign it to 
 captions). A frame around the watched video must follow its position and resize with it, keeping
 consistent spacing throughout the motion.
 
-**Before the first hand-off, check the three things the gate cannot** (each one cost a full
-round on a real edit, rated 5–6/10):
+**Before the first hand-off, check the two things the gate cannot** (each one cost a full
+round on a real edit, rated 5–6/10). When `seam-silence` says `not checked`, measure that seam
+by energy yourself.
 
-1. **Dead air at every seam.** Measure the face audio across each cut (energy, not Whisper: it
-   stretches a segment's first word back over the silence). A pause over ~0.3s at a seam,
-   above all where a screen shot comes in, reads as a gap: `capcutctl ripple --from S --to S`
-   removes it on every track, keeping ~0.1s either side of the words.
-2. **Every hit on its frame.** For each SFX, find the frame its event happens (frame-diff the
+1. **Every hit on its frame.** For each SFX, find the frame its event happens (frame-diff the
    render or the source: the dialog changes, the number lands, the lid shuts) and put the sound
    there. A click goes on the frame the UI reacts, not at the shot start; every graphic beat that
    moves (a tag landing) gets its sound. Polish places click and typing sounds only from the rl2
@@ -273,12 +277,13 @@ round on a real edit, rated 5–6/10):
    never an alpha-0 video carrier or a cloned segment; `add` refuses audio files (`ADD_AUDIO`)
    and points here. Overlapping cues take the next lane (`sfx-keys-2`…); exact repeats are
    skipped as `SFX_DUPLICATE`.
-3. **Captions drawn on the frames.** `qa` cannot draw native text, so composite each caption's
+2. **Captions drawn on the frames.** `qa` cannot draw native text, so composite each caption's
    text at its `transform.y` onto the qa frame and look; `gate` catches only the geometry.
 
 Then look for the review rules the gate does not check either:
 
-- a split never has an empty or black half;
+- a split never has an empty or black half (gate `layout-filled` catches an empty one; look for
+  halves that are filled but read black);
 - never blur a device screen the viewer must read (a deliberate tease blur is the exception);
 - process videos use full-size, readable screens;
 - a named input is flashed for 0.5–1s.
@@ -286,9 +291,10 @@ Then look for the review rules the gate does not check either:
 Check the opening and one dense section with sound. Then tell the user, in this order:
 
 1. The project name, and that it is ready in CapCut.
-2. The gate verdict and every WARN (e.g. `mograph-import` until the Mac checklist in the CLI's
-   `docs/mograph.md` has passed; `unseen` native layers; missing SFX), every `SKIPPED <stage>` line
-   build printed, and any review WARN (`REVIEW_ROUNDS_EXHAUSTED`, `REVIEW_DISCARDED_AGAIN`).
+2. The gate verdict: every WARN by name (a `not checked` row above all; missing SFX); NOTEs as
+   one line (`mograph-import` until the Mac checklist in the CLI's `docs/mograph.md` has passed,
+   `unseen-layers`); every `SKIPPED <stage>` line build printed, and any review WARN
+   (`REVIEW_ROUNDS_EXHAUSTED`, `REVIEW_DISCARDED_AGAIN`).
 3. What you could not check (sound in native effects, motion easing at full speed).
 4. Ask how many minutes of manual fixing it took, and record it — the target is under ten.
 

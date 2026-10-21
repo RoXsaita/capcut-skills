@@ -201,6 +201,10 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 - **`sfx`** — `--sound` or `--file` (`SFX_SOURCE`); overlaps take the next lane (`sfx-keys-2`);
   exact repeats are skipped as `SFX_DUPLICATE`. Word swaps, whooshes and voice patches are
   `capcutctl sfx --file PATH --cues AT[:DUR]`, never an alpha-0 video carrier or a cloned segment.
+- **`alpha`** — `capcutctl alpha --project NAME` premultiplies the straight overlays in place,
+  keeping audio and metadata, and prints `note: not checked: …` on stderr for any it cannot read.
+  `capcutctl alpha FILE --force` on a file already premultiplied exits 2 with
+  `ALREADY_PREMULTIPLIED`: it never re-encodes (a second pass darkens soft edges).
 - **`captions`** — `captions --replace` redoes them, `--reposition [--clamp]` re-places words after
   a layout change; `PYTHON_MISSING_DEPENDENCY` names the install.
 - **`preview`** — `--max-minutes` stops a slow render (`PREVIEW_TOO_SLOW`): shorten `--from/--to`,

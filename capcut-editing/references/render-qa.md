@@ -71,7 +71,9 @@ capcutctl gate --project NAME --profile ref-profile.json
 `compare` lists the reel, the profile and (with `--project`) the edit side by side for the first
 visual event, longest static stretch, opening gap and median shot. `--profile-out` writes only
 `density.hookEventBy`, `openingMaxGap` and `maxStatic` — a decode cannot tell which events are
-graphics. `shots.png` shows the first frame of every shot; read it for the style: caption register,
+graphics. To recalibrate `opening-density` for good, copy what it measured into the user profile
+(`capcutctl profile where`), never the public preset: the shipped `presets/profile.json` in the
+CLI repo stays brand-neutral. `shots.png` shows the first frame of every shot; read it for the style: caption register,
 framing, graphic vocabulary, the once-per-video trick. The numbers cannot show those. Raise
 `--cut-threshold` if screen scrolling reads as cuts.
 

@@ -50,6 +50,7 @@ numbers from a live project.
 - **Alpha overlays are premultiplied.** CapCut reads ProRes alpha premultiplied; a straight file
   paints its glow's hidden colour as a haze (the yellow-filled callout, 2026-10-11). Renders
   premultiply at encode; `gate` fails `alpha-premultiplied`; `capcutctl alpha --project` fixes.
+  The row is always reported: an overlay it could not read is a WARN `not checked`, never a pass.
 - **Overlays only.** Main track always empty. See `style.md` rule zero.
 - **Face stays 1×.** Recut length with `cut --keep`; never speed the talking head.
 
