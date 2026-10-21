@@ -99,10 +99,11 @@ against the plate. No plate in the profile → leave the room as shot. Never blu
 Without a plate, `layout screen`, `layout background` and build's `warnings[]` say
 `no room plate (<reason>): N span(s) over black`: that is the gate's `card-background` FAIL in
 advance, so name it in the hand-off.
-**The derived face has no transcript or energy index.** Set edit.json `"words"` to the ORIGINAL
-face's `.whisper` JSON before building, and read build's exit code: `ANCHOR_ORPHANED`, or a build
-rolled back, keeps the previous graphics while `gate` still passes, and stress pushes and the duck
-skip (`DUCK_NO_SPEECH_INDEX` refuses up front).
+**The derived face keeps the original's words.** After `replace-media --derived-from ORIGINAL`,
+build finds the original's transcript and energy index by provenance, with the offset applied.
+Set edit.json `"words"` to the ORIGINAL face's `.whisper` JSON only if build reports
+`ANCHOR_NO_WORDS` or `DUCK_NO_SPEECH_INDEX`. Always read build's exit code: `ANCHOR_ORPHANED`, or
+a build rolled back, keeps the previous graphics while `gate` still passes.
 
 **Stop and get the cut signed off.** Everything else anchors to it. After sign-off a recut is
 cheap — `build` re-anchors every graphic to its words — but a wrong keep-list poisons all of it.
@@ -190,6 +191,8 @@ capcutctl gate --project NAME                            # re-check on its own a
 `scenes` on their words with their sounds → logo pops → endcard → follow ending → motivated seams →
 music bed → loudness → duck → gate.
 Every stage replaces its own output; an unchanged plan on an unchanged cut is a no-op.
+`ANCHOR_NO_WORDS` or `DUCK_NO_SPEECH_INDEX` means the take's index is wrong or missing: run `cut`
+on that take ([pitfalls](references/pitfalls.md)).
 
 **`build` never writes captions**, so the first gate always FAILs `captions`; build prints
 `next: capcutctl captions`. Run `capcutctl captions --project NAME` once after the first build,

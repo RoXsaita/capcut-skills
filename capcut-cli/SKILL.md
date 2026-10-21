@@ -241,9 +241,14 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
   `capcutctl alpha FILE --force` on a file already premultiplied exits 2 with
   `ALREADY_PREMULTIPLIED`: it never re-encodes (a second pass darkens soft edges).
 - **`captions`** — `captions --replace` redoes them, `--reposition [--clamp]` re-places words after
-  a layout change; `PYTHON_MISSING_DEPENDENCY` names the install.
+  a layout change; `PYTHON_MISSING_DEPENDENCY` names the install. Output has top-level `warnings`;
+  the bundle has `dropped_segments`, `onset_snapped` and `text_polish` (`rejected`, `rejections`).
+  A wordless ASR segment outside the worded narration (e.g. trailing) is dropped with a warning; a
+  wordless segment mid-narration, or over 10% of the video wordless, still refuses.
 - **`preview`** — `--max-minutes` stops a slow render (`PREVIEW_TOO_SLOW`): shorten `--from/--to`,
-  or `export --no-gate`.
+  or `export --no-gate`. `preview`, `qa --project` and `xray --project` take the edit range from
+  the CLI, so a stale `created.contentEnd` no longer cuts the CTA or ender: never edit
+  `contentEnd` to fix a short preview.
 - **`export`** — CapCut's real renderer through a bounded macOS UI bridge. **Only on an explicit
   request.** Its gate uses the profile/style `build` recorded; `--profile` / `--style` override
   it. `EXPORT_TAIL_PAST_CONTENT` refuses a draft that runs past the edit's end,

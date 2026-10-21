@@ -105,12 +105,19 @@ Concrete traps already hit on this project. Read before starting.
   `capcutctl loudness --project NAME --peak-only`, then re-export.
 - **Speed caps**: the user's own projects top out around 100×. To compress 900s into 1.5s you need
   600×, which is out of range — pick a shorter source span instead.
-- **A derived-face swap loses the transcript.** After
+- **A derived-face swap keeps the transcript by provenance.** After
   `capcutctl replace-media --project NAME --segments ID --all --file COMP --derived-from ORIGINAL`
-  the composited face has no transcript or energy index. Set edit.json `"words"` to the ORIGINAL
-  face's `.whisper` JSON before building and read build's exit code: `ANCHOR_ORPHANED`, or a build
-  rolled back, keeps the previous graphics while `gate` still passes, and stress pushes and the
-  duck skip (`DUCK_NO_SPEECH_INDEX` refuses up front).
+  build finds the ORIGINAL's transcript and energy index, with the offset applied, for anchors,
+  stress and the duck. Set edit.json `"words"` to the ORIGINAL face's `.whisper` JSON only if build
+  reports `ANCHOR_NO_WORDS` or `DUCK_NO_SPEECH_INDEX`. Always read build's exit code:
+  `ANCHOR_ORPHANED`, or a build rolled back, keeps the previous graphics while `gate` still passes.
+- **`ANCHOR_NO_WORDS` / `DUCK_NO_SPEECH_INDEX` mean a wrong or missing take index.** Speech-index
+  lookups no longer fall through to any video's transcript, and a same-named take's transcript is
+  refused by its token (`details.reason`: `index belongs to another file`; the message says
+  `re-run cut on this take`). So these codes can appear where the wrong take's words used to be
+  used silently. Fix: run `capcutctl cut` on that take, then build again. An anchor whose word
+  Whisper started just before a clip's in-point resolves with `anchor.snapped: true`; that is
+  expected, not an error.
 - **A face-layout switch has side effects.** `split-screen`, `circle` and `full-face` no longer
   write desc `layout:<name>`; an old `layout:*` desc is cleared to `''` and the layout lives in
   the side field `capcutctl_layout`, which a CapCut save drops — run `doctor --fix` after a save.
