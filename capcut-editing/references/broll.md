@@ -94,13 +94,28 @@ outcome this whole toolkit exists to avoid. `add` refuses it now (`PREFRAMED_MED
 | Tempting ffmpeg pass | What it costs the editor | The CapCut-native verb |
 |---|---|---|
 | `crop=` to the split-screen half | Cannot reframe, re-zoom, or change layout | `capcutctl layout broll --row PIXEL_ROW` |
-| `crop=` a window capture | Same, and the window treatment is lost | `capcutctl layout screen --media FULL.mp4` |
+| `crop=` a landscape capture (1920×1050) | Same | `capcutctl layout broll --at SECONDS --track N --row R --scale S` |
+| `crop=` a portrait window capture | Same, and the window treatment is lost | `capcutctl layout screen --media FULL.mp4` |
 | `-ss`/`-t` to cut a subclip | Can only extend inside your window | `add --src S --dur S` on the whole file |
 | `setpts=`/`atempo=` for speed | Speed stops being a slider | `add --cover IN-OUT`, `pace`, `ramp` |
 | `zoompan` for a punch-in | A camera move nobody can retime | `punch`, `keyframe --focus` |
 | `concat` a montage | One clip where there were eight | one `add` per shot |
 
 Rendered media is allowed for one thing only: `mograph` graphics, imported `--generated` with a sidecar that re-renders them.
+
+**Landscape or portrait decides the verb.** `layout screen` is the indigo card for portrait
+window captures only (width/height ≤ 1); it sizes the frame from the recording's dimensions
+(unchanged for 720×1050) and the new material carries `capcutctl_origin`. A landscape capture
+refuses there with `SCREEN_NEEDS_PORTRAIT_WINDOW`: frame it natively in the split with
+`layout broll --row R --scale S`. Without `--scale`, a landscape capture refuses with
+`BROLL_NEEDS_SCREEN_LAYOUT`, whose `details.minScale` is the scale that fills the half; pass
+that or larger.
+
+**`BROLL_TOO_SHORT` has two meanings.** From `layout broll` (exit 2), an explicit `--scale` is
+below the half-height minimum: raise it to `details.minScale` (scales within 1% snap up, and the
+`framed[]` row reports `snapped`; `BROLL_TOO_SMALL` is the same refusal for width and also names
+the overall minimum). From the B-roll lint (`gate`, `finish`), the B-roll is under 0.8s on
+screen: lengthen or drop the shot. Crop/frame/framing params no longer switch the scale guard off.
 
 ## Replace a re-recorded take
 

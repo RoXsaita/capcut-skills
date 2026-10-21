@@ -96,6 +96,9 @@ original and swap it in with
 `capcutctl replace-media --project NAME --segments ID --all --file COMP --derived-from ORIGINAL`:
 `--all` relinks every clip sharing that material and keeps windows and keyframes. Check a frame
 against the plate. No plate in the profile → leave the room as shot. Never blur it (gate `clear-background`).
+Without a plate, `layout screen`, `layout background` and build's `warnings[]` say
+`no room plate (<reason>): N span(s) over black`: that is the gate's `card-background` FAIL in
+advance, so name it in the hand-off.
 **The derived face has no transcript or energy index.** Set edit.json `"words"` to the ORIGINAL
 face's `.whisper` JSON before building, and read build's exit code: `ANCHOR_ORPHANED`, or a build
 rolled back, keeps the previous graphics while `gate` still passes, and stress pushes and the duck

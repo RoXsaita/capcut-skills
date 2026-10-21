@@ -108,7 +108,7 @@ decision the editor can no longer take back:
 
 | Code | Trigger | Fix |
 |---|---|---|
-| `PREFRAMED_MEDIA` | Exactly half the canvas (1080×960 on 1080×1920): a crop, not a recording | Import the full frame; `layout broll --row` / `layout screen` |
+| `PREFRAMED_MEDIA` | Exactly half the canvas (1080×960 on 1080×1920): a crop, not a recording | Import the full frame; `layout screen` (portrait window) / `layout broll --row --scale` (landscape) |
 | `EPHEMERAL_MEDIA` | Source under `/tmp`, `$TMPDIR` or a scratchpad | Move it somewhere durable first |
 | `DERIVED_SOURCE_MISSING` | `--derived-from` names a missing or temporary original | Point at the surviving recording |
 
@@ -166,6 +166,39 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
   times (contiguous-filled, off by up to ~0.7s). Refuses to build while lint findings remain.
 - **`layout auto`** — moving picture under the face: split-screen; nothing: full face. Reproduced a
   hand edit 18/18. Layout plates are not B-roll.
+- **Face layouts** (`split-screen`, `circle`, `full-face`) — the layout is recorded in the side
+  field `capcutctl_layout`, no longer as desc `layout:<name>` (an old `layout:*` desc is cleared
+  to `''`). A CapCut save drops that field like every `capcutctl_*` key: the `doctor --fix` after
+  a save restores it, and `layout auto`/`audit` read the mask regardless. A layout *change* drops
+  the old camera keys (scale, position, rotation) and reports `clearedCameraKeys`: re-add punches
+  and pushes afterwards, then `capcutctl captions --project NAME --reposition`. A screen recording
+  covering exactly the switched span is hidden (alpha 0, `screen_layout_recording_hidden`), not
+  deleted; `layout screen` on it again shows it. New materials from `layout screen` and the
+  `clip.add` spec op (`add`) no longer inherit the face's crop, matting or beauty.
+- **`layout screen` / `layout broll`** — `layout screen` sizes the indigo frame from the
+  recording's dimensions (unchanged for rl2's 720×1050) and stamps `capcutctl_origin` on the new
+  material. A landscape capture is framed natively in the split with
+  `capcutctl layout broll --project NAME --at SECONDS --track N --row R --scale S`:
+
+  | Code (exit 2) | Meaning | Fix |
+  |---|---|---|
+  | `SCREEN_NEEDS_PORTRAIT_WINDOW` | `layout screen` takes portrait window captures only (width/height ≤ 1) | `layout broll --at --track --row --scale` |
+  | `BROLL_NEEDS_SCREEN_LAYOUT` | No `--scale`, and the capture at fill width is shorter than the upper half | Landscape: `--scale` ≥ `details.minScale`. Portrait window: `layout screen` |
+  | `BROLL_TOO_SMALL` / `BROLL_TOO_SHORT` | An explicit `--scale` leaves a blank band (narrower than the canvas / shorter than the half) | Raise `--scale` to `details.minScale` (the overall minimum) |
+
+  A scale within 1% of the minimum snaps up and the `framed[]` row reports `snapped`;
+  crop/frame/framing params no longer bypass the guard. **`BROLL_TOO_SHORT` means two things:**
+  from `layout broll` it is the scale refusal above; from the B-roll lint (`gate`, `finish`) it is
+  a B-roll under 0.8s on screen — lengthen or drop the shot.
+- **No room plate** — `layout screen` and `layout background` print
+  `warning: no room plate (<reason>): N span(s) over black — set brand.background.plate …` on
+  stderr and carry it in `warnings[]`; `build` carries it in its summary's `warnings[]`. Treat it
+  as the gate's `card-background` FAIL in advance, and name it in the hand-off.
+- **`layout background`** — swaps blurred face copies for the clear room plate and strips Blur
+  from every other blurred clip, now including stills (kind `blurred-media`); `sig:` and
+  `motion:` segments are exempt. A Blur is matched by effect id / resource id, not only its
+  (localized) name. CapCut's Background → Blur canvas is repaired in place. The result's
+  `unblurred` gains `canvases` and `overBlack`, and `track` may be `null`.
 - **`build`** — the post-sign-off pipeline; see capcut-editing. Graphics anchor to source words.
 - **`gate`** — reads the draft, not pixels or sound; FAIL exits 1.
 - **`mograph`** — deterministic HTML/JS graphics, tight-bbox ProRes 4444 or a PNG with native eased
@@ -190,6 +223,8 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
   the source window (`SOURCE_BEFORE_START`).
 - **`punch`** — `--word` is a timing source like `--at` (`PUNCH_TIMING_CONFLICT`,
   `PUNCH_NO_TRANSCRIPT`, `PUNCH_NO_TIME`).
+- **`keyframe`** — `--clear` removes the camera keys (scale, position and `KFTypeRotation`) and
+  lists every property it cleared in `cleared`.
 - **`grade`** — start with `capcutctl grade --project NAME --measure`; it preserves source colour
   by default; corrections are explicit (`--set`) and approximate; compare in CapCut.
 - **`music` / `loudness`** — `capcutctl music --file` or `--prompt` lays the bed and `--duck` dips

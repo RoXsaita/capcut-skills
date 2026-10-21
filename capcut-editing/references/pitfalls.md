@@ -111,6 +111,15 @@ Concrete traps already hit on this project. Read before starting.
   face's `.whisper` JSON before building and read build's exit code: `ANCHOR_ORPHANED`, or a build
   rolled back, keeps the previous graphics while `gate` still passes, and stress pushes and the
   duck skip (`DUCK_NO_SPEECH_INDEX` refuses up front).
+- **A face-layout switch has side effects.** `split-screen`, `circle` and `full-face` no longer
+  write desc `layout:<name>`; an old `layout:*` desc is cleared to `''` and the layout lives in
+  the side field `capcutctl_layout`, which a CapCut save drops — run `doctor --fix` after a save.
+  A layout change drops the old camera keyframes (scale, position, rotation) and reports
+  `clearedCameraKeys`: re-add punches and pushes afterwards, then run
+  `capcutctl captions --project NAME --reposition`. A screen recording covering exactly the
+  switched span is hidden (alpha 0, `screen_layout_recording_hidden`), not deleted; running
+  `layout screen` on it again shows it. New materials from `layout screen` and the `clip.add`
+  spec op no longer inherit the face's crop, matting or beauty.
 ## Media / environment
 
 - **Use the CLI's selected Python environment.** `pyproject.toml` and SETUP.md are the
