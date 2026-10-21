@@ -269,6 +269,10 @@ round on a real edit, rated 5–6/10):
    visible typed command, Enter or click with no `polish:click`/`polish:type` cue, find the frame,
    run `capcutctl sfx --project NAME --sound click --cues AT:DUR --dry-run` (`typing`, `click` or
    `enter`), then the same without `--dry-run`. Overlaps take the next lane by themselves.
+   Word swaps and local sounds use `capcutctl sfx --project NAME --file PATH --cues AT[:DUR]`,
+   never an alpha-0 video carrier or a cloned segment; `add` refuses audio files (`ADD_AUDIO`)
+   and points here. Overlapping cues take the next lane (`sfx-keys-2`…); exact repeats are
+   skipped as `SFX_DUPLICATE`.
 3. **Captions drawn on the frames.** `qa` cannot draw native text, so composite each caption's
    text at its `transform.y` onto the qa frame and look; `gate` catches only the geometry.
 

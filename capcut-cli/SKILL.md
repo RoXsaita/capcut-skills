@@ -200,7 +200,7 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
   `--peak-only` limits the mix only.
 - **`sfx`** — `--sound` or `--file` (`SFX_SOURCE`); overlaps take the next lane (`sfx-keys-2`);
   exact repeats are skipped as `SFX_DUPLICATE`. Word swaps, whooshes and voice patches are
-  `capcutctl sfx --file PATH --cues AT[:DUR]`, never an alpha-0 carrier clip.
+  `capcutctl sfx --file PATH --cues AT[:DUR]`, never an alpha-0 video carrier or a cloned segment.
 - **`captions`** — `captions --replace` redoes them, `--reposition [--clamp]` re-places words after
   a layout change; `PYTHON_MISSING_DEPENDENCY` names the install.
 - **`preview`** — `--max-minutes` stops a slow render (`PREVIEW_TOO_SLOW`): shorten `--from/--to`,

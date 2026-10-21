@@ -195,13 +195,13 @@ Every option each command accepts, from `capcutctl contract`.
 - `projects`: `--json` `--root`
 - `punch`: `--at` `--dry-run` `--ease` `--ease-position` `--hold` `--kind` `--no-ease` `--on` `--plan` `--project` `--ramp` `--segment` `--segments` `--track` `--word` `--words` `--zoom`
 - `qa`: `--allow-missing` `--at-broll` `--at-cuts` `--at-scenes` `--cut-window` `--expect` `--fps` `--from` `--guide` `--label` `--languages` `--max-minutes` `--native` `--no-cache` `--no-grade` `--ocr` `--out` `--preview` `--project` `--rects-only` `--resolution` `--selftest` `--sheet` `--times` `--to` `--width` `--z`
-- `ramp`: `--at` `--dry-run` `--project` `--reach-back` `--result-at` `--segment` `--settle` `--speed` `--track`
+- `ramp`: `--at` `--dry-run` `--project` `--reach-back` `--reach-forward` `--result-at` `--segment` `--settle` `--speed` `--track`
 - `reference`: `--build-threshold` `--cut-threshold` `--json` `--media` `--overwrite` `--profile` `--profile-out` `--project` `--sheet`
 - `reframe`: `--auto` `--dry-run` `--plan` `--project` `--segment`
 - `remove`: `--at` `--dry-run` `--project` `--segments` `--track`
 - `replace-media`: `--all` `--allow-ephemeral` `--at` `--derived-from` `--derived-offset` `--dry-run` `--file` `--generated` `--height` `--media` `--media-duration` `--no-localize` `--project` `--retime` `--segments` `--track` `--width`
 - `restore`: `--dry-run` `--force-running` `--no-backup` `--project` `--snapshot`
-- `review`: `--fps` `--id` `--out` `--project` `--width`
+- `review`: `--fps` `--id` `--max-minutes` `--out` `--project` `--width`
 - `review-video`: `--decide` `--issue` `--json` `--media` `--model` `--project` `--reason` `--reset-rounds` `--script` `--speech` `--verdict`
 - `ripple`: `--dry-run` `--from` `--project` `--to`
 - `rm`: `--dry-run` `--force-running` `--project`
