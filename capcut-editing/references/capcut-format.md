@@ -1,14 +1,3 @@
-## Quantise to whole frames using frame-position differences
-
-Timings are integer microseconds and a frame at 30 fps is 33333.33 µs, so `round(frames * 1e6/30)`
-per segment accumulates 1 µs errors that read as overlapping segments. Derive each duration as the
-**difference of two absolute frame positions**, never by rounding the duration on its own:
-
-```python
-us  = lambda f: int(round(f*1e6/30))
-dur = us(t+n) - us(t)          # correct: end lands exactly on the next start
-# NOT: dur = us(n)             # drifts by 1us and trips the overlap check
-```
 # CapCut project format
 
 Reverse-engineered and version-specific. This is a schema reference, not a manual write
@@ -62,6 +51,18 @@ source_timerange.duration == target_timerange.duration * speed
 ```
 
 Violate it and speed ramps corrupt. Validate this on every segment before saving.
+
+### Quantise to whole frames using frame-position differences
+
+Timings are integer microseconds and a frame at 30 fps is 33333.33 µs, so `round(frames * 1e6/30)`
+per segment accumulates 1 µs errors that read as overlapping segments. Derive each duration as the
+**difference of two absolute frame positions**, never by rounding the duration on its own:
+
+```python
+us  = lambda f: int(round(f*1e6/30))
+dur = us(t+n) - us(t)          # correct: end lands exactly on the next start
+# NOT: dur = us(n)             # drifts by 1us and trips the overlap check
+```
 
 ### extra_material_refs
 

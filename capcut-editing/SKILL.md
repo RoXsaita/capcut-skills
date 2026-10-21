@@ -83,7 +83,9 @@ repeated line (usually the last, if it is also the most complete), false starts,
 and the running order (hook → explanation → proof → payoff → CTA). Boundaries, dead air and seam
 repair are arithmetic — never hand-pick timestamps. Details: [references/aroll.md](references/aroll.md).
 **The CTA always goes at the end**, wherever it was said (use `--order`); the follow ender sits on it.
-**Less face, more content:** by default the content fills the frame with his face as the small circle; full face only for a few seconds (hook, key line, CTA); split screen sometimes, not by default.
+**Content fills the frame by default:** either full screen with the face as the small circle, or
+an equal split. The ~80% boxed card on the plate is rare, and only when zoomed so the UI reads.
+Full face only for the hook, the key line and the CTA, a few seconds each.
 
 **Replace the room before sign-off** when the profile sets `brand.background.plate`
 (`capcutctl profile show`). Composite the talking head onto that exact plate on every A-roll,
@@ -108,7 +110,8 @@ capcutctl match --project NAME --screen SCREEN.mp4 --out shots.json   # sentence
 capcutctl verify-shots --project NAME --shots shots.json               # CONTRADICTED blocks
 ```
 
-Edit `shots.json`: weak matches stay on the face (a valid answer). The picture must **prove the
+Edit `shots.json`: a weak match means another moment, a still or a graphic; full face is the last
+resort. The picture must **prove the
 words**: verify the verb on before/action/after frames, separate waiting (ramp it) from the action
 (readable) and the result (hold it), one focus per shot, and the first 1.5s must show proof.
 Details and OCR discipline: [references/broll.md](references/broll.md).
@@ -116,6 +119,8 @@ Details and OCR discipline: [references/broll.md](references/broll.md).
 When a line is about something a Claude Code session did ("the agent studied Apple's video"), don't hand-search a long rl2 take: `python3 <capcut-cli repo>/tools/claude_timeline.py --take <take> --grep "words"` returns the take, video time (`vt`) and session of that moment (it also writes `<take>/claude-timeline.jsonl`); seek there, then verify the frame. `*` means the session was likely on screen, a hint, not proof.
 On a restarted (multi-part) take the rows also carry `file`, `file_t` and `gap`: seek `file` at
 `file_t`, never `vt`; a `gap` row is in no file.
+The creator re-records a screen take after the build: conform it, don't rebuild the shots
+([broll.md](references/broll.md#replace-a-re-recorded-take)).
 
 ## 3. Write `edit.json` — the judgement
 
@@ -259,9 +264,20 @@ round on a real edit, rated 5–6/10):
 2. **Every hit on its frame.** For each SFX, find the frame its event happens (frame-diff the
    render or the source: the dialog changes, the number lands, the lid shuts) and put the sound
    there. A click goes on the frame the UI reacts, not at the shot start; every graphic beat that
-   moves (a tag landing) gets its sound.
+   moves (a tag landing) gets its sound. Polish places click and typing sounds only from the rl2
+   trace (`click`, `typing_burst`): dictated prompts and empty traces get nothing. For every
+   visible typed command, Enter or click with no `polish:click`/`polish:type` cue, find the frame,
+   run `capcutctl sfx --project NAME --sound click --cues AT:DUR --dry-run` (`typing`, `click` or
+   `enter`), then the same without `--dry-run`. Overlaps take the next lane by themselves.
 3. **Captions drawn on the frames.** `qa` cannot draw native text, so composite each caption's
    text at its `transform.y` onto the qa frame and look; `gate` catches only the geometry.
+
+Then look for the review rules the gate does not check either:
+
+- a split never has an empty or black half;
+- never blur a device screen the viewer must read (a deliberate tease blur is the exception);
+- process videos use full-size, readable screens;
+- a named input is flashed for 0.5–1s.
 
 Check the opening and one dense section with sound. Then tell the user, in this order:
 
@@ -330,6 +346,8 @@ then the same without `--dry-run`. Never hand-duplicate a project.
 **Revisions.** For a note like "change only X", snapshot, make the change, then prove its scope
 before saying it is done: `capcutctl diff --project NAME --snapshot LABEL --allow SEGMENT-ID,track:NAME`.
 It exits 1 and names every change outside that scope. Record rejections in `notes` as they come.
+After CapCut has opened or saved the draft, read [pitfalls.md](references/pitfalls.md#after-capcut-has-opened-or-saved-the-draft)
+before the next write: keep the creator's edits, repair what the save did.
 
 ## Reference files
 

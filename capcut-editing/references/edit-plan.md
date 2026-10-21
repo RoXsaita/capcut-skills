@@ -27,7 +27,7 @@ Paths are relative to the plan file. Unknown top-level keys refuse, so a typo is
 | `style` | none | A style from the profile's `styles` (`capcutctl profile` lists them). Its `pace.graphicEvery` becomes the gate's drought target; an unknown name refuses with the list. |
 | `words` | the transcript `cut` cached for the face | Word-level Whisper JSON the anchors resolve against. Required after a derived-face swap (`replace-media --derived-from`): the derived file has no transcript or energy index, so point this at the ORIGINAL face's `.whisper` JSON. |
 | `shots` | none | A reviewed `match` shot list. Applied **once**; later changes go through `match`/`replace-media`, or restore a snapshot by label (`restore --snapshot pre-build`) and run a plain `build`, which rebuilds when its outputs are missing. |
-| `layout` | `"auto"` | `layout auto`: split-screen where B-roll covers the face, full face elsewhere. `false` leaves layouts alone. |
+| `layout` | `"auto"` | `layout auto` turns a circle face over non-layout B-roll into a split, and leaves a `layout:screen-recording` card alone. `false` keeps hand-set looks: use it to keep full-screen content under the face circle, which auto would turn into a split. A shot's own `ops` in `shots.json` replaces `match`'s default `layout.screen` (accepted: `clip.add`, `layout.screen`, `layout.apply`, `pace`, `punch`, `ramp`). |
 | `camera.stress` | `true` | Small eased pushes on the words hit hardest (`zoom --stress`). Skipped, with the reason, if the energy index is missing. |
 | `camera.reframe` / `cursor` | `false` | Opt-in Vision face reframing / pointer halo from telemetry. |
 | `graphics` | `[]` | Rendered motion graphics, below. |

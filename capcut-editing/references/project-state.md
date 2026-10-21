@@ -24,7 +24,9 @@ capcutctl find "Build" --media /path/to/screen.mp4 --shows --refresh
 ```
 
 Indexes cache under `~/Downloads/.video-index/` as
-`<name>.energy10.json`, `<name>.whisper-<model>.json`, `<name>.ocr-<source-cache-key>.json`.
+`<stem>.whisper-<slug>.<key>.json`, `<stem>.energy10.<key>.json` (key = a content hash) and
+`<stem>.ocr-<source-cache-key>.json`. Legacy names without the key are still read, and a
+`<stem>.whisper-*` glob still matches both.
 
 ## The geometry source of truth
 

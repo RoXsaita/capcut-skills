@@ -1,3 +1,5 @@
+# A-roll indexing
+
 ## The three indexes
 
 Nothing gets cut from a source that has not been indexed. There are three, and they answer
@@ -5,17 +7,20 @@ different questions. Skipping any one of them is where every defect so far came 
 
 **`capcutctl cut VIDEO` builds the Whisper and Energy indexes for you** and caches both in
 `~/Downloads/.video-index/`. You never invoke them directly. OCR is only for screen B-roll —
-see `capcut-editing-screen-recording`.
+see [broll.md](broll.md#screen--ocr-b-roll) → "Screen — OCR (B-roll)".
 
 | Index | Question it answers | Built with | Cache |
 |---|---|---|---|
-| **Whisper** | what is said, and roughly when | `mlx_whisper`, `large-v3-turbo` | `<name>.whisper-<model>.json` |
+| **Whisper** | what is said, and roughly when | `mlx_whisper`, `large-v3-turbo` | `<stem>.whisper-<slug>.<key>.json` |
 | **OCR** | what is on the screen, second by second | Vision via `find --shows --refresh` | `<name>.ocr-<source-cache-key>.json` |
-| **Energy** | where sound actually is, to 10 ms | `audio_index.py` (inside `capcutctl cut`) | `<name>.energy10.json` |
+| **Energy** | where sound actually is, to 10 ms | `audio_index.py` (inside `capcutctl cut`) | `<stem>.energy10.<key>.json` |
 
 Whisper is **semantic** and its timings lie (contiguous fill). Energy is **acoustic** and
 sample-true but knows no meaning. A cut point has to satisfy both: Whisper decides *which words*,
 energy decides *exactly where*.
+
+`<key>` is a content hash of the source. Legacy names without it (`<stem>.whisper-<slug>.json`,
+`<stem>.energy10.json`) are still read, and a `<stem>.whisper-*` glob still matches both.
 ## The energy index
 
 `capcutctl cut` builds and queries this for you. The API below is what runs **inside** it —

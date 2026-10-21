@@ -45,8 +45,13 @@ Concrete traps already hit on this project. Read before starting.
 - **Speeding the talking head.** `clip.trim` that lengthens the source window and leaves the
   target the same is a speed ramp. Used on `a previous speech-recovery edit` to "save" first words
   the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
-  re-run `cut --keep` so the clip gets *longer*, not faster. `pace` already refuses the
-  principal track; trim does not, so do not reach for it on `content`.
+  re-run `cut --keep` so the clip gets *longer*, not faster. On the principal track a
+  length-changing `trim --src/--start/--dur` refuses with `PRINCIPAL_TRACK` ("Faces stay 1x:
+  recut with cut --keep, or --retime"). `--retime` keeps the clip's speed and resizes its slot
+  instead, and refuses with `CLIP_OVERLAP` when the new length would run into a neighbour.
+- **Hand-placed sounds stay put on a recut.** `cut.recut` keeps hand-placed SFX (a
+  `capcutctl sfx` cue, for example) at their old timeline time. Read `anchors.unownedAudio` in its
+  result and re-place each one against the new cut.
 - **Cold open.** Handing over 5s+ of full-face with no screen. The author recut it to split-screen
   proof from t=0. `finish` flags `cold-open`. The first picture is the result, sharing the
   frame. Full-face comes after.
@@ -91,6 +96,13 @@ Concrete traps already hit on this project. Read before starting.
 - **Preserve the empty main video track.** It is required by the overlays-only structure;
   do not strip every empty track from a cloned draft.
 - **The speed invariant** (`source = target × speed`) must hold on every segment.
+- **Shared speed materials.** `trim`, `pace` and `replace-media --retime` clone a speed material
+  shared with another clip, so only the named clip changes. A `material.patch` spec op on a shared
+  speed refuses with `SHARED_MATERIAL`: clone it private for one clip first.
+- **Loudness never raises SFX.** A placed SFX keeps its level (the clip pass may only bring a hot
+  one down). To match one to the target, name it: `capcutctl loudness --project NAME --segments ID`.
+  On a `true-peak` FAIL with loudness already near the target, run
+  `capcutctl loudness --project NAME --peak-only`, then re-export.
 - **Speed caps**: the user's own projects top out around 100×. To compress 900s into 1.5s you need
   600×, which is out of range — pick a shorter source span instead.
 - **A derived-face swap loses the transcript.** After
@@ -123,6 +135,18 @@ Cause: `Timelines/<uuid>/draft_info.json` is the copy CapCut restores from. See
 Guard: use CLI transactions and run `doctor`; each document must agree with its own mirrors,
 while root and active-timeline documents may differ. Use `sync` for drift. Reopen CapCut and
 verify current playback before final delivery.
+## After CapCut has opened or saved the draft
+
+The creator may have touched it, and CapCut rewrites what it saves. Before the next write:
+
+- **Keep the creator's edits.** `capcutctl diff --project NAME --snapshot LAST-BUILD-LABEL` shows
+  what changed since your last build. Those changes are theirs: keep them, build around them.
+- **Repair what the save did.** `capcutctl doctor --project NAME --fix --dry-run`, then
+  `capcutctl doctor --project NAME --fix`. It merges byte-identical duplicate ids and restores
+  stripped `capcutctl_*` keys from the ledger. A copy that really differs is left, and the fix
+  says `N conflicting id(s) left`: resolve it with `capcutctl sync --project NAME`, or by hand.
+- **CapCut frame-snaps cuts.** A snapped edge can run a clip past its media: run `doctor` and
+  look for `SOURCE_AFTER_END`.
 ## "Cover" means the main track
 
 Do not read "cover" as "B-roll covering the face". In the author's vocabulary the **main track is the

@@ -43,7 +43,7 @@ beats and their sounds stay the same.
 | Number | hold still | `number-pop` | pop |
 | Brand mention | — | logo pop (native), or `brand-chip` without art | pop |
 | Instruction | `punch` onto the element | `callout-box` on a static shot | enter/click |
-| Demo action | 1× on the thing named; ramp the waiting | — | click / typing (from the trace) |
+| Demo action | 1× on the thing named; ramp the waiting | — | click / typing (from the trace; else `capcutctl sfx` on the verified frame) |
 | Result | punch → hold → release; 0.4–0.7× | — | idea / coin |
 | Reaction | face at 1×, clean | — | none |
 | CTA | full face | none (endcard keyword) | select; music out |

@@ -5,7 +5,8 @@ The premise, in the author's words:
 > **Every single sentence I say must be matched to the exact thing happening on screen.**
 
 If the narration says "I tapped Build", the frame is the moment Build is tapped — ideally with a
-punch onto it. Not approximately. A weak match stays on the face; that is a valid answer.
+punch onto it. Not approximately. A weak match means another moment, a still or a graphic.
+Full face is the last resort.
 
 ## The loop
 
@@ -25,7 +26,8 @@ capcutctl qa --project NAME --times 18.6 --expect "18.6=Publish"        # the co
 ## Build each shot from evidence
 
 Start from a reviewed `capcutctl match --project NAME --screen FILE` shot list when one
-exists. Weak matches (`flag` / `none`) stay on the face — that is a valid answer. Then
+exists. A weak match (`flag` / `none`) means another moment, a still or a graphic. Full face
+is the last resort. Then
 keep the exact narration phrase, source file/range, timeline range and inspected evidence
 together. `match --apply` writes only through `layout.screen` / `add` / `pace` / `punch` /
 `ramp`. `verify-shots` is the blind before/action/after check; CONTRADICTED blocks the build.
@@ -42,9 +44,9 @@ together. `match --apply` writes only through `layout.screen` / `add` / `pace` /
   tool calls, preserve the opening action and emphasize the actual tool name and result.
   When narration quotes a prompt, land a native position/scale move on that exact prompt
   during the quoted words; move to the answer only when narration moves there.
-- **Return to the speaker.** Use full-face for context, reactions and connective narration
-  that has no useful screen evidence. A product photo belongs at a reveal/payoff, not
-  throughout every mention of the product.
+- **Return to the speaker sparingly.** Full face only for reactions, the hook, the key line and
+  the CTA, not for connective narration: that gets content with the face as the circle. A
+  product photo belongs at a reveal/payoff, not throughout every mention of the product.
 - **Choose one focus.** Write what the viewer should notice. Crop/zoom to an inspected
   rectangle and leave caption space; use a highlight only if it makes that target clearer.
   Avoid simultaneous competing callouts, zooms and transitions. A stable shot is valid.
@@ -100,6 +102,29 @@ outcome this whole toolkit exists to avoid. `add` refuses it now (`PREFRAMED_MED
 
 Rendered media is allowed for one thing only: `mograph` graphics, imported `--generated` with a sidecar that re-renders them.
 
+## Replace a re-recorded take
+
+The edit is built and the creator re-records the screen. Conform the new take to the old windows;
+never rebuild the shots.
+
+1. List each segment's source window and speed on the old take (`capcutctl scenes --project NAME`).
+2. Event-align each window to the new take: the same click, typing burst or state change on both,
+   never the same wall-clock time.
+3. **Only the start shifts** (every event sits S seconds earlier in the new take):
+   `capcutctl replace-media --project NAME --segments A,B,C --file NEW.mp4 --derived-from OLD.mp4 --derived-offset S`.
+   One transaction; windows and keyframes shift; `SOURCE_BEFORE_START` refuses a bad offset. The
+   CLI takes `--derived-offset` only with `--derived-from`, so `OLD.mp4` is named there to unlock
+   the shift; it is recorded as provenance and nothing else.
+   **The pace differs:** render one conformed file per segment (ffmpeg `trim`/`setpts`, in a script
+   file with `${var}` braces, under the heavy lock when one is set), then relink each with
+   `--derived-from NEW.mp4`. That is the derived-media path, like the room plate composite: the
+   original stays recorded and the window stays a CapCut property. It is not a pre-framed import.
+4. Shared speed materials are cloned automatically. `CONFLICTING_MATERIAL_ID` means run
+   `capcutctl sync --project NAME` first.
+5. Move line-tied overlays (a callout, a punch target) by the measured pixel shift ÷ (canvas/2),
+   in transform units.
+6. `capcutctl gate --project NAME`, then the X-ray on the next render.
+
 ## Standing rule: never full-frame B-roll over the face
 
 Tried and rejected outright:
@@ -107,7 +132,9 @@ Tried and rejected outright:
 > *"you used the screen recording as a cover, which I don't like and it's weird to edit."*
 
 B-roll shares the frame with the speaker via a layout (circle inset, split screen or the screen
-card) — it does not replace them. `layout auto` applies the rule; `capcutctl layout list` prints the geometry.
+card) — it does not replace them. Never cover the face. Full-screen content plus the face circle
+is the default look, and it is not "covering the face": the speaker stays on screen, inset over
+the content. `layout auto` applies the rule; `capcutctl layout list` prints the geometry.
 
 Historical note: an older project (`reference A`) used a **different** `Split` mask config —
 `centerX 0.0435, centerY 0.4969`, with the screen on top and the face on the bottom — versus the
@@ -160,6 +187,13 @@ actually frontmost when it finds none — match the trace's process name, not th
 **What `--moments` does not tell you.** That an action *succeeded*, or what the change was.
 A moment is "these pixels moved". The verb still has to be verified on frames, exactly as
 below.
+
+**A deferred cursor.** If the take's `session.json` has `cursor_render.deferred: true`,
+`screen.mp4` has no pointer yet. Run `rl2 cursor-preview TAKE` before import: a whole-take render
+keeps the timing, and the clean capture is kept as `screen-clean.mp4`. A per-clip render
+(`--from S --to S`) starts at 0, so subtract FROM from every take-time window you read for it. A
+multi-part (restarted) take refuses the whole-take render; render clips inside one part. Do not
+test `shows_cursor`: it is false on every polished take. A take without the field is unchanged.
 
 ## Screen — OCR (B-roll)
 
@@ -238,6 +272,8 @@ that arbitrary video pixels are private.
 
 ## Telemetry cursor halo — opt-in
 
+Skip it on a take that already carries a rendered pointer (a burned-in cursor, or a
+`cursor-preview` render): the halo would double it.
 `capcutctl cursor --project NAME --segment ID --plan`, then `--dry-run`, then apply;
 `--auto` walks eligible recording clips. Requires the take's rl2 pointer sidecar. Missing
 samples are reported as `skippedNoCursor`; **never infer pointer positions from OCR**. The
@@ -254,4 +290,4 @@ constant 8×–100×; faces and variable speed refuse. FFmpeg interpolates and m
 samples into a durable derivative. The timeline slot stays the same length, playing the
 derivative at 1×. The original path and source offset are recorded; restore the transaction
 snapshot to undo the baked look. Inspect with `qa` and native playback. Never add this to
-`pace --auto`.
+`pace --auto`, and never use it on a device screen the viewer must read.
