@@ -174,7 +174,9 @@ The creator may have touched it, and CapCut rewrites what it saves. Before the n
 - **Repair what the save did.** `capcutctl doctor --project NAME --fix --dry-run`, then
   `capcutctl doctor --project NAME --fix`. It merges byte-identical duplicate ids and restores
   stripped `capcutctl_*` keys from the ledger. A copy that really differs is left, and the fix
-  says `N conflicting id(s) left`: resolve it with `capcutctl sync --project NAME`, or by hand.
+  says `N conflicting id(s) left`. `sync` will not help: it merges with the same rule. Pick the
+  right copy (a `material.patch` spec op with a speed/value selector) or clone one private for
+  its clip, then run `doctor` again.
 - **CapCut frame-snaps cuts.** A snapped edge can run a clip past its media: run `doctor` and
   look for `SOURCE_AFTER_END`.
 ## "Cover" means the main track

@@ -508,6 +508,19 @@ def stub_bin(where: Path, marker: Path) -> Path:
     return bin_dir
 
 
+def durable_parent() -> Path:
+    """The checkout (its root is gitignored), unless it sits where render-alpha.sh refuses
+    to write, as a checkout under /tmp does; then the home directory."""
+    real = os.path.realpath(ROOT)
+    roots = ["/tmp", "/private/tmp", "/var/folders", "/private/var/folders"]
+    if os.environ.get("TMPDIR"):
+        roots.append(os.environ["TMPDIR"])
+    ephemeral = any(real == os.path.realpath(r) or real.startswith(os.path.realpath(r).rstrip("/") + "/")
+                    for r in roots)
+    ephemeral = ephemeral or any(part in ("scratchpad", ".scratch") for part in real.split(os.sep))
+    return Path.home() if ephemeral else ROOT
+
+
 def render_alpha(out: str, cwd: Path, bin_dir: Path, **env: str) -> tuple[int, str]:
     environ = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", **env}
     done = subprocess.run(["bash", str(RENDER_ALPHA), "src/index.ts", "Shot", out], cwd=cwd,
@@ -521,12 +534,13 @@ def kit_main() -> int:
         return 0
     failures = 0
     # The durable directory cannot be a mkdtemp() default: that is the system temp root,
-    # which the script refuses by design.
-    durable = Path(tempfile.mkdtemp(dir=Path.home(), prefix=".skills-kit-"))
+    # which the script refuses by design. It only ever holds the stubbed renders and a lock
+    # file; the stub executables and the marker live in the temp dir, which is allowed.
+    durable = Path(tempfile.mkdtemp(dir=durable_parent(), prefix=".test-durable-"))
     scratch = Path(tempfile.mkdtemp(prefix="skills-kit-"))
     try:
-        marker = durable / "marker.log"
-        bin_dir = stub_bin(durable, marker)
+        marker = scratch / "marker.log"
+        bin_dir = stub_bin(scratch, marker)
         refused = ["/private/tmp/x/scratchpad/a.mov", "/private/var/folders/ab/T/a.mov",
                    "scratchpad/a.mov", "/tmp/a.mov", str(scratch / "a.mov")]
         for out in refused:
