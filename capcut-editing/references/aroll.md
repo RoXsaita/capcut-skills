@@ -14,11 +14,35 @@ capcutctl scenes --project NAME --transcript
 capcutctl doctor --project NAME
 ```
 
-`--order` is the final narrative order (an exact permutation of the kept ids). Repeatable
-`--trim-beat ID:in=SECONDS` / `ID:out=SECONDS` only move an edge inward and are refused when
-unsafe. `cut --review decisions.json` takes the same decision as a durable v1 file. After a
-user tweak, recut the signed-off project in place with `cut FACE.mp4 … --into NAME`; `build`
-then re-anchors every graphic.
+`--order` is the final narrative order (an exact permutation of the kept ids). The other
+editorial flags:
+
+- **`--trim-beat ID:in=+S` / `ID:out=-S`** are offsets from the indexed edge, inward only. The
+  wrong sign refuses (`expands the beat`); an unsafe trim refuses too.
+- **`--recover-beat ID:in=S` / `ID:out=S`** is an outward search window, not an offset. It needs
+  a v5 index, snaps to acoustic evidence, and refuses in continuous speech (`no quiet acoustic IN
+  boundary…`). On its own it is a full decision on the default keep list, so pass your `--keep`
+  and `--order` with it. In a `--review` file it is the `recoveries` map (`--review` refuses
+  every editorial flag beside it). A beat cannot be trimmed and recovered in one decision.
+- **`--drop IDS`** removes beats from the keep list. **`--into NAME`** recuts the signed-off
+  project in place after a user tweak (`--in-place` means `--into .`; neither goes with
+  `--project`); `build` then re-anchors every graphic.
+
+`cut --review decisions.json` takes the same decision as a durable v1 file.
+
+**`FIRST_WORD_CLIPPED` blocks, and `--force` never overrides it.** Listen to the seam first. If
+Whisper stretched the word's start back over silence (the audio is fine), back up
+`FACE.aroll.json`, correct that word's `start` in it, and rerun the same cut. If the word really
+is clipped, recover it with `--recover-beat`.
+
+**`SEAM_REPEAT`** (the same words either side of a seam; it can false-positive on common bigrams)
+and **IN `LOUD_BOUNDARY`** (the IN lands inside sound; there is no auto-repair, and `--trim-beat`
+refuses inside sound) both block until you listen: then `--force` with the reason recorded, or
+change the beat or the order.
+
+**`CTA_DROPPED`** (a beat that reads as the CTA is not kept) and **`CTA_NOT_LAST`** (a kept CTA is
+followed by another beat) are warnings only. They print with the lint and are written to the
+plan's `cta` key (`FACE.plan.json`); the CTA still goes last (`--order`).
 
 The `scenes --transcript` audit joins transcript segments that overlap a clip boundary, so a
 boundary word can appear twice; it is an audit feed, not proof.
@@ -109,7 +133,7 @@ This produced a cut the user reviewed and called perfect, with "literally no mis
     `--order` when later-recorded replacements belong in the middle. Check the opening and ending
     explicitly.
 12. **Dry-run the reviewed decision.** Pass `--keep`, an exact-permutation `--order`, and only
-    acoustically safe inward `--trim-beat` hints. Read the final order, source/target ranges,
+    acoustically safe `--trim-beat` / `--recover-beat` hints. Read the final order, source/target ranges,
     repairs and lint. A v1 `cut --review` JSON file is the durable form of the same decision.
 13. **Write CapCut, then hand it off.** Close CapCut and run the same reviewed decision with
     `--project NAME` instead of `--dry-run`; build overlays-only with the main track empty, run
@@ -163,9 +187,6 @@ Known-weak, in the order worth fixing:
   coming round again). You still choose which take to keep.
 - **Exact source-contiguous neighbors can false-positive lint.** The linter should evaluate the
   joined pair and exempt a boundary when one beat ends exactly where the next begins at 1×.
-- **Boundary recovery is inward-only.** `--trim-beat` safely removes edge material but cannot
-  expand outward to recover a clipped word. A future safe outward mode should use the acoustic
-  index and first-word protection rather than raw timestamps.
 - **Semantic defects are only proposed, not decided.** Incomplete sentences, repeated CTA starts,
   and retakes recorded at the end still need an agent to remove/reorder them. Future handout
   warnings can make that review faster, but should not pretend to understand the argument.

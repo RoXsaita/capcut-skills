@@ -8,7 +8,8 @@ Concrete traps already hit on this project. Read before starting.
   gate fails crowding (more than two things animating at once), template repeats inside 10s and
   entrances inside 6 frames; it warns when there is no rest from overlays. Leave sentences bare.
 - **Subtitling instead of emphasising.** A `keyword-super` is 1–3 words that matter, not the
-  sentence. Full captions are not the house style.
+  sentence. Word captions are still required, in one style (`capcutctl captions`); keyword supers
+  are emphasis on top of them, never a replacement.
 - **A spinning glow on a logo.** The native `orbit-glow` recipe rotated a blurred halo 720° on
   linear keys and dropped the pop sound; it is no longer the logo default. Recipes are opt-in
   and experimental.
@@ -40,12 +41,25 @@ Concrete traps already hit on this project. Read before starting.
 - **Doing the whole video at once.** The user explicitly asked for one section at a time, checked
   end-to-end. Cut the talking head, get it signed off, *then* the shot list and `build`. `build`
   re-anchors graphics to their words after a recut, but reviewed B-roll shots are timed to the
-  cut they were matched against: recheck `shots.json` after any recut.
+  cut they were matched against: recheck `shots.json` after any recut. `match` cuts a shot back
+  to the next one's start (`clamped-to-next`) or turns it into a flag (`overlaps-next`), and
+  `match --apply` refuses overlapping screen shots on one track with `CLIP_OVERLAP`: shorten or
+  drop one in `shots.json`.
 - **Speeding the talking head.** `clip.trim` that lengthens the source window and leaves the
   target the same is a speed ramp. Used on `a previous speech-recovery edit` to "save" first words
   the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
-  re-run `cut --keep` so the clip gets *longer*, not faster. `pace` already refuses the
-  principal track; trim does not, so do not reach for it on `content`.
+  re-run `cut --keep` so the clip gets *longer*, not faster. On the principal track a
+  length-changing `trim --src/--start/--dur` refuses with `PRINCIPAL_TRACK` ("Faces stay 1x:
+  recut with cut --keep, or --retime"). `--retime` keeps the clip's speed and resizes its slot
+  instead, and refuses with `CLIP_OVERLAP` when the new length would run into a neighbour.
+- **Hand-placed sounds stay put on a recut.** `cut.recut` keeps hand-placed SFX (a
+  `capcutctl sfx` cue, for example) at their old timeline time. Read `anchors.unownedAudio` in its
+  result and re-place each one against the new cut.
+- **A ripple can drop a sound.** `ripple` splits a face or voice clip that spans the range (the
+  tail gets a new id) and moves one-shot SFX rather than cutting them: to the previous sound's
+  end, onto a `<lane>:ripple` track, or, when neither fits, out of the timeline. Read `dropped` in
+  its result after every ripple and re-place what it lists. `ripple` and `remove` also prune the
+  removed segment's main material once nothing else uses it.
 - **Cold open.** Handing over 5s+ of full-face with no screen. The author recut it to split-screen
   proof from t=0. `finish` flags `cold-open`. The first picture is the result, sharing the
   frame. Full-face comes after.
@@ -63,8 +77,14 @@ Concrete traps already hit on this project. Read before starting.
 - **Loose OCR keywords silently over-match.** `wave` returned 1006 seconds because the *prompt
   text* on screen said "wave progression". Always sanity-check span length — a 1000s match for a
   transient event is a bug, not a find.
-- **OCR TSV-derived ROI is unreliable.** Multi-word keys never match single-word TSV tokens; after
-  loosening, most results pinned to the clamp value. Use it as a hint; confirm visually.
+- **OCR and transcript matching is word-based.** `match` scores each spoken word against the
+  words in the OCR boxes, not a substring of the whole line, and Levantine fillers and particles
+  are stopwords (`يعني`, `هلق`, `هيك`, `شو`). A sentence with an Arabic action verb (`اضغط`,
+  `كبس`, `افتح`, `اكتب`, `اختار`, `نزل`) or an English one (click, open, type) is an action shot.
+  A box is still a hint for the framing: confirm it on the frame.
+- **Grade samples can disagree.** A `grade --plan` row carries `spread` {mid, warmth} and a
+  `warning` when mid > 25 or warmth > 12: one grade cannot fit that source. Re-sample with more
+  `--samples` before `--apply`, and check its darkest and brightest shots.
 - **240px frames are too small to OCR.** Use ~810px wide.
 - **Whisper can hallucinate a trailing Arabic subtitle credit.** Check the source audio and
   remove it only when it was not actually spoken.
@@ -90,8 +110,37 @@ Concrete traps already hit on this project. Read before starting.
 - **Preserve the empty main video track.** It is required by the overlays-only structure;
   do not strip every empty track from a cloned draft.
 - **The speed invariant** (`source = target × speed`) must hold on every segment.
+- **Shared speed materials.** `trim`, `pace` and `replace-media --retime` clone a speed material
+  shared with another clip, so only the named clip changes. A `material.patch` spec op on a shared
+  speed refuses with `SHARED_MATERIAL`: clone it private for one clip first.
+- **Loudness never raises SFX.** A placed SFX keeps its level (the clip pass may only bring a hot
+  one down). To match one to the target, name it: `capcutctl loudness --project NAME --segments ID`.
+  On a `true-peak` FAIL with loudness already near the target, run
+  `capcutctl loudness --project NAME --peak-only`, then re-export.
 - **Speed caps**: the user's own projects top out around 100×. To compress 900s into 1.5s you need
   600×, which is out of range — pick a shorter source span instead.
+- **A derived-face swap keeps the transcript by provenance.** After
+  `capcutctl replace-media --project NAME --segments ID --all --file COMP --derived-from ORIGINAL`
+  build finds the ORIGINAL's transcript and energy index, with the offset applied, for anchors,
+  stress and the duck. Set edit.json `"words"` to the ORIGINAL face's `.whisper` JSON only if build
+  reports `ANCHOR_NO_WORDS` or `DUCK_NO_SPEECH_INDEX`. Always read build's exit code:
+  `ANCHOR_ORPHANED`, or a build rolled back, keeps the previous graphics while `gate` still passes.
+- **`ANCHOR_NO_WORDS` / `DUCK_NO_SPEECH_INDEX` mean a wrong or missing take index.** Speech-index
+  lookups no longer fall through to any video's transcript, and a same-named take's transcript is
+  refused by its token (`details.reason`: `index belongs to another file`; the message says
+  `re-run cut on this take`). So these codes can appear where the wrong take's words used to be
+  used silently. Fix: run `capcutctl cut` on that take, then build again. An anchor whose word
+  Whisper started just before a clip's in-point resolves with `anchor.snapped: true`; that is
+  expected, not an error.
+- **A face-layout switch has side effects.** `split-screen`, `circle` and `full-face` no longer
+  write desc `layout:<name>`; an old `layout:*` desc is cleared to `''` and the layout lives in
+  the side field `capcutctl_layout`, which a CapCut save drops — run `doctor --fix` after a save.
+  A layout change drops the old camera keyframes (scale, position, rotation) and reports
+  `clearedCameraKeys`: re-add punches and pushes afterwards, then run
+  `capcutctl captions --project NAME --reposition`. A screen recording covering exactly the
+  switched span is hidden (alpha 0, `screen_layout_recording_hidden`), not deleted; running
+  `layout screen` on it again shows it. New materials from `layout screen` and the `clip.add`
+  spec op no longer inherit the face's crop, matting or beauty.
 ## Media / environment
 
 - **Use the CLI's selected Python environment.** `pyproject.toml` and SETUP.md are the
@@ -116,6 +165,20 @@ Cause: `Timelines/<uuid>/draft_info.json` is the copy CapCut restores from. See
 Guard: use CLI transactions and run `doctor`; each document must agree with its own mirrors,
 while root and active-timeline documents may differ. Use `sync` for drift. Reopen CapCut and
 verify current playback before final delivery.
+## After CapCut has opened or saved the draft
+
+The creator may have touched it, and CapCut rewrites what it saves. Before the next write:
+
+- **Keep the creator's edits.** `capcutctl diff --project NAME --snapshot LAST-BUILD-LABEL` shows
+  what changed since your last build. Those changes are theirs: keep them, build around them.
+- **Repair what the save did.** `capcutctl doctor --project NAME --fix --dry-run`, then
+  `capcutctl doctor --project NAME --fix`. It merges byte-identical duplicate ids and restores
+  stripped `capcutctl_*` keys from the ledger. A copy that really differs is left, and the fix
+  says `N conflicting id(s) left`. `sync` will not help: it merges with the same rule. Pick the
+  right copy (a `material.patch` spec op with a speed/value selector) or clone one private for
+  its clip, then run `doctor` again.
+- **CapCut frame-snaps cuts.** A snapped edge can run a clip past its media: run `doctor` and
+  look for `SOURCE_AFTER_END`.
 ## "Cover" means the main track
 
 Do not read "cover" as "B-roll covering the face". In the author's vocabulary the **main track is the

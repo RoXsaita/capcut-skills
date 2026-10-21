@@ -31,23 +31,22 @@ the claim, the number, the list, the "all of it".
 
 ## What each beat gets
 
-When the profile names a house look (`brand.house`), its pieces replace the defaults below for their
-job: `brand.house.super` sets the Hook and Claim supers instead of `hook-title` / `keyword-super`,
-and `brand.house.transition` is the scene for a chapter change. The beats and their sounds stay
-the same.
-
+`build` does not read `brand.house`. When the profile names one, write its super template
+(e.g. `slab-super`) for Hook and Claim graphics instead of `hook-title` / `keyword-super`, and put
+its transition scene in `scenes` at a chapter change ([edit-plan.md](edit-plan.md#scenes)). The
+beats and their sounds stay the same.
 
 | Beat | Camera | Graphic | Sound |
 |---|---|---|---|
-| Hook (0–1.5s) | proof on screen by 1.5s; a snap punch | `hook-title` | impact on frame 0 |
+| Hook (0–1.5s) | frame 0 is the built result, never the raw input or an empty screen; something moves after 0s and by `density.hookEventBy` (0.5s): a snap punch, a cut, or the super's entrance. A shot at 0s does not count | `hook-title` | impact on frame 0 |
 | Claim | stress push (automatic) | `keyword-super` (1–3 words) | pop |
 | Number | hold still | `number-pop` | pop |
 | Brand mention | — | logo pop (native), or `brand-chip` without art | pop |
 | Instruction | `punch` onto the element | `callout-box` on a static shot | enter/click |
-| Demo action | 1× on the thing named; ramp the waiting | — | click / typing (from the trace) |
+| Demo action | 1× on the thing named; ramp the waiting | — | click / typing (from the trace; else `capcutctl sfx` on the verified frame) |
 | Result | punch → hold → release; 0.4–0.7× | — | idea / coin |
 | Reaction | face at 1×, clean | — | none |
-| CTA | full face | `cta-card` + endcard | select; music out |
+| CTA | full face | none (endcard keyword) | select; music out |
 
 ## Density (profile defaults)
 
@@ -63,17 +62,20 @@ the same.
 
 - Anything that spins or loops forever; rotation.
 - Linear easing on an entrance.
-- Letter-by-letter Arabic, or Arabic in a Latin fallback face; more than one font family.
+- Letter-by-letter Arabic, or Arabic in a Latin fallback face; more than one display family in
+  graphics (captions keep the caption style; code scenes may use the profile mono face).
 - Text that repeats the whole spoken sentence (that is subtitling, not emphasis).
 - A graphic without a sound, or a sound without a reason on screen.
 - Anything inside the platform UI (top bar, bottom caption band, right action rail).
 - A punch and a callout on the same target; camera motion on the circle layout.
 - An endcard longer than 3s with nothing new on it.
+- A drawn card over the face at the CTA (`cta-card`), unless the creator asks.
 
 ## Design system (tokens)
 
-One family (IBM Plex Sans Arabic, 600/700, bundled). Colours: indigo `#4040FE` (the card's
-measured fill), white ring, ink, white text, and one accent for the key word. Type scale at
+Colours and font come from the profile: `capcutctl profile` prints `tokens.color` (the brand
+fill behind text, ring, ink, text, and one accent for the key word) and `tokens.font` (one
+display family; IBM Plex Sans Arabic 600/700 is the shipped default, bundled). Type scale at
 1080 wide: hook 120, numeral 200, super 84, list 56, chip 44. Entrances ease out
 (`cubic-bezier(.16,1,.3,1)`), exits are faster, pops overshoot at most 6%. Timings are in
 frames at 30fps and even. Graphics lead their word by 3 frames and land their sound with

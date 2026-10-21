@@ -3,12 +3,15 @@ name: CLI drift
 # The vendored contract and generated reference describe one CLI commit. This job compares them
 # with the CLI's current main, so a new command, flag or summary upstream shows up here as a
 # red check instead of as an agent hand-writing JSON because the skills never mentioned it.
-# Refresh with scripts/sync-cli.sh against a clone of the CLI. Not a pull-request check: a PR
-# that documents an unmerged CLI branch is legitimately ahead of main until both merge.
+# Refresh with scripts/sync-cli.sh against a clone of the CLI. Runs daily and on every push to
+# main, so drift is a day old at most. Not a pull-request check: a PR that documents an unmerged
+# CLI branch is legitimately ahead of main until both merge.
 
 on:
   schedule:
-    - cron: "17 6 * * 1"
+    - cron: "17 6 * * *"
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:

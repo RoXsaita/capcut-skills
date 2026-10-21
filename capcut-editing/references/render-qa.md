@@ -71,7 +71,9 @@ capcutctl gate --project NAME --profile ref-profile.json
 `compare` lists the reel, the profile and (with `--project`) the edit side by side for the first
 visual event, longest static stretch, opening gap and median shot. `--profile-out` writes only
 `density.hookEventBy`, `openingMaxGap` and `maxStatic` — a decode cannot tell which events are
-graphics. `shots.png` shows the first frame of every shot; read it for the style: caption register,
+graphics. To recalibrate `opening-density` for good, copy what it measured into the user profile
+(`capcutctl profile where`), never the public preset: the shipped `presets/profile.json` in the
+CLI repo stays brand-neutral. `shots.png` shows the first frame of every shot; read it for the style: caption register,
 framing, graphic vocabulary, the once-per-video trick. The numbers cannot show those. Raise
 `--cut-threshold` if screen scrolling reads as cuts.
 
@@ -89,6 +91,12 @@ A bare token is a segment id; `track:NAME` or `track:N` admits every segment on 
 including ones the edit added. Anything else that changed is listed under `scope.outOfScope` with
 both values, and the command exits 1. Track index shifts from an inserted overlay track are not
 findings.
+
+Each diff segment row carries `clip`, `keyframes` (a short hash of the keys), `mask`, `refs`
+(speed, animation, transition, mask and canvas extras) and, on caption rows, `text`. So a reframe,
+a keyframe change, a re-speed or a re-caption outside the allowed ids is reported even when the
+clip did not move: `scope.ok: false`, exit 1. When that change was intended, add its id to
+`--allow`. Never treat exit 1 as noise.
 
 ## `notes` is the creative log
 

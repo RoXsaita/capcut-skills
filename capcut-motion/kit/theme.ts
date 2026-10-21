@@ -49,3 +49,7 @@ export const MARGIN = 64;
 export const GAP = 40;
 // Framed media panels only. Never round full-frame media.
 export const RADIUS = profile.tokens.radius?.box ?? 24;
+
+// Platform UI the text must stay out of: `safeZones.forbidden` (canvas px, y down) and the
+// per-layout `textBands`, from the merged profile sync-profile.sh wrote. Never typed in here.
+export const SAFE = profile.safeZones;

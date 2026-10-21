@@ -90,16 +90,22 @@ For each row:
 ```bash
 kit/scripts/stills.sh src/index.ts SHOT qa/SHOT 6 20 45 70         # look first
 kit/scripts/render-alpha.sh src/index.ts SHOT /durable/path/SHOT.mov [--opaque]
+# top-half graphic: under the face; `layout auto` opens the split onto it
 capcutctl add --project NAME --media /durable/path/SHOT.mov --at T --dur D \
   --track broll --volume 0 --generated --desc SHOT
+# full-frame alpha graphic: over the face, below the mograph and caption lanes
+capcutctl add --project NAME --media /durable/path/SHOT.mov --at T --dur D \
+  --track gfx --layer top --volume 0 --generated --desc SHOT
 ```
 
 Then the composite, at the word and at the shot's peak:
 
 ```bash
 capcutctl qa --project NAME --times T,T+1
-capcutctl layout auto --project NAME            # the face shares the frame where a graphic covers it
+capcutctl layout auto --project NAME            # top-half graphics only: the face shares the frame
 ```
+
+Skip `layout auto` for a full-frame alpha graphic on `--layer top`; it already sits over the face.
 
 ## 8. The variety check
 

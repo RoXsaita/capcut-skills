@@ -24,7 +24,9 @@ capcutctl find "Build" --media /path/to/screen.mp4 --shows --refresh
 ```
 
 Indexes cache under `~/Downloads/.video-index/` as
-`<name>.energy10.json`, `<name>.whisper-<model>.json`, `<name>.ocr-<source-cache-key>.json`.
+`<stem>.whisper-<slug>.<key>.json`, `<stem>.energy10.<key>.json` (key = a content hash) and
+`<stem>.ocr-<source-cache-key>.json`. Legacy names without the key are still read, and a
+`<stem>.whisper-*` glob still matches both.
 
 ## The geometry source of truth
 
@@ -48,6 +50,7 @@ numbers from a live project.
 - **Alpha overlays are premultiplied.** CapCut reads ProRes alpha premultiplied; a straight file
   paints its glow's hidden colour as a haze (the yellow-filled callout, 2026-10-11). Renders
   premultiply at encode; `gate` fails `alpha-premultiplied`; `capcutctl alpha --project` fixes.
+  The row is always reported: an overlay it could not read is a WARN `not checked`, never a pass.
 - **Overlays only.** Main track always empty. See `style.md` rule zero.
 - **Face stays 1×.** Recut length with `cut --keep`; never speed the talking head.
 

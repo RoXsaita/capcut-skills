@@ -16,7 +16,9 @@ This copy is the part an agent needs mid-edit.
    cp mograph/scenes/word-slam.js mograph/scenes/my-idea.js   # then set id: 'my-idea'
    ```
 
-   Keep the structure and rewrite only `draw` (and `setup` and `cues` as needed).
+   Keep the structure and rewrite only `draw` (and `setup` and `cues` as needed). For a drawn
+   B-roll insert over footage, fork a scene that takes `presentation: "overlay"`
+   (`format-morph`, `claude-brief`) so the fork keeps a transparent, bounded overlay.
 4. **Never:** the same idea in a new colour (colour is a param), a scene with this video's copy
    baked in (copy is a param), or a one-off outside the library.
 
@@ -58,6 +60,17 @@ SCENE.define({
 | Info-safe box | `K.safe` (canvas minus the top bar, bottom UI and right rail) |
 | Sound | `cues()` kinds: impact, kick, thud, click, blip, pluck, bell, stab, whoosh, riser, tone, glitch, sparkle |
 
+**Overlay templates** (`mograph/templates/`, on `mograph/runtime.js`, the `MG` object) are cropped
+to their box, and the crop box includes each element's shadow and blur reach. `MG.reach(el)` gives
+how far `el` paints past its box per side (`{l, r, t, b, max}`), and `MG.maxReach(el)` the largest
+reach of `el` or a descendant. Derive a layout margin from it (three times any animated blur), so
+a glow is never clipped at the crop edge.
+
+**Renders** are cached by a fingerprint of the template or scene file, the runtime, the params
+and the profile tokens (for a template, also the bytes of any local file its params name; see
+*Renders, rerender and refusals* in [native.md](native.md)). Editing a scene file re-renders on
+the next `build`.
+
 ## Promotion checklist
 
 - [ ] The header has a summary plus `params:`, `beats:`, `handoff:` and `use:`, and a timing paragraph.
@@ -68,7 +81,7 @@ SCENE.define({
 - [ ] A cue on every hit.
 - [ ] It's added to `CASES` in `test/mograph-scenes.test.mjs`, and the test passes.
 - [ ] A preview sheet was looked at: the hits, the first and last frames, Arabic joins and punctuation.
-- [ ] The catalog tables (the CLI's `mograph/scenes/README.md` and this skill's `SKILL.md`) have its row.
+- [ ] The catalog tables (the CLI's `mograph/scenes/README.md` and this skill's `references/native.md`) have its row.
 
 ```bash
 capcutctl mograph scene-preview --scene my-idea --params '{"text":"كود"}' --out sheet.png

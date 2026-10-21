@@ -132,8 +132,8 @@ offset; do not quantize it away.
 ## Presets
 
 `Preset 3` is a **branded endcard**, 7.43s, with all content parked at the end of the timeline
-(68.83→76.27s of a 76.27s project). Assets: `suheilai-rect-indigo-1080x1920 (2).png` (indigo
-frame), `suheilai-circle-white-1080x1920.png`, `circle-1080x1080.gif`, plus two clips.
+(68.83→76.27s of a 76.27s project). Assets: a full-frame 1080×1920 brand-colour frame PNG, a
+full-frame white circle-ring PNG, a 1080×1080 animated circle GIF, plus two clips.
 
 Use `capcutctl new` to clone the template and park its clips after the content.
 `endcard` / `wrap` place the actual CTA over the talking head near `contentEnd`; parked
@@ -226,8 +226,10 @@ These are not "probably nots". Each was counted across the whole library:
 | Rotation | `KFTypeRotation` present 435× but the value is `0.0` everywhere | never tilts |
 
 In the hand edits the premium feel came from **pace, motion and the seam formula**. The profile keeps
-all three and adds rendered typography on top (keyword supers, not captions; no colour grade, no
-CapCut loudness normalisation, no AI beat sync — those verdicts still stand).
+all three and adds rendered typography on top: word captions are required, in one style, and
+keyword supers are emphasis on top of them (the Captions row above describes the hand-edit
+library only). No colour grade, no CapCut loudness normalisation, no AI beat sync — those
+verdicts still stand.
 
 ### Eased keyframes exist and are underused
 

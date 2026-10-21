@@ -99,6 +99,11 @@ you cannot follow a click you cannot see. And the clean-pixels argument is weak 
 trace already carries exact click coordinates — the cursor is not how the pipeline locates
 anything. `--no-cursor` is there when a take really is only for analysis.
 
+Later (2026-10): newer builds may defer the cursor render. When `session.json` has
+`cursor_render.deferred: true`, `screen.mp4` is the clean capture and `rl2 cursor-preview` draws
+the pointer afterwards; see [broll.md](../../capcut-editing/references/broll.md) for the import
+steps. Takes without that field are unchanged.
+
 Audio modes: **`both` (default)**, `mic`, `system`, `none`. "Record my screen" normally means the
 narration *and* whatever the machine is doing, so mixed is the default — mic-only was the first
 guess and it was wrong for the same reason the missing cursor was.

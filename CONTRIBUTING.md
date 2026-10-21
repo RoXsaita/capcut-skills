@@ -17,7 +17,9 @@ python3 scripts/test_validate.py
 If your change documents a new CLI capability, the CLI change must be pushed
 first; then run `scripts/sync-cli.sh PATH_TO_CLI_CLONE`, which refreshes
 `.capcut/cli-contract.json`, the generated `capcut-cli/reference.md` and the
-`contractSyncedFrom` block together, and link the two PRs to each other.
+`contractSyncedFrom` block together, and link the two PRs to each other. It
+refuses a CLI tree with uncommitted changes or a detached HEAD; sync from a
+clean `git worktree add` checkout of the CLI branch.
 
 If you previously installed the four-skill layout, remove the retired
 `capcut-editing-talking-head` and `capcut-editing-screen-recording` links.

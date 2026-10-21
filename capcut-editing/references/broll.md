@@ -5,7 +5,8 @@ The premise, in the author's words:
 > **Every single sentence I say must be matched to the exact thing happening on screen.**
 
 If the narration says "I tapped Build", the frame is the moment Build is tapped — ideally with a
-punch onto it. Not approximately. A weak match stays on the face; that is a valid answer.
+punch onto it. Not approximately. A weak match means another moment, a still or a graphic.
+Full face is the last resort.
 
 ## The loop
 
@@ -22,10 +23,18 @@ capcutctl qa --project NAME --times 18.6 --expect "18.6=Publish"        # the co
 `match` is a first pass, not proof. `build` applies the reviewed `shots.json` once, then
 `layout auto`; use `punch`, `ramp` and `pace` for the per-shot timing it cannot infer.
 
+`match` scores spoken words against OCR words (word-based; Levantine fillers are stopwords), and
+an Arabic or English action verb (`اضغط`, `افتح`, click, open…) marks the sentence as an action.
+A shot that would run into the next one is cut back to its start (reason `clamped-to-next`), or,
+when too little would stay on screen, becomes a flag (reason `overlaps-next`). `match --apply`
+refuses overlapping screen shots on one track with `CLIP_OVERLAP`: shorten or drop one in
+`shots.json`, then apply again.
+
 ## Build each shot from evidence
 
 Start from a reviewed `capcutctl match --project NAME --screen FILE` shot list when one
-exists. Weak matches (`flag` / `none`) stay on the face — that is a valid answer. Then
+exists. A weak match (`flag` / `none`) means another moment, a still or a graphic. Full face
+is the last resort. Then
 keep the exact narration phrase, source file/range, timeline range and inspected evidence
 together. `match --apply` writes only through `layout.screen` / `add` / `pace` / `punch` /
 `ramp`. `verify-shots` is the blind before/action/after check; CONTRADICTED blocks the build.
@@ -42,9 +51,9 @@ together. `match --apply` writes only through `layout.screen` / `add` / `pace` /
   tool calls, preserve the opening action and emphasize the actual tool name and result.
   When narration quotes a prompt, land a native position/scale move on that exact prompt
   during the quoted words; move to the answer only when narration moves there.
-- **Return to the speaker.** Use full-face for context, reactions and connective narration
-  that has no useful screen evidence. A product photo belongs at a reveal/payoff, not
-  throughout every mention of the product.
+- **Return to the speaker sparingly.** Full face only for reactions, the hook, the key line and
+  the CTA, not for connective narration: that gets content with the face as the circle. A
+  product photo belongs at a reveal/payoff, not throughout every mention of the product.
 - **Choose one focus.** Write what the viewer should notice. Crop/zoom to an inspected
   rectangle and leave caption space; use a highlight only if it makes that target clearer.
   Avoid simultaneous competing callouts, zooms and transitions. A stable shot is valid.
@@ -92,13 +101,56 @@ outcome this whole toolkit exists to avoid. `add` refuses it now (`PREFRAMED_MED
 | Tempting ffmpeg pass | What it costs the editor | The CapCut-native verb |
 |---|---|---|
 | `crop=` to the split-screen half | Cannot reframe, re-zoom, or change layout | `capcutctl layout broll --row PIXEL_ROW` |
-| `crop=` a window capture | Same, and the window treatment is lost | `capcutctl layout screen --media FULL.mp4` |
+| `crop=` a landscape capture (1920×1050) | Same | `capcutctl layout broll --at SECONDS --track N --row R --scale S` |
+| `crop=` a portrait window capture | Same, and the window treatment is lost | `capcutctl layout screen --media FULL.mp4` |
 | `-ss`/`-t` to cut a subclip | Can only extend inside your window | `add --src S --dur S` on the whole file |
 | `setpts=`/`atempo=` for speed | Speed stops being a slider | `add --cover IN-OUT`, `pace`, `ramp` |
 | `zoompan` for a punch-in | A camera move nobody can retime | `punch`, `keyframe --focus` |
 | `concat` a montage | One clip where there were eight | one `add` per shot |
 
 Rendered media is allowed for one thing only: `mograph` graphics, imported `--generated` with a sidecar that re-renders them.
+
+**Landscape or portrait decides the verb.** `layout screen` is the indigo card for portrait
+window captures only (width/height ≤ 1); it sizes the frame from the recording's dimensions
+(unchanged for 720×1050) and the new material carries `capcutctl_origin`. A landscape capture
+refuses there with `SCREEN_NEEDS_PORTRAIT_WINDOW`: frame it natively in the split with
+`layout broll --row R --scale S`. Without `--scale`, a landscape capture refuses with
+`BROLL_NEEDS_SCREEN_LAYOUT`, whose `details.minScale` is the scale that fills the half; pass
+that or larger.
+
+**`BROLL_TOO_SHORT` has two meanings.** From `layout broll` (exit 2), an explicit `--scale` is
+below the half-height minimum: raise it to `details.minScale` (scales within 1% snap up, and the
+`framed[]` row reports `snapped`; `BROLL_TOO_SMALL` is the same refusal for width and also names
+the overall minimum). From the B-roll lint (`gate`, `finish`), the B-roll is under 0.8s on
+screen: lengthen or drop the shot. Crop/frame/framing params no longer switch the scale guard off.
+
+## Replace a re-recorded take
+
+The edit is built and the creator re-records the screen. Conform the new take to the old windows;
+never rebuild the shots.
+
+1. List each segment's source window and speed on the old take (`capcutctl scenes --project NAME`).
+2. Event-align each window to the new take: the same click, typing burst or state change on both,
+   never the same wall-clock time.
+3. **Only the start shifts** (every event sits S seconds earlier in the new take):
+   `capcutctl replace-media --project NAME --segments A,B,C --file NEW.mp4 --derived-from OLD.mp4 --derived-offset S`.
+   One transaction; windows and keyframes shift; `SOURCE_BEFORE_START` refuses a bad offset. The
+   CLI takes `--derived-offset` only with `--derived-from`, so `OLD.mp4` is named there to unlock
+   the shift; it is recorded as provenance and nothing else. S must be 0 or more: a negative
+   offset refuses with `BAD_DERIVED_OFFSET`.
+   **Events sit later in the new take** (more lead-in): use the per-segment conform below. For a
+   plain later start on B-roll, relink with no offset, then set each window with
+   `capcutctl trim --project NAME --segments ID --src IN-OUT` (one id per call); `trim` does not
+   move keyframes, so re-place them.
+   **The pace differs:** render one conformed file per segment (ffmpeg `trim`/`setpts`, in a script
+   file with `${var}` braces, under the heavy lock when one is set), then relink each with
+   `--derived-from NEW.mp4`. That is the derived-media path, like the room plate composite: the
+   original stays recorded and the window stays a CapCut property. It is not a pre-framed import.
+4. Shared speed materials are cloned automatically. `CONFLICTING_MATERIAL_ID` means run
+   `capcutctl sync --project NAME` first.
+5. Move line-tied overlays (a callout, a punch target) by the measured pixel shift ÷ (canvas/2),
+   in transform units.
+6. `capcutctl gate --project NAME`, then the X-ray on the next render.
 
 ## Standing rule: never full-frame B-roll over the face
 
@@ -107,7 +159,9 @@ Tried and rejected outright:
 > *"you used the screen recording as a cover, which I don't like and it's weird to edit."*
 
 B-roll shares the frame with the speaker via a layout (circle inset, split screen or the screen
-card) — it does not replace them. `layout auto` applies the rule; `capcutctl layout list` prints the geometry.
+card) — it does not replace them. Never cover the face. Full-screen content plus the face circle
+is the default look, and it is not "covering the face": the speaker stays on screen, inset over
+the content. `layout auto` applies the rule; `capcutctl layout list` prints the geometry.
 
 Historical note: an older project (`reference A`) used a **different** `Split` mask config —
 `centerX 0.0435, centerY 0.4969`, with the screen on top and the face on the bottom — versus the
@@ -161,6 +215,13 @@ actually frontmost when it finds none — match the trace's process name, not th
 A moment is "these pixels moved". The verb still has to be verified on frames, exactly as
 below.
 
+**A deferred cursor.** If the take's `session.json` has `cursor_render.deferred: true`,
+`screen.mp4` has no pointer yet. Run `rl2 cursor-preview TAKE` before import: a whole-take render
+keeps the timing, and the clean capture is kept as `screen-clean.mp4`. A per-clip render
+(`--from S --to S`) starts at 0, so subtract FROM from every take-time window you read for it. A
+multi-part (restarted) take refuses the whole-take render; render clips inside one part. Do not
+test `shows_cursor`: it is false on every polished take. A take without the field is unchanged.
+
 ## Screen — OCR (B-roll)
 
 ```bash
@@ -202,9 +263,8 @@ good way to stretch a narrow window without drifting.
 Phone screen recordings are often taller than 9:16 (e.g. 1080×2652 vs a 1080×1920 canvas), so
 every shot needs a vertical crop decision, and **the right crop differs per shot**.
 
-OCR TSV output (`tesseract f.jpg stdout tsv`) gives word boxes and can suggest a ROI, but in
-practice it was **unreliable** — loose token matching pushed most results to the clamp. It is a
-hint, not an answer.
+OCR word boxes (`find --boxes`) can suggest a ROI. A box is a hint, not an answer: confirm the
+crop on the frame.
 
 **What actually works:** render the candidate crops and look at a contact sheet.
 
@@ -238,6 +298,8 @@ that arbitrary video pixels are private.
 
 ## Telemetry cursor halo — opt-in
 
+Skip it on a take that already carries a rendered pointer (a burned-in cursor, or a
+`cursor-preview` render): the halo would double it.
 `capcutctl cursor --project NAME --segment ID --plan`, then `--dry-run`, then apply;
 `--auto` walks eligible recording clips. Requires the take's rl2 pointer sidecar. Missing
 samples are reported as `skippedNoCursor`; **never infer pointer positions from OCR**. The
@@ -254,4 +316,4 @@ constant 8×–100×; faces and variable speed refuse. FFmpeg interpolates and m
 samples into a durable derivative. The timeline slot stays the same length, playing the
 derivative at 1×. The original path and source offset are recorded; restore the transaction
 snapshot to undo the baked look. Inspect with `qa` and native playback. Never add this to
-`pace --auto`.
+`pace --auto`, and never use it on a device screen the viewer must read.
