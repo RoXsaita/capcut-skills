@@ -114,7 +114,12 @@ never rebuild the shots.
    `capcutctl replace-media --project NAME --segments A,B,C --file NEW.mp4 --derived-from OLD.mp4 --derived-offset S`.
    One transaction; windows and keyframes shift; `SOURCE_BEFORE_START` refuses a bad offset. The
    CLI takes `--derived-offset` only with `--derived-from`, so `OLD.mp4` is named there to unlock
-   the shift; it is recorded as provenance and nothing else.
+   the shift; it is recorded as provenance and nothing else. S must be 0 or more: a negative
+   offset refuses with `BAD_DERIVED_OFFSET`.
+   **Events sit later in the new take** (more lead-in): use the per-segment conform below. For a
+   plain later start on B-roll, relink with no offset, then set each window with
+   `capcutctl trim --project NAME --segments ID --src IN-OUT` (one id per call); `trim` does not
+   move keyframes, so re-place them.
    **The pace differs:** render one conformed file per segment (ffmpeg `trim`/`setpts`, in a script
    file with `${var}` braces, under the heavy lock when one is set), then relink each with
    `--derived-from NEW.mp4`. That is the derived-media path, like the room plate composite: the

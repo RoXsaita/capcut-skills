@@ -44,9 +44,9 @@ def sandbox() -> Path:
 
 
 def run(repo: Path, *args: str, **env: str) -> tuple[int, str]:
-    # A developer's own CAPCUTCTL_CLI or strict setting must not decide a case.
+    # A developer's own CAPCUTCTL_CLI, strict setting or personal tokens must not decide a case.
     environ = {key: value for key, value in os.environ.items()
-               if key not in ("CAPCUTCTL_CLI", "CAPCUT_STRICT_DRIFT")}
+               if key not in ("CAPCUTCTL_CLI", "CAPCUT_STRICT_DRIFT", "CAPCUT_PERSONAL_TOKENS")}
     done = subprocess.run([sys.executable, "scripts/validate.py", *args], cwd=repo,
                           env={**environ, **env}, capture_output=True, text=True, timeout=120)
     return done.returncode, done.stdout + done.stderr
@@ -284,11 +284,11 @@ def _(repo: Path) -> str:
     return "hard-codes the colour #4040FE"
 
 
-@case("the creator handle in a reference")
-def _(repo: Path) -> str:
+@case("a token from CAPCUT_PERSONAL_TOKENS in a reference")
+def _(repo: Path) -> tuple[str, dict[str, str]]:
     with (repo / "capcut-editing" / "references" / "style.md").open("a", encoding="utf-8") as handle:
-        handle.write("\nThe frame is `suheilai-rect.png`.\n")
-    return "contains the creator handle"
+        handle.write("\nThe frame is `ExampleCreator-rect.png`.\n")
+    return "contains a personal token", {"CAPCUT_PERSONAL_TOKENS": "nobody, examplecreator"}
 
 
 @case("a personal home path in a skill")
@@ -617,7 +617,10 @@ def main() -> int:
         repo = sandbox()
         try:
             expected = mutate(repo)
-            code, output = run(repo)
+            env: dict[str, str] = {}
+            if isinstance(expected, tuple):
+                expected, env = expected
+            code, output = run(repo, **env)
             if code == 0:
                 print(f"NOT CAUGHT  {name}", file=sys.stderr)
                 missed += 1

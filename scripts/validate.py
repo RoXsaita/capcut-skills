@@ -27,7 +27,8 @@ So this checks:
                 `contract --markdown` match what we vendor (warns; fails with --strict
                 or CAPCUT_STRICT_DRIFT=1). Without one this says "live CLI not checked"
   hygiene       no retired skill name, every reference opens with an H1, and no
-                personal brand token or hard-coded hex colour in a skill
+                personal home path, hard-coded hex colour, or token listed in
+                $CAPCUT_PERSONAL_TOKENS (comma-separated, kept out of git) in a skill
   reference     capcut-cli/reference.md was generated from the vendored contract: same CLI
                 and contract version, and every command's summary and example present
   budget        the happy path stays under HAPPY_PATH_BUDGET lines
@@ -86,9 +87,13 @@ RETIRED_EXEMPT = {"CONTRIBUTING.md"}  # explains the merge, so it names them on 
 # may still write: the CLI's shipped default profile colours, black and white.
 HEX = re.compile(r"(?<![\w&/])#[0-9A-Fa-f]{6}(?![\w-])")
 NEUTRAL_HEX = {"#3D3D3D", "#FFB020", "#0B0B14", "#FFFFFF", "#000000"}
+# A creator's own handles and brand words never live in this public repo, not even in the
+# guard: list them, comma-separated, in $CAPCUT_PERSONAL_TOKENS (shell profile, never git).
+PERSONAL_TOKENS_ENV = "CAPCUT_PERSONAL_TOKENS"
 PERSONAL = [
-    (re.compile(r"suheilai", re.I), "the creator handle"),
     (re.compile(r"/Users/[^/\s`]+"), "a personal home path"),
+    *[(re.compile(re.escape(token.strip()), re.I), "a personal token")
+      for token in os.environ.get(PERSONAL_TOKENS_ENV, "").split(",") if token.strip()],
 ]
 STRICT_DRIFT_ENV = "CAPCUT_STRICT_DRIFT"
 SYNC_SCRIPT = ROOT / "scripts" / "sync-cli.sh"
