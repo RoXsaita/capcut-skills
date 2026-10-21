@@ -119,7 +119,9 @@ the brand stays the same:
 
 Nobody can watch the clip in real time here, so stills are the review: `mograph scene-preview`
 / `mograph preview` sheets for native pieces, `kit/scripts/stills.sh` for Remotion, then
-`capcutctl qa` on the composite. Every image inspection also follows the
+`capcutctl qa` on the composite. Scene previews, mograph render batches and stills run one at a
+time across sessions, under the heavy lock: prefix them with `lockf -k "$CAPCUTCTL_HEAVY_LOCK"`
+when the environment sets it (never a hard-coded path). Every image inspection also follows the
 [whole-frame review and fix/recheck rule](../capcut-editing/SKILL.md#5-review-and-hand-off),
 even when testing one graphic. Inspect layout relationships through motion, including frames
 that must follow and resize with their video. On every frame, check:

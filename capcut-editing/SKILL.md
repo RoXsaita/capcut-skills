@@ -108,6 +108,14 @@ a build rolled back, keeps the previous graphics while `gate` still passes.
 **Stop and get the cut signed off.** Everything else anchors to it. After sign-off a recut is
 cheap — `build` re-anchors every graphic to its words — but a wrong keep-list poisons all of it.
 
+**Prep before the A-roll exists** builds nothing. Write edit.json with `say` anchors from the
+script lines (no `at` seconds, no `shots`), render graphics with `mograph preview` on the real
+text, draft the scenes and the music brief, and put open questions in `notes`. Never build into a
+placeholder face: `say` without a transcript refuses (`ANCHOR_NO_WORDS`), `at` is never
+re-anchored, and `shots` apply once per shots.json hash (`build --force` re-applies them only when
+every clip they placed is gone). Once the take lands, run the normal loop: cut, sign-off,
+match/verify-shots, `build --edit`. On `ANCHOR_ORPHANED`, reword the `say` to what Whisper heard.
+
 ## 2. The shot list
 
 ```bash
