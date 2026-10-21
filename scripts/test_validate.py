@@ -8,6 +8,7 @@ copy, and asserts the checker reports it.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -183,6 +184,14 @@ def _(repo: Path) -> str:
     return "the house CTA is full face"
 
 
+@case("Remotion as the default for drawn B-roll")
+def _(repo: Path) -> str:
+    path = repo / "capcut-motion" / "references" / "remotion.md"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("\n3. **Remotion for the rest**: collages, a process climbing.\n")
+    return "Remotion is a last resort"
+
+
 # ------------------------------------------------------------------ scripts/sync-cli.sh
 
 SYNC_CASES: list[tuple[str, object]] = []
@@ -286,6 +295,76 @@ def sync_main() -> int:
     return failures
 
 
+# ------------------------------------------------ capcut-motion/kit/scripts/render-alpha.sh
+
+RENDER_ALPHA = ROOT / "capcut-motion" / "kit" / "scripts" / "render-alpha.sh"
+
+
+def stub_bin(where: Path, marker: Path) -> Path:
+    """npx, capcutctl, ffprobe and lockf that only record they ran: nothing real renders."""
+    bin_dir = where / "bin"
+    bin_dir.mkdir()
+    stubs = {
+        # npx remotion render ENTRY COMP OUT ...: mark the call and leave a file at OUT.
+        "npx": f'echo "npx $*" >> "{marker}"; touch "$5"\n',
+        "capcutctl": f'echo "capcutctl $*" >> "{marker}"\n',
+        "ffprobe": "exit 0\n",
+        "lockf": f'echo "lockf $1 $2" >> "{marker}"; shift 2; exec "$@"\n',
+    }
+    for name, body in stubs.items():
+        path = bin_dir / name
+        path.write_text("#!/usr/bin/env bash\n" + body, encoding="utf-8")
+        path.chmod(0o755)
+    return bin_dir
+
+
+def render_alpha(out: str, cwd: Path, bin_dir: Path, **env: str) -> tuple[int, str]:
+    environ = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", **env}
+    done = subprocess.run(["bash", str(RENDER_ALPHA), "src/index.ts", "Shot", out], cwd=cwd,
+                          env=environ, capture_output=True, text=True, timeout=60)
+    return done.returncode, done.stdout + done.stderr
+
+
+def kit_main() -> int:
+    if not shutil.which("python3"):
+        print("skipped     render-alpha.sh cases (python3 is required on PATH)")
+        return 0
+    failures = 0
+    # The durable directory cannot be a mkdtemp() default: that is the system temp root,
+    # which the script refuses by design.
+    durable = Path(tempfile.mkdtemp(dir=Path.home(), prefix=".skills-kit-"))
+    scratch = Path(tempfile.mkdtemp(prefix="skills-kit-"))
+    try:
+        marker = durable / "marker.log"
+        bin_dir = stub_bin(durable, marker)
+        refused = ["/private/tmp/x/scratchpad/a.mov", "/private/var/folders/ab/T/a.mov",
+                   "scratchpad/a.mov", "/tmp/a.mov", str(scratch / "a.mov")]
+        for out in refused:
+            marker.unlink(missing_ok=True)
+            code, output = render_alpha(out, durable, bin_dir)
+            created = (durable / out).parent.exists() if not out.startswith("/") else False
+            if code != 2 or marker.exists() or created:
+                print(f"NOT REFUSED render-alpha.sh {out} (exit {code})\n{output}", file=sys.stderr)
+                failures += 1
+            else:
+                print(f"refused     render-alpha.sh {out}")
+        cases = [("renders/a.mov", {}, "npx remotion render"),
+                 ("renders/b.mov", {"CAPCUTCTL_HEAVY_LOCK": str(durable / "heavy.lock")}, "lockf -k")]
+        for out, env, expected in cases:
+            marker.unlink(missing_ok=True)
+            code, output = render_alpha(out, durable, bin_dir, **env)
+            log = marker.read_text(encoding="utf-8") if marker.exists() else ""
+            if code != 0 or expected not in log or "--layer top" not in output:
+                print(f"BLOCKED     render-alpha.sh {out} (exit {code})\n{output}{log}", file=sys.stderr)
+                failures += 1
+            else:
+                print(f"rendered    render-alpha.sh {out}")
+    finally:
+        shutil.rmtree(durable, ignore_errors=True)
+        shutil.rmtree(scratch, ignore_errors=True)
+    return failures
+
+
 def main() -> int:
     # The unmodified repository must pass, or every case below proves nothing.
     code, output = run(ROOT)
@@ -293,7 +372,7 @@ def main() -> int:
         print(f"the repository itself does not validate:\n{output}", file=sys.stderr)
         return 1
 
-    failures = sync_main()
+    failures = sync_main() + kit_main()
     missed = 0
     for name, mutate in CASES:
         repo = sandbox()

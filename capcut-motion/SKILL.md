@@ -5,8 +5,8 @@ description: >
   creator's brand (read from their capcutctl profile, never from this skill), flexes by the
   style for its video type, and gets one visual idea of its own, checked against a log so
   consecutive videos never look the same. Covers overlay graphics and full-frame scenes
-  (`capcutctl mograph`: hook slams, openers, transitions, reveals, name cards), drawn B-roll the
-  CLI cannot draw (the Remotion kit, rendered with alpha and placed `--generated`), the shot list
+  (`capcutctl mograph`: hook slams, openers, transitions, reveals, name cards, drawn B-roll
+  inserts as overlay scenes; the Remotion kit only as a last resort), the shot list
   from the transcript, the taste rules and AI-slop tells, and the still-frame QA. Use for any
   graphic, motion, intro/outro, kinetic type or transition in a CapCut edit, for "make it look
   premium / like a motion designer did it", for a motion reel, or when a graphic reads as
@@ -56,7 +56,8 @@ capcutctl profile            # the merged profile: read brand, tokens.color, tok
 Read the signed-off transcript (`capcutctl scenes --project NAME --transcript`) and pick the
 profile style whose `use` fits the video. Say which one and why in one line; the creator can
 overrule. Put it in `edit.json` as `"style": "NAME"`. `build` and `gate --style` then hold the
-graphics to that style's `pace`. The rest of the style (`feel`, `lead`, `accent`, `camera`,
+graphics to that style's spacing (`pace.graphicEvery`), and only that: nothing enforces
+`pace.maxScenes`, so count it yourself. The rest of the style (`feel`, `lead`, `accent`, `camera`,
 `sound`) steers the beats you choose. When no style fits, pick the closest and say what does
 not fit. If the creator makes this kind of video often, offer to add a style to their profile.
 
@@ -93,7 +94,9 @@ the brand stays the same:
 ## 3. The shot list, then build
 
 1. **Shot list** ([shotlist.md](references/shotlist.md)): tag the beats, budget 3–6 graphic beats
-   (the style's `pace` sets the spacing, `maxScenes` caps the full-frame scenes), choose the
+   (the style's `pace` sets the spacing; `maxScenes` caps the full-frame scenes, counted by
+   hand: idea scenes and openers count, the house seam-wipe chapter transitions and the auto
+   follow ending do not), choose the
    slot, and build each beat **from the idea** using the archetypes in
    [scenes.md](references/scenes.md) as vocabulary. Add columns for the idea and the colour role
    each beat uses. **Show it to the creator before building.**
@@ -101,9 +104,14 @@ the brand stays the same:
    scenes rendered by `capcutctl mograph` in the profile's colours and font, declared in
    `edit.json` beside the style, then `capcutctl build` and `capcutctl gate`. When the idea needs
    a move the catalog lacks, extend the library ([native-authoring.md](references/native-authoring.md)).
-   Don't write a one-off.
-3. **Remotion for the rest** ([remotion.md](references/remotion.md)): collages of real frames, a
-   process climbing, captures built into two-ups. Sync the profile into the project first
+   Don't write a one-off. Renders are kept as `mograph/<id>-<fingerprint>`; `mograph rerender`
+   keeps the graphic's current timeline position, `sfx` and `allowUnsafe`. A `MOGRAPH_SAFE_ZONE`
+   refusal names a `suggestCenter`: use it as `params.center`. `MOGRAPH_CANVAS` means the draft's
+   canvas is not the profile's (a landscape draft).
+3. **Remotion only as a last resort** ([remotion.md](references/remotion.md)), and never when the
+   profile's `brand.avoid` names it. A drawn B-roll insert is a native scene first (fork the
+   nearest one with `presentation: "overlay"`). Remotion is for what the catalog truly cannot
+   express, such as a collage of real frames. Sync the profile into the project first
    (`kit/scripts/sync-profile.sh`) so the render and the native graphics share one brand.
 4. **Brand marks and the end card stay native** (`capcutctl logo`, `capcutctl endcard`).
 
@@ -176,7 +184,7 @@ ideas count toward the last-3 rule too.
 | `kit/examples/Terminal.tsx` | Block climb, as code |
 | `kit/scripts/sync-profile.sh` | The profile and its fonts into a Remotion project |
 | `kit/scripts/stills.sh` | Render the frames you will inspect |
-| `kit/scripts/render-alpha.sh` | ProRes 4444 with alpha, then the `capcutctl add --generated` line |
+| `kit/scripts/render-alpha.sh` | ProRes 4444 with alpha (refuses temp dirs and scratchpads), then the `capcutctl add --generated` lines: top-half under the face, full-frame `--layer top` |
 
 ## What this skill does not do
 

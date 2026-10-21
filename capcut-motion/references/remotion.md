@@ -1,9 +1,11 @@
-# Remotion — for what the native engine cannot draw
+# Remotion — a last resort, for what the native engine cannot draw
 
-`capcutctl mograph` covers overlay graphics and full-frame scenes ([native.md](native.md)). Use the
-Remotion kit (`../kit/`) for a drawn piece those cannot express: a collage of real frames, a
-process climbing, a big word pulled off the frame, a two-up built from captures. The result is
-rendered, then placed with `capcutctl add --generated`; the edit around it stays native.
+`capcutctl mograph` covers overlay graphics and full-frame scenes ([native.md](native.md)). A
+drawn B-roll insert is a native mograph scene first: fork the nearest scene with
+`presentation: "overlay"` ([native-authoring.md](native-authoring.md)). Use the Remotion kit
+(`../kit/`) only when the catalog truly cannot express the piece (a collage of real frames, say)
+**and** the profile's `brand.avoid` does not name Remotion. The result is rendered, then placed
+with `capcutctl add --generated`; the edit around it stays native.
 
 The kit has no brand of its own: `kit/scripts/sync-profile.sh` copies the creator's merged
 profile and font files into the project, and `kit/theme.ts` reads only that.
@@ -12,7 +14,8 @@ profile and font files into the project, and `kit/theme.ts` reads only that.
 
 | Piece | Tool |
 |---|---|
-| A talking-head video with drawn B-roll inserts (the normal case) | Remotion + this kit → `add --generated` → finish in CapCut |
+| A talking-head video with drawn B-roll inserts | A native mograph scene: fork the nearest one with `presentation: "overlay"` ([native-authoring.md](native-authoring.md)) |
+| A drawn piece the catalog truly cannot express, and `brand.avoid` does not name Remotion | Remotion + this kit → `add --generated` → finish in CapCut (last resort) |
 | A graphics-heavy promo with a few seconds of face | Diffusion Studio (`dapi mount` a TSX composition; MPL-2.0, `brew install --cask diffusionstudio/tap/editor`), render, then `add --generated` if it must end in CapCut |
 | A camera move on real footage | `capcutctl keyframe` / `punch` / `zoom` — native, eased, editable in CapCut; not a render |
 | A brand mark or a text line that earned the beat | `capcutctl logo` or `capcutctl motion` — default orbit-glow (Blur underlay plus the recipe). Not a render, and not a word dropped on a face that did not ask for it |
@@ -44,19 +47,29 @@ can still touch it. Render only what CapCut cannot draw.
    at every frame against the tells in [taste.md](taste.md). A wrong still is cheaper than a wrong render,
    and a still is exact: the kit has no wall clock and no `Math.random`.
 6. **Render** with `kit/scripts/render-alpha.sh` (`--opaque` when the graphic fills its slot,
-   alpha when it lies over footage). Keep the output somewhere durable; `add` refuses `/tmp`.
+   alpha when it lies over footage). Keep the output somewhere durable: `add` refuses temp dirs
+   and agent scratchpads, and the script refuses them before it renders. Set
+   `CAPCUTCTL_HEAVY_LOCK` to the shared heavy-job lock file to serialise the render with others.
 7. **Place and inspect the composite**, not the movie:
 
 ```bash
+# top-half graphic: under the face, then `layout auto` makes the split
 capcutctl add --project NAME --media /path/renders/SHOT.mov --at 16.3 --dur 5.8 \
   --track broll --volume 0 --generated --desc SHOT
+# full-frame alpha graphic: over the face, below the mograph and caption lanes
+capcutctl add --project NAME --media /path/renders/SHOT.mov --at 16.3 --dur 5.8 \
+  --track gfx --layer top --volume 0 --generated --desc SHOT
 capcutctl qa --project NAME --times 16.3,19,22
 ```
 
    `--generated` records that there is no editable original to relink; without it the origin
    contract refuses the file. `qa` sees the composited frame CapCut will show, keyframes
-   resolved, which the Remotion still cannot. Then `capcutctl layout auto` so the face shares
-   the frame wherever a graphic covers it.
+   resolved, which the Remotion still cannot.
+
+   A new `--track` lands under the face by default. Reusing a track on the wrong side of the
+   face refuses with `TRACK_PLACEMENT`. An `add` result with `underPrincipal: true` means a
+   full-frame face hides the clip, so run `capcutctl layout auto` to open a window onto it. Do
+   not run `layout auto` over a full-frame alpha graphic on `--layer top`.
 
 8. **Variety, then sound.** List the archetypes in order; no two adjacent the same, none three
    times. Sound belongs to `polish`, not to the render: the graphic's picture changes are the

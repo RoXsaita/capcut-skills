@@ -57,7 +57,8 @@ transitions. Every scene declares `handoff: { in, out }`, and a chain matches th
 - Type is big and short: 1–3 words per line, and captions of five words at most. One family
   (the profile face), plus mono for technical micro-type.
 - At most the style's `pace.maxScenes` full-frame scenes in a video (never more than three).
-  A scene never covers the proof on screen.
+  Nothing enforces it, so count by hand: idea scenes and openers count; the house seam-wipe
+  chapter transitions and the auto follow ending do not. A scene never covers the proof on screen.
 
 ## 7. Sound is picture
 

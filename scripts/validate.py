@@ -53,6 +53,8 @@ CONTRADICTIONS = [
     (r"`cta-card`\s*\+\s*endcard", "the house CTA is full face + the endcard keyword; cta-card is opt-in only"),
     (r"full captions are not the house style|keyword supers, not captions",
      "word captions are required (one style); keyword supers are emphasis on top"),
+    (r"remotion[^|\n]*normal case|normal case[^|\n]*remotion|remotion for the rest",
+     "drawn B-roll is native mograph first; Remotion is a last resort"),
 ]
 CONTRACT = ROOT / ".capcut" / "cli-contract.json"
 COMPAT = ROOT / ".capcut" / "cli-compatibility.json"
