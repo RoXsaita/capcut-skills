@@ -66,9 +66,11 @@ longer because each panel is smaller.
 
 ### 9:16 safe area
 
-At 1080×1920 keep readable content inside `x 64–900`, `y 200–1520`. The right 180px is the
-platform action rail; the bottom 400px is the caption reserve. Graphics may cross these; text may
-not.
+The platform UI zones come from the profile, not from this page: `safeZones.forbidden` in
+`capcutctl profile`, `SAFE.forbidden` in `kit/theme.ts`. The shipped defaults at 1080×1920, as an
+example only: the top bar to y 220, the bottom UI from y 1500, the right action rail at x ≥ 940
+for y 700–1600. Keep readable content outside every forbidden zone and 64px in from the frame
+edge. Graphics may cross these; text may not.
 
 For the house split-screen (1080×960 top half) the safe area is the whole slot minus the 64
 margin; the seam bar is drawn by `capcutctl layout`, not by the graphic.

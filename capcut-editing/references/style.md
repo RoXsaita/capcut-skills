@@ -132,8 +132,8 @@ offset; do not quantize it away.
 ## Presets
 
 `Preset 3` is a **branded endcard**, 7.43s, with all content parked at the end of the timeline
-(68.83→76.27s of a 76.27s project). Assets: `suheilai-rect-indigo-1080x1920 (2).png` (indigo
-frame), `suheilai-circle-white-1080x1920.png`, `circle-1080x1080.gif`, plus two clips.
+(68.83→76.27s of a 76.27s project). Assets: a full-frame 1080×1920 brand-colour frame PNG, a
+full-frame white circle-ring PNG, a 1080×1080 animated circle GIF, plus two clips.
 
 Use `capcutctl new` to clone the template and park its clips after the content.
 `endcard` / `wrap` place the actual CTA over the talking head near `contentEnd`; parked

@@ -63,7 +63,7 @@ or `material.patch` specs for this.
 
 **`--dry-run` is a guarantee about transactional commands only:** resolve, validate, report what
 would change, write nothing. The exact list is `capcutctl contract | jq -r '.dryRun.commands[]'`.
-`snapshot`, `init-spec --output`, `harvest --out` and `review` write files and do not take it.
+`snapshot`, `capcutctl init-spec --output`, `harvest --out` and `review` write files and do not take it.
 
 `capcutctl history` / `restore` / `diff --snapshot` recover and compare. `--snapshot` takes a
 NAME or a LABEL: a label picks the newest `<ts>-LABEL`, as in
@@ -116,7 +116,7 @@ decision the editor can no longer take back:
 imports its graphics); `--derived-from ORIGINAL` records the source when pre-processing was
 unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older projects, and
 `MEDIA_NOT_LOCALIZED` when media sits outside the sandboxed draft ("Link media") — fix with
-`localize`.
+`capcutctl localize --project NAME`.
 
 ## Invariants that bite
 
@@ -153,6 +153,15 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 
 ## Behaviour worth knowing before you reach for a verb
 
+- **Clip verbs** — `capcutctl shift` moves a clip in time, `capcutctl trim` changes its source
+  window, `capcutctl split` cuts it in two, `capcutctl remove` deletes it; `capcutctl volume`,
+  `capcutctl fade` (audio) and `capcutctl animate` (CapCut's intro/outro) set the rest.
+  `capcutctl timeline --project NAME` draws the stacked tracks. `capcutctl rm` moves a whole
+  project to the recycle bin: only when the creator asks.
+- **Single passes** — `capcutctl zoom --stress` pushes the face on stressed words;
+  `capcutctl wrap --plan` previews logos from what is said plus the endcard (`capcutctl brands`
+  lists the known brands and their spoken aliases); `capcutctl screen-motion --regions FILE`
+  adds sparse eased zooms and connected pans across a screen recording.
 - **`cut`** — boundaries come from the acoustic index (`onset_after`, `trough`), never Whisper word
   times (contiguous-filled, off by up to ~0.7s). Refuses to build while lint findings remain.
 - **`layout auto`** — moving picture under the face: split-screen; nothing: full face. Reproduced a
@@ -168,9 +177,10 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
 - **`polish`** — rebuilds its own transitions on the principal track and keeps hand-placed ones,
   slicing so each transition has a clip on both sides (CapCut drops one that does not). Sound leads
   picture by ~0.14s. `--motivated` = picture changes only.
-- **`pace` / `ramp`** — speed is arithmetic; never touches the face; never writes `curve_speed`.
-  `ramp --reach-back S` lets the wait start before the in-point; `REACH_LIMITED` names the span it
-  needs, `ANIMATED` refuses a keyframed clip.
+- **`pace` / `ramp`** — `capcutctl pace --project NAME` compresses waiting B-roll; speed is
+  arithmetic; never touches the face; never writes `curve_speed`. `ramp --reach-back S` lets the
+  wait start before the in-point; `REACH_LIMITED` names the span it needs, `ANIMATED` refuses a
+  keyframed clip.
 - **`trim`** — the principal track refuses a length change (`PRINCIPAL_TRACK`); use `cut --keep`
   or `trim --retime`. **`split`** (new) cuts one clip in two; refusals are `SPLIT_*`.
 - **`add`** — refuses audio (`ADD_AUDIO`). `--layer top|under-face` places a new track;
@@ -180,9 +190,10 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
   the source window (`SOURCE_BEFORE_START`).
 - **`punch`** — `--word` is a timing source like `--at` (`PUNCH_TIMING_CONFLICT`,
   `PUNCH_NO_TRANSCRIPT`, `PUNCH_NO_TIME`).
-- **`grade`** — preserves source colour by default; corrections are explicit (`--set`) and
-  approximate; compare in CapCut.
-- **`music` / `loudness`** — the bed moves, speech and picture never do; loudness limits peaks and
+- **`grade`** — start with `capcutctl grade --project NAME --measure`; it preserves source colour
+  by default; corrections are explicit (`--set`) and approximate; compare in CapCut.
+- **`music` / `loudness`** — `capcutctl music --file` or `--prompt` lays the bed and `--duck` dips
+  it under speech; the bed moves, speech and picture never do; loudness limits peaks and
   refuses an unsafe mix rather than clipping; neither emulates CapCut's native DSP. `loudness`
   matches speech; SFX keep their placed level (never raised; name one with `--segments`), parked
   clips are skipped, volume keys scale, duck keyframes no longer block `--measure`, and

@@ -17,11 +17,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CASES: list[tuple[str, str]] = []
+# Mutations the validator must still accept: a check that cries wolf gets switched off.
+PASS_CASES: list[tuple[str, object]] = []
 
 
 def case(name: str):
     def register(fn):
         CASES.append((name, fn))
+        return fn
+    return register
+
+
+def pass_case(name: str):
+    def register(fn):
+        PASS_CASES.append((name, fn))
         return fn
     return register
 
@@ -34,10 +43,26 @@ def sandbox() -> Path:
     return temp / "repo"
 
 
-def run(repo: Path) -> tuple[int, str]:
-    done = subprocess.run([sys.executable, "scripts/validate.py"], cwd=repo,
-                          capture_output=True, text=True, timeout=120)
+def run(repo: Path, *args: str, **env: str) -> tuple[int, str]:
+    # A developer's own CAPCUTCTL_CLI or strict setting must not decide a case.
+    environ = {key: value for key, value in os.environ.items()
+               if key not in ("CAPCUTCTL_CLI", "CAPCUT_STRICT_DRIFT")}
+    done = subprocess.run([sys.executable, "scripts/validate.py", *args], cwd=repo,
+                          env={**environ, **env}, capture_output=True, text=True, timeout=120)
     return done.returncode, done.stdout + done.stderr
+
+
+def fence(repo: Path, code: str) -> None:
+    with (repo / "README.md").open("a", encoding="utf-8") as handle:
+        handle.write(f"\n```bash\n{code}\n```\n")
+
+
+def add_command(repo: Path, name: str) -> None:
+    """A contract command with no summary or example, so only the coverage check can object."""
+    path = repo / ".capcut" / "cli-contract.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["commands"][name] = {"group": "dev", "options": [], "transactional": False}
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def edit(path: Path, old: str, new: str) -> None:
@@ -190,6 +215,171 @@ def _(repo: Path) -> str:
     with path.open("a", encoding="utf-8") as handle:
         handle.write("\n3. **Remotion for the rest**: collages, a process climbing.\n")
     return "Remotion is a last resort"
+
+
+@case("$( capcutctl … ) assigned to a variable")
+def _(repo: Path) -> str:
+    fence(repo, "x=$(capcutctl bogus)")
+    return "`capcutctl bogus` is not a command"
+
+
+@case("a bad subcommand inside a quoted $( … )")
+def _(repo: Path) -> str:
+    fence(repo, 'tail "$(capcutctl profile wher)/motion-log.jsonl"')
+    return "`capcutctl profile wher` is not a subcommand of profile"
+
+
+@case("a backtick command substitution")
+def _(repo: Path) -> str:
+    fence(repo, "x=`capcutctl bogus`")
+    return "`capcutctl bogus` is not a command"
+
+
+@case("a kit shell script with a flag the CLI does not have")
+def _(repo: Path) -> str:
+    script = repo / "capcut-motion" / "kit" / "scripts" / "extra.sh"
+    script.write_text("#!/usr/bin/env bash\n# capcutctl add --fine-in-a-comment\n"
+                      "capcutctl add --project NAME \\\n  --bogus\n", encoding="utf-8")
+    return "`capcutctl add` has no --bogus"
+
+
+@case("a kit .tsx that draws a command the CLI does not have")
+def _(repo: Path) -> str:
+    path = repo / "capcut-motion" / "kit" / "examples" / "Extra.tsx"
+    path.write_text("export const LINES = [{cmd: 'capcutctl bogus --now'}];\n", encoding="utf-8")
+    return "`capcutctl bogus` is not a command"
+
+
+@case("a contract command no skill names")
+def _(repo: Path) -> str:
+    add_command(repo, "frobnicate")
+    return "`capcutctl frobnicate` is in the CLI contract but no SKILL.md"
+
+
+@case("an allowlisted command the contract no longer has")
+def _(repo: Path) -> str:
+    edit(repo / "scripts" / "validate.py", 'UNMENTIONED_OK = {\n',
+         'UNMENTIONED_OK = {\n    "gone": "removed upstream",\n')
+    return "UNMENTIONED_OK lists `gone`"
+
+
+@case("a retired skill name")
+def _(repo: Path) -> str:
+    with (repo / "README.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nLoad capcut-editing-talking-head first.\n")
+    return "names the retired skill 'capcut-editing-talking-head'"
+
+
+@case("a reference without an H1")
+def _(repo: Path) -> str:
+    path = repo / "capcut-editing" / "references" / "pitfalls.md"
+    path.write_text("\n\nPitfalls, no heading.\n" + path.read_text(encoding="utf-8"), encoding="utf-8")
+    return "the first line is not a `# ` heading"
+
+
+@case("a hard-coded brand colour in a skill")
+def _(repo: Path) -> str:
+    with (repo / "capcut-motion" / "SKILL.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nUse the indigo `#4040FE` for the card.\n")
+    return "hard-codes the colour #4040FE"
+
+
+@case("the creator handle in a reference")
+def _(repo: Path) -> str:
+    with (repo / "capcut-editing" / "references" / "style.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nThe frame is `suheilai-rect.png`.\n")
+    return "contains the creator handle"
+
+
+@case("a personal home path in a skill")
+def _(repo: Path) -> str:
+    with (repo / "capcut-cli" / "SKILL.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nFonts live in /Users/someone/fonts.\n")
+    return "contains a personal home path"
+
+
+@pass_case("a $( … ) whose quoted argument holds a )")
+def _(repo: Path) -> None:
+    fence(repo, """tail "$(capcutctl profile where | node -pe 'JSON.parse(require("fs").readFileSync(0)).userDir')/x" """)
+
+
+@pass_case("an allowlisted command no skill names")
+def _(repo: Path) -> None:
+    add_command(repo, "frobnicate")
+    edit(repo / "scripts" / "validate.py", 'UNMENTIONED_OK = {\n',
+         'UNMENTIONED_OK = {\n    "frobnicate": "test",\n')
+
+
+@pass_case("the retired names in CONTRIBUTING.md, and a neutral placeholder colour")
+def _(repo: Path) -> None:
+    with (repo / "CONTRIBUTING.md").open("a", encoding="utf-8") as handle:
+        handle.write("\ncapcut-editing-screen-recording was merged into capcut-editing.\n")
+    with (repo / "capcut-motion" / "SKILL.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nFor example `#FFB020` as the accent.\n")
+
+
+# ------------------------------------------------------------ validate.py vs a live CLI
+
+def fake_cli(where: Path, extra: str | None) -> Path:
+    """A CLI clone whose `contract` prints the vendored one, plus one command if asked."""
+    cli = where / "cli"
+    (cli / "bin").mkdir(parents=True)
+    data = json.loads((ROOT / ".capcut" / "cli-contract.json").read_text(encoding="utf-8"))
+    if extra:
+        data["commands"][extra] = {"group": "dev", "summary": "New.", "example": f"capcutctl {extra}",
+                                   "options": ["--project"], "transactional": False}
+    (cli / "bin" / "contract.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    shutil.copy(ROOT / "capcut-cli" / "reference.md", cli / "bin" / "reference.md")
+    (cli / "bin" / "capcutctl.mjs").write_text(
+        "import fs from 'node:fs';\n"
+        "const file = process.argv.includes('--markdown') ? 'reference.md' : 'contract.json';\n"
+        "process.stdout.write(fs.readFileSync(new URL(`./${file}`, import.meta.url)));\n",
+        encoding="utf-8")
+    return cli
+
+
+def live_main() -> int:
+    if not shutil.which("node"):
+        print("skipped     live CLI cases (node is required)")
+        return 0
+    failures = 0
+    scratch = Path(tempfile.mkdtemp(prefix="skills-live-"))
+    try:
+        drifted = str(fake_cli(scratch / "drifted", "frobnicate"))
+        same = str(fake_cli(scratch / "same", None))
+        cases = [
+            ("a live CLI with an extra command warns", [], {"CAPCUTCTL_CLI": drifted}, 0,
+             "commands added: frobnicate"),
+            ("--strict fails on it", ["--strict"], {"CAPCUTCTL_CLI": drifted}, 1,
+             "commands added: frobnicate"),
+            ("CAPCUT_STRICT_DRIFT=1 fails on it", [], {"CAPCUTCTL_CLI": drifted, "CAPCUT_STRICT_DRIFT": "1"},
+             1, "commands added: frobnicate"),
+            ("a matching live CLI says so", ["--strict"], {"CAPCUTCTL_CLI": same}, 0,
+             "live CLI ($CAPCUTCTL_CLI) matches"),
+            ("a CAPCUTCTL_CLI with no bin/capcutctl.mjs is drift", ["--strict"],
+             {"CAPCUTCTL_CLI": str(scratch)}, 1, "has no bin/capcutctl.mjs"),
+        ]
+        for name, args, env, want, expected in cases:
+            code, output = run(ROOT, *args, **env)
+            if code != want or expected not in output:
+                print(f"WRONG       {name} (exit {code}, wanted {want})\n{output}", file=sys.stderr)
+                failures += 1
+            else:
+                print(f"live        {name}")
+        # A sandbox has no ../cli: it must say what it did not do, not claim parity.
+        repo = sandbox()
+        try:
+            code, output = run(repo)
+            if code != 0 or "live CLI not checked" not in output:
+                print(f"WRONG       no CLI found says 'live CLI not checked'\n{output}", file=sys.stderr)
+                failures += 1
+            else:
+                print("live        no CLI found says 'live CLI not checked'")
+        finally:
+            shutil.rmtree(repo.parent, ignore_errors=True)
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+    return failures
 
 
 # ------------------------------------------------------------------ scripts/sync-cli.sh
@@ -365,6 +555,43 @@ def kit_main() -> int:
     return failures
 
 
+# ----------------------------------------------- capcut-motion/kit/scripts/sync-profile.sh
+
+SYNC_PROFILE = ROOT / "capcut-motion" / "kit" / "scripts" / "sync-profile.sh"
+
+
+def sync_profile_main() -> int:
+    """A profile naming `../../secret.txt` as a font must not copy it out of the fonts folder."""
+    if not shutil.which("node"):
+        print("skipped     sync-profile.sh cases (node is required)")
+        return 0
+    scratch = Path(tempfile.mkdtemp(prefix="skills-sync-profile-"))
+    try:
+        (scratch / "bin").mkdir()
+        (scratch / "mograph" / "fonts").mkdir(parents=True)
+        (scratch / "mograph" / "fonts" / "ok.woff2").write_text("font", encoding="utf-8")
+        (scratch / "secret.txt").write_text("secret", encoding="utf-8")
+        profile = {"tokens": {"font": {"files": {"700": ["ok.woff2", "../../secret.txt"]}}}}
+        stub = scratch / "bin" / "capcutctl"
+        stub.write_text(f"#!/usr/bin/env bash\necho '{json.dumps(profile)}'\n", encoding="utf-8")
+        stub.chmod(0o755)
+        project = scratch / "proj"
+        environ = {**os.environ, "PATH": f"{scratch / 'bin'}{os.pathsep}{os.environ['PATH']}"}
+        done = subprocess.run(["bash", str(SYNC_PROFILE), str(project)], env=environ,
+                              capture_output=True, text=True, timeout=60)
+        copied = sorted(path.name for path in (project / "public" / "fonts").iterdir()) \
+            if (project / "public" / "fonts").exists() else []
+        if done.returncode != 0 or copied != ["ok.woff2"] \
+                or "skipped unsafe font name" not in done.stderr:
+            print(f"NOT GUARDED sync-profile.sh copied {copied} (exit {done.returncode})\n"
+                  f"{done.stdout}{done.stderr}", file=sys.stderr)
+            return 1
+        print("guarded     sync-profile.sh skips ../../secret.txt and copies ok.woff2")
+        return 0
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+
 def main() -> int:
     # The unmodified repository must pass, or every case below proves nothing.
     code, output = run(ROOT)
@@ -372,7 +599,19 @@ def main() -> int:
         print(f"the repository itself does not validate:\n{output}", file=sys.stderr)
         return 1
 
-    failures = sync_main() + kit_main()
+    failures = sync_main() + kit_main() + sync_profile_main() + live_main()
+    for name, mutate in PASS_CASES:
+        repo = sandbox()
+        try:
+            mutate(repo)
+            code, output = run(repo)
+            if code != 0:
+                print(f"FALSE ALARM {name}\n{output}", file=sys.stderr)
+                failures += 1
+            else:
+                print(f"accepted    {name}")
+        finally:
+            shutil.rmtree(repo.parent, ignore_errors=True)
     missed = 0
     for name, mutate in CASES:
         repo = sandbox()
