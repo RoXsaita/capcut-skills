@@ -163,10 +163,12 @@ Consequences worth remembering:
 
 ## Starting a video
 
-`capcutctl new --project NAME --media FILE --scenes 0:6@122.4,6:12,12:18` clones
+`capcutctl new --project NAME --media FILE --scenes 0:6@122.4,6:12,12:18` duplicates
 **Preset 3**, parks its template clips 30 seconds after the new scenes, registers the draft
 so CapCut lists it, and prints `contentTrack` — the track your scenes landed on, which
-the layout commands need. `--blank` for an empty timeline.
+the layout commands need. `--blank` for an empty timeline. `--from SOURCE` copies an existing
+edit instead, with its paths rewritten (see capcut-cli). Files of 1 MB or more are copied as
+APFS clones on macOS, as in `localize`, `stage` and `variant`.
 
 New scenes never inherit the template's mask/effect/animation materials. Preset 3's
 backdrop segment carries a Blur; cloning it wholesale blurs every scene in the project.

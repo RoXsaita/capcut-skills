@@ -41,7 +41,10 @@ Concrete traps already hit on this project. Read before starting.
 - **Doing the whole video at once.** The user explicitly asked for one section at a time, checked
   end-to-end. Cut the talking head, get it signed off, *then* the shot list and `build`. `build`
   re-anchors graphics to their words after a recut, but reviewed B-roll shots are timed to the
-  cut they were matched against: recheck `shots.json` after any recut.
+  cut they were matched against: recheck `shots.json` after any recut. `match` cuts a shot back
+  to the next one's start (`clamped-to-next`) or turns it into a flag (`overlaps-next`), and
+  `match --apply` refuses overlapping screen shots on one track with `CLIP_OVERLAP`: shorten or
+  drop one in `shots.json`.
 - **Speeding the talking head.** `clip.trim` that lengthens the source window and leaves the
   target the same is a speed ramp. Used on `a previous speech-recovery edit` to "save" first words
   the energy snap had dropped — the face played at 1.02–1.44×. Faces stay 1×. To keep a word,
@@ -52,6 +55,11 @@ Concrete traps already hit on this project. Read before starting.
 - **Hand-placed sounds stay put on a recut.** `cut.recut` keeps hand-placed SFX (a
   `capcutctl sfx` cue, for example) at their old timeline time. Read `anchors.unownedAudio` in its
   result and re-place each one against the new cut.
+- **A ripple can drop a sound.** `ripple` splits a face or voice clip that spans the range (the
+  tail gets a new id) and moves one-shot SFX rather than cutting them: to the previous sound's
+  end, onto a `<lane>:ripple` track, or, when neither fits, out of the timeline. Read `dropped` in
+  its result after every ripple and re-place what it lists. `ripple` and `remove` also prune the
+  removed segment's main material once nothing else uses it.
 - **Cold open.** Handing over 5s+ of full-face with no screen. The author recut it to split-screen
   proof from t=0. `finish` flags `cold-open`. The first picture is the result, sharing the
   frame. Full-face comes after.
@@ -69,8 +77,14 @@ Concrete traps already hit on this project. Read before starting.
 - **Loose OCR keywords silently over-match.** `wave` returned 1006 seconds because the *prompt
   text* on screen said "wave progression". Always sanity-check span length — a 1000s match for a
   transient event is a bug, not a find.
-- **OCR TSV-derived ROI is unreliable.** Multi-word keys never match single-word TSV tokens; after
-  loosening, most results pinned to the clamp value. Use it as a hint; confirm visually.
+- **OCR and transcript matching is word-based.** `match` scores each spoken word against the
+  words in the OCR boxes, not a substring of the whole line, and Levantine fillers and particles
+  are stopwords (`يعني`, `هلق`, `هيك`, `شو`). A sentence with an Arabic action verb (`اضغط`,
+  `كبس`, `افتح`, `اكتب`, `اختار`, `نزل`) or an English one (click, open, type) is an action shot.
+  A box is still a hint for the framing: confirm it on the frame.
+- **Grade samples can disagree.** A `grade --plan` row carries `spread` {mid, warmth} and a
+  `warning` when mid > 25 or warmth > 12: one grade cannot fit that source. Re-sample with more
+  `--samples` before `--apply`, and check its darkest and brightest shots.
 - **240px frames are too small to OCR.** Use ~810px wide.
 - **Whisper can hallucinate a trailing Arabic subtitle credit.** Check the source audio and
   remove it only when it was not actually spoken.

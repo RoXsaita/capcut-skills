@@ -92,6 +92,12 @@ including ones the edit added. Anything else that changed is listed under `scope
 both values, and the command exits 1. Track index shifts from an inserted overlay track are not
 findings.
 
+Each diff segment row carries `clip`, `keyframes` (a short hash of the keys), `mask`, `refs`
+(speed, animation, transition, mask and canvas extras) and, on caption rows, `text`. So a reframe,
+a keyframe change, a re-speed or a re-caption outside the allowed ids is reported even when the
+clip did not move: `scope.ok: false`, exit 1. When that change was intended, add its id to
+`--allow`. Never treat exit 1 as noise.
+
 ## `notes` is the creative log
 
 Record what the user rejected and why, what landed, and the decisions a later round must not undo.

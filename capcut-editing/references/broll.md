@@ -23,6 +23,13 @@ capcutctl qa --project NAME --times 18.6 --expect "18.6=Publish"        # the co
 `match` is a first pass, not proof. `build` applies the reviewed `shots.json` once, then
 `layout auto`; use `punch`, `ramp` and `pace` for the per-shot timing it cannot infer.
 
+`match` scores spoken words against OCR words (word-based; Levantine fillers are stopwords), and
+an Arabic or English action verb (`اضغط`, `افتح`, click, open…) marks the sentence as an action.
+A shot that would run into the next one is cut back to its start (reason `clamped-to-next`), or,
+when too little would stay on screen, becomes a flag (reason `overlaps-next`). `match --apply`
+refuses overlapping screen shots on one track with `CLIP_OVERLAP`: shorten or drop one in
+`shots.json`, then apply again.
+
 ## Build each shot from evidence
 
 Start from a reviewed `capcutctl match --project NAME --screen FILE` shot list when one
@@ -256,9 +263,8 @@ good way to stretch a narrow window without drifting.
 Phone screen recordings are often taller than 9:16 (e.g. 1080×2652 vs a 1080×1920 canvas), so
 every shot needs a vertical crop decision, and **the right crop differs per shot**.
 
-OCR TSV output (`tesseract f.jpg stdout tsv`) gives word boxes and can suggest a ROI, but in
-practice it was **unreliable** — loose token matching pushed most results to the clamp. It is a
-hint, not an answer.
+OCR word boxes (`find --boxes`) can suggest a ROI. A box is a hint, not an answer: confirm the
+crop on the frame.
 
 **What actually works:** render the candidate crops and look at a contact sheet.
 

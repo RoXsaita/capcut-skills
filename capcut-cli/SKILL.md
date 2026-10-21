@@ -54,7 +54,9 @@ and overwrites you on its next autosave. Two ways through:
   CapCut's folder, and every later command edits the copy. Only
   `capcutctl stage commit --project NAME` needs CapCut closed. `STAGE_CONFLICT` (exit 5) means
   the creator saved in CapCut meanwhile: never force it. `export` refuses while a stage is
-  active (`STAGE_ACTIVE`); `capcutctl stage discard --project NAME` drops the copy.
+  active (`STAGE_ACTIVE`); `capcutctl stage discard --project NAME` drops the copy. `stage commit`
+  carries the stage's snapshots into live history and reports `historyCarried` (their names); an
+  `{error, stage}` there means they did not carry and the stage folder was kept.
 
 **After any CapCut open or save**, before the next write, run
 `capcutctl doctor --project NAME --fix --dry-run`, then `--fix`. It restores the `capcutctl_*`
@@ -65,7 +67,10 @@ or `material.patch` specs for this.
 would change, write nothing. The exact list is `capcutctl contract | jq -r '.dryRun.commands[]'`.
 `snapshot`, `capcutctl init-spec --output`, `harvest --out` and `review` write files and do not take it.
 
-`capcutctl history` / `restore` / `diff --snapshot` recover and compare. `--snapshot` takes a
+`capcutctl history` / `restore` / `diff --snapshot` recover and compare. A diff segment row
+carries `clip`, `keyframes` (short hash), `mask`, `refs` (speed, animation, transition, mask,
+canvas) and `text` on captions, so `--allow` also catches out-of-scope reframes, keys, re-speeds
+and re-captions (`scope.ok: false`, exit 1). `--snapshot` takes a
 NAME or a LABEL: a label picks the newest `<ts>-LABEL`, as in
 `capcutctl restore --project NAME --snapshot pre-build`; a timestamp fragment no longer matches.
 An unknown one is `SNAPSHOT_NOT_FOUND` (exit 2) listing the 5 newest; `restore` reports
@@ -85,8 +90,9 @@ not the first resort.
 - `--key=value` works everywhere; a boolean given `=value` is `FLAG_TAKES_NO_VALUE`, a repeated
   flag `DUPLICATE_FLAG`, a non-number `BAD_NUMBER` (`0,5`: write `0.5`). `--plan` never writes:
   on every command that takes it, it is a dry run.
-- `UNKNOWN_COMMAND` / `UNKNOWN_OPTION` name the nearest match. `capcutctl <cmd> --help` prints
-  only that command's slice.
+- `UNKNOWN_COMMAND` / `UNKNOWN_OPTION` are a short refusal naming the nearest match ("Did you
+  mean"). `capcutctl <cmd> --help` prints only that command's slice. `notes` accepts `--decision`
+  for `--decide`, and `--outstanding` or `--add` for `--todo`. `preflight` ignores `--project`.
 
 ## Shell
 
@@ -215,18 +221,41 @@ unavoidable. `doctor` reports `MEDIA_PREFRAMED` / `MEDIA_ORIGIN_LOST` on older p
   wait start before the in-point; `REACH_LIMITED` names the span it needs, `ANIMATED` refuses a
   keyframed clip.
 - **`trim`** — the principal track refuses a length change (`PRINCIPAL_TRACK`); use `cut --keep`
-  or `trim --retime`. **`split`** (new) cuts one clip in two; refusals are `SPLIT_*`.
-- **`add`** — refuses audio (`ADD_AUDIO`). `--layer top|under-face` places a new track;
+  or `trim --retime`.
+- **`split`** — cuts one clip in two. The left half keeps the id; the right id is deterministic
+  from (id, T), and the output names `leftId` / `rightId`. `--at` snaps to the frame grid; on an
+  existing boundary it changes nothing (`existing: true`). Refusals (exit 2): `SPLIT_EDGE` (within
+  a frame of an edge), `SPLIT_OUTSIDE`, `SPLIT_KEYFRAMED` (`keyframe --clear`, split, re-add),
+  `SPLIT_ANIMATED` (a combo, or an intro/outro longer than its half), `SPLIT_EXISTS`. Fade-in and
+  intro stay left; fade-out, outro and the transition move right.
+- **`ripple`** — output has `split`, `relaned` and `dropped`. A video or voice clip spanning the
+  range is split: the head keeps its id, the tail gets a new id seeded from the doc id and the
+  range. Music beds (track or desc matching music/bed) and text lose the range from their tail. A
+  one-shot SFX that would stack moves to the previous sound's end, or to a new `<lane>:ripple`
+  track, or is dropped and listed in `dropped`: check `dropped` after every ripple. `ripple` and
+  `remove` (`segment.remove`) prune the removed segment's main material once nothing uses it.
+- **`new --from SOURCE`** — refuses a source with an active stage (`STAGE_ACTIVE`, exit 2) and
+  makes a self-contained copy, every baked path rewritten to it. From `.capcutctl` it carries only
+  `media-map.json`, `meta-ledger.json`, `rl2/`, `.video-index/` and `alpha-cache.json`: no
+  history, `build.json`, reviews or verify state. Without `--scenes` it inherits `created.json`
+  (`contentEnd`, `contentTrack`, `preserved`) with `template` set to the source's name.
+  `localize`, `stage`, `variant` and `new` copy files of 1 MB or more as APFS clones on macOS.
+- **`add`** — works on a fresh `new --blank`; refuses audio (`ADD_AUDIO`). `--layer top|under-face` places a new track;
   `TRACK_PLACEMENT` refuses a reused track on the other side. When the hint says `underPrincipal`,
   run `capcutctl layout auto`.
 - **`replace-media`** — `--all` relinks every clip sharing the material; `--derived-offset` shifts
   the source window (`SOURCE_BEFORE_START`).
 - **`punch`** — `--word` is a timing source like `--at` (`PUNCH_TIMING_CONFLICT`,
-  `PUNCH_NO_TRANSCRIPT`, `PUNCH_NO_TIME`).
+  `PUNCH_NO_TRANSCRIPT`, `PUNCH_NO_TIME`). On a split-screen half it keeps its focus inside the
+  visible band.
 - **`keyframe`** — `--clear` removes the camera keys (scale, position and `KFTypeRotation`) and
-  lists every property it cleared in `cleared`.
+  lists every property it cleared in `cleared`. `--focus` on a split mask: an overshoot of a pixel
+  or two past the split row is clamped and reported in `note`; a real crossing refuses with
+  `FOCUS_MASKED`, whose details name the split `row` and the visible band (`visibleSource`).
 - **`grade`** — start with `capcutctl grade --project NAME --measure`; it preserves source colour
-  by default; corrections are explicit (`--set`) and approximate; compare in CapCut.
+  by default; corrections are explicit (`--set`) and approximate; compare in CapCut. A row whose
+  samples disagree carries `spread` {mid, warmth} and a `warning` (mid > 25 or warmth > 12):
+  re-sample before `--apply`.
 - **`music` / `loudness`** — `capcutctl music --file` or `--prompt` lays the bed and `--duck` dips
   it under speech; the bed moves, speech and picture never do; loudness limits peaks and
   refuses an unsafe mix rather than clipping; neither emulates CapCut's native DSP. `loudness`

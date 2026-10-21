@@ -361,7 +361,9 @@ then the same without `--dry-run`. Never hand-duplicate a project.
 
 **Revisions.** For a note like "change only X", snapshot, make the change, then prove its scope
 before saying it is done: `capcutctl diff --project NAME --snapshot LABEL --allow SEGMENT-ID,track:NAME`.
-It exits 1 and names every change outside that scope. Record rejections in `notes` as they come.
+It exits 1 and names every change outside that scope, including a reframe, keyframe, speed or
+caption change on a clip that did not move. An intended change goes into `--allow`; never treat
+exit 1 as noise. Record rejections in `notes` as they come.
 After CapCut has opened or saved the draft, read [pitfalls.md](references/pitfalls.md#after-capcut-has-opened-or-saved-the-draft)
 before the next write: keep the creator's edits, repair what the save did.
 
