@@ -67,6 +67,29 @@ transitions. Every scene declares `handoff: { in, out }`, and a chain matches th
 - Cues come from the scene's `cues()` on the same clock as the picture, and are synthesised,
   so they cannot drift or go missing.
 
+## 8. Premium screens
+
+From a reference reel that looks premium on plain cuts (26.7 s, 18 shots, measured 14 Nov 2026).
+Its premium feel comes mostly from what is on screen, so these rules start there.
+
+- Show each screen in its finished, best state. An empty or default UI is never a shot.
+- Full-content shots: the screen at 92–96% of the frame width on a plain plate, with no shadow.
+  The travelling frame is the only border. Push 100→105% per 1.5 s (at least 1 px/frame at the
+  edge) or do not push.
+- Match the plate's lightness to the screen's own background: a light plate for a light UI, near
+  black for a dark UI. Never put a dark UI on a light plate.
+- Aim for one visual change every 1–1.5 s on a spoken beat (a cut, punch, pan or graphic). The
+  hard limit is the profile's `maxStatic`. Never split a shot only to reset the count.
+- Use three layout states only: split (content in the top 45%), content full screen with the face
+  circle, and face full screen at 1.0× (1.3× on the hook and the CTA only). Change state only
+  when the idea changes.
+- Accent on one word per shot, the topic word, on a dark slab. Show a bad example at 60%
+  brightness with a vignette, never in a second colour.
+- On a before/after, put 3–4 tags of 1–3 words on the "before" card, each beside its flaw,
+  4 frames apart. The "after" card has no tags.
+- Number the chapters of a step video: a "#1", "#2" tag above the caption on the first shot of
+  each step, held 1 s.
+
 ## The tells: why a graphic reads as "AI"
 
 A viewer cannot name it, but they see it in one frame. Measured against a reference launch
